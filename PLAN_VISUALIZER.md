@@ -87,7 +87,8 @@ Cut order if behind (§4.2): overview dot map → smoke column → evidence-ring
 ## Steps
 
 ### V0 · Scaffold (10:55–11:10)
-- [ ] **Goal:** runnable `web/` that loads an incident JSON + OSM file and shows the banner; no scene code.
+- [x] **Goal:** runnable `web/` that loads an incident JSON + OSM file and shows the banner; no scene code.
+  - **Result 11:00:** build + 4 tests pass; `#/incident/sample` shows SAMPLE DATA + "Kharkiv_buildings_2024-06-22.json · 941 buildings · impact inside radius"; index falls back to sample; `/media` serves video with range (206); `/api` → 502 while backend is down. Sample target = way/103292605 (apartments, 10 floors). OSM `center` is `[lat, lon]` in the files. A 5th extract (`Dnipro_buildings_2025-06-24.json`) appeared in data/osm at ~10:55 and is included.
 - **Files:** `web/` (Vite react-ts), `vite.config.ts` (proxy + `/media` middleware), `src/types.ts`, `src/data/load.ts` (`loadIndex()`, `loadIncident(id)`, `loadOsmFor(impact)`), `src/App.tsx` (hash routes, stub pages), `src/ui/SampleBanner.tsx`, `public/sample_incident.json`, `public/sample_index.json`, `public/osm/Kharkiv_buildings_2024-06-22.json` (+ the other 3 extracts) + `public/osm/index.json`, `scripts/make_sample.mjs` (picks the target way, writes sample geometry), `src/time/derive.test.ts` stub, `vitest`.
 - **Reads:** `is_sample`, `id`, `city`, `title`, `impact.{lat,lon}`; OSM `elements[].{id,tags,geometry}`.
 - **Accept:** `npm run build` passes; `npx vitest run` passes; `npm run dev` → `#/incident/sample` shows "SAMPLE DATA", title, and "OSM: Kharkiv_buildings_2024-06-22.json · 941 buildings · impact inside radius". Rename `public/incidents/index.json` away (it doesn't exist yet) → index falls back to `sample_index.json`.
