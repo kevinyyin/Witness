@@ -141,6 +141,7 @@ function Verdict({ r }: { r: ClipRecord }) {
               : <span className="muted">Location: unknown</span>}
           </div>
           <div>Graphic level: {r.triage.graphic_level}</div>
+          {r.weapon && <h4>WEAPON INDICATORS</h4>}
           <WeaponBars weapon={r.weapon} />
           <div>
             {r.incident_id ? <>Matched incident #{r.incident_id} </> : <>New incident </>}

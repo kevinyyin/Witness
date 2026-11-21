@@ -12,7 +12,7 @@ import { Timeline } from './Timeline'
 import { Callouts } from './Callouts'
 import { Clock, GapCard, LowerThird, NowPanel, TitleCard } from './HudText'
 import { SourceVideo } from './SourceVideo'
-import { FlagsList, Footer, Sources, Summary, WeaponBars } from './Sidebar'
+import { FlagsList, Footer, Sources, Summary, WeaponSection } from './Sidebar'
 
 /** §7.1 Reconstruction view. Everything below reads scene time t from the store. `?wire=1` or key W = wireframe. */
 export function IncidentPage({ id }: { id: string }) {
@@ -117,7 +117,7 @@ export function IncidentPage({ id }: { id: string }) {
         <SourceVideo inc={inc} />
         <NowPanel inc={inc} />
         <Summary inc={inc} />
-        <WeaponBars weapon={inc.weapon} />
+        <WeaponSection weapon={inc.weapon} />
         <FlagsList inc={inc} osm={osm?.osm ?? null} />
         <Sources inc={inc} />
         <Footer inc={inc} showKey={showKey} toggleKey={() => setShowKey((v) => !v)} />

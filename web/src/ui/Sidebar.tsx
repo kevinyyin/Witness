@@ -1,5 +1,5 @@
-// §7.1.7 sidebar sections 3–7. Every string shown comes from the incident JSON.
-import { useEffect, useState } from 'react'
+// §7.1.7 sidebar sections 3–7. Every string shown comes from the incident JSON. Sections fold open/closed.
+import { useEffect, useState, type ReactNode } from 'react'
 import type { Incident, OsmFile, Weapon } from '../types'
 import { useTime } from '../time/store'
 import { fmtT } from '../time/derive'
@@ -7,18 +7,22 @@ import { resolveAnchor } from '../scene/anchors'
 
 const conf = (c: number | null | undefined) => (c == null ? '—' : c.toFixed(2))
 
+/** A sidebar section that folds; `open` is only the starting state. */
+export function Sec({ title, open = true, children }: { title: ReactNode; open?: boolean; children: ReactNode }) {
+  return <details className="sec" open={open}><summary><h4>{title}</h4></summary><section>{children}</section></details>
+}
+
 // §7.1.9: never "war crime", "illegal", "guilty". Carbon's free text is checked before it is shown.
 const VERDICT = /\b(war crimes?|illegal|guilty)\b/i
 
 export function Summary({ inc }: { inc: Incident }) {
   if (!inc.summary) return null
   return (
-    <section>
-      <h4>WHAT PROBABLY HAPPENED</h4>
+    <Sec title="WHAT PROBABLY HAPPENED">
       {VERDICT.test(inc.summary)
         ? <div className="warn">Summary withheld: its wording breaks the no-verdict rule (§7.1.9).</div>
         : <div>{inc.summary}</div>}
-    </section>
+    </Sec>
   )
 }
 
@@ -28,14 +32,13 @@ const WEAPONS: [string, string][] = [
   ['fpv_drone', 'FPV drone'], ['unknown', 'Unknown'],
 ]
 
-/** §7.1.7 #4 + D7: probability bars, "Unclear" when the top option is < 0.5. Same shape in §9.1 and §9.2. */
+/** The bars only (§7.1.7 #4 + D7): probability bars, "Unclear" when the top option is < 0.5. Same shape in §9.1 and §9.2. */
 export function WeaponBars({ weapon }: { weapon: Weapon | null }) {
   const o = weapon?.options
   if (!o) return null
   const top = Math.max(...WEAPONS.map(([k]) => o[k] ?? 0))
   return (
-    <section>
-      <h4>WEAPON INDICATORS</h4>
+    <>
       {top < 0.5 && <div className="unclear">Unclear</div>}
       {WEAPONS.map(([k, name]) => (
         <div key={k} className="bar-row">
@@ -46,8 +49,13 @@ export function WeaponBars({ weapon }: { weapon: Weapon | null }) {
       ))}
       {!!weapon?.evidence.length && <div className="muted why">why: {weapon.evidence.join(' · ')}</div>}
       <div className="muted foot">Weapon ID needs an expert. These are cues, not conclusions.</div>
-    </section>
+    </>
   )
+}
+
+export function WeaponSection({ weapon }: { weapon: Weapon | null }) {
+  if (!weapon?.options) return null
+  return <Sec title="WEAPON INDICATORS" open={false}><WeaponBars weapon={weapon} /></Sec>
 }
 
 /** §7.1.7 #5: every flag and review note in time order (click = jump); checked-none at the bottom. */
@@ -56,8 +64,7 @@ export function FlagsList({ inc, osm }: { inc: Incident; osm: OsmFile | null }) 
   const timed = items.filter((x) => x.f.t != null).sort((a, b) => a.f.t! - b.f.t!)
   const rest = items.filter((x) => x.f.t == null)
   return (
-    <section>
-      <h4>ALL FLAGS <span className="muted">(click = jump)</span></h4>
+    <Sec title={<>FLAGS &amp; NOTES <span className="muted">(click = jump)</span></>}>
       {timed.map(({ f, s }, i) => {
         const lost = f.anchor && f.anchor.kind !== 'clock' && resolveAnchor(inc, osm, f.anchor) === null
         return (
@@ -70,7 +77,7 @@ export function FlagsList({ inc, osm }: { inc: Incident; osm: OsmFile | null }) 
       {rest.map(({ f }, i) => (
         <div key={i} className="muted">{f.status === 'checked_none' ? '○ checked, none:' : '·'} {f.label}</div>
       ))}
-    </section>
+    </Sec>
   )
 }
 
@@ -92,11 +99,10 @@ export function Sources({ inc }: { inc: Incident }) {
   )
   const ok = inc.sources.filter((s) => s.authenticity !== 'fake'), bad = inc.sources.filter((s) => s.authenticity === 'fake')
   return (
-    <section>
-      <h4>SOURCES ({ok.length}) <span className="muted">✓/⚠/✗</span></h4>
+    <Sec title={<>SOURCES ({ok.length}) <span className="muted">✓/⚠/✗ · click = play</span></>} open={false}>
       {ok.map(row)}
       {bad.length > 0 && <details><summary className="muted">✗ rejected ({bad.length})</summary>{bad.map(row)}</details>}
-    </section>
+    </Sec>
   )
 }
 

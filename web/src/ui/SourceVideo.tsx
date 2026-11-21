@@ -15,6 +15,8 @@ function useSync(src: Source, get: () => Adapter | null) {
       const clipTs = s.t - src.offset_s, force = s.seekNonce !== nonce
       nonce = s.seekNonce
       if (clipTs < 0) { a.pause(); if (force) a.seek(0); return }
+      // past the clip's end: hold the last frame (play() on an ended video restarts it from 0, forever)
+      if (clipTs > src.duration_s) { a.pause(); if (force) a.seek(Math.max(0, src.duration_s - 0.05)); return }
       if (force || Math.abs(a.time() - clipTs) > 0.5) a.seek(clipTs)
       a.rate(s.speed * (s.mode === 'walk' ? slowmo(s.t) : 1))
       if (s.playing) a.play(); else a.pause()
