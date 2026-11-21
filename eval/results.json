@@ -1,25 +1,25 @@
 {
- "split": "dev",
- "frozen_at": null,
- "n_clips": 29,
+ "split": "test",
+ "frozen_at": "2026-11-21T20:47:07+00:00",
+ "n_clips": 70,
  "rows": [
   {
    "claim": "Fakes caught",
    "metric": "precision",
-   "witness": 100,
+   "witness": 95,
    "baseline": 100,
    "unit": "%",
    "baseline_name": "Single Hydrogen call, no physics or audio checks",
-   "n": 29
+   "n": 70
   },
   {
    "claim": "Fakes caught",
    "metric": "precision",
-   "witness": 100,
+   "witness": 95,
    "baseline": 100,
    "unit": "%",
    "baseline_name": "gemini-3.8-flash asked directly (previous generation)",
-   "n": 29
+   "n": 70
   },
   {
    "claim": "Fakes caught",
@@ -28,7 +28,7 @@
    "baseline": 100,
    "unit": "%",
    "baseline_name": "Single Hydrogen call, no physics or audio checks",
-   "n": 29
+   "n": 70
   },
   {
    "claim": "Fakes caught",
@@ -37,16 +37,16 @@
    "baseline": 100,
    "unit": "%",
    "baseline_name": "gemini-3.8-flash asked directly (previous generation)",
-   "n": 29
+   "n": 70
   },
   {
    "claim": "Fakes caught",
    "metric": "precision (file clips only)",
-   "witness": 100,
+   "witness": 92,
    "baseline": 100,
    "unit": "%",
    "baseline_name": "Claude Opus 5.5 on 5 frames + caption (no video, no sound)",
-   "n": 24
+   "n": 60
   },
   {
    "claim": "Fakes caught",
@@ -55,97 +55,97 @@
    "baseline": 100,
    "unit": "%",
    "baseline_name": "Claude Opus 5.5 on 5 frames + caption (no video, no sound)",
-   "n": 24
+   "n": 60
   },
   {
    "claim": "Geolocation works",
    "metric": "within 1 km",
-   "witness": 59,
-   "baseline": 53,
+   "witness": 47,
+   "baseline": 40,
    "unit": "%",
    "baseline_name": "Gemini asked directly",
-   "n": 17
+   "n": 47
   },
   {
    "claim": "Geolocation works",
    "metric": "within 5 km",
-   "witness": 94,
-   "baseline": 88,
+   "witness": 83,
+   "baseline": 81,
    "unit": "%",
    "baseline_name": "Gemini asked directly",
-   "n": 17
+   "n": 47
   },
   {
    "claim": "Geolocation works",
    "metric": "median error",
-   "witness": 0.7,
-   "baseline": 0.8,
+   "witness": 1.2,
+   "baseline": 1.2,
    "unit": "km",
    "baseline_name": "Gemini asked directly",
-   "n": 17
+   "n": 47
   },
   {
    "claim": "Uncertainty is honest",
    "metric": "true location inside the radius",
-   "witness": 76,
+   "witness": 66,
    "baseline": null,
    "unit": "%",
    "baseline_name": "none (target ≥ 70%)",
-   "n": 17
+   "n": 47
   },
   {
    "claim": "Geolocation works",
    "metric": "within 1 km",
-   "witness": 59,
-   "baseline": 47,
+   "witness": 47,
+   "baseline": 38,
    "unit": "%",
    "baseline_name": "gemini-3.8-flash asked directly (previous generation)",
-   "n": 17
+   "n": 47
   },
   {
    "claim": "Geolocation works",
    "metric": "within 5 km",
-   "witness": 94,
-   "baseline": 94,
+   "witness": 83,
+   "baseline": 85,
    "unit": "%",
    "baseline_name": "gemini-3.8-flash asked directly (previous generation)",
-   "n": 17
+   "n": 47
   },
   {
    "claim": "Geolocation works",
    "metric": "median error",
-   "witness": 0.7,
-   "baseline": 1.4,
+   "witness": 1.2,
+   "baseline": 1.5,
    "unit": "km",
    "baseline_name": "gemini-3.8-flash asked directly (previous generation)",
-   "n": 17
+   "n": 47
   },
   {
    "claim": "Geolocation works",
    "metric": "within 1 km",
-   "witness": 59,
-   "baseline": 18,
+   "witness": 47,
+   "baseline": 23,
    "unit": "%",
    "baseline_name": "Claude Opus 5.5 on 5 frames + caption (no video, no sound)",
-   "n": 17
+   "n": 47
   },
   {
    "claim": "Geolocation works",
    "metric": "within 5 km",
-   "witness": 94,
-   "baseline": 94,
+   "witness": 83,
+   "baseline": 77,
    "unit": "%",
    "baseline_name": "Claude Opus 5.5 on 5 frames + caption (no video, no sound)",
-   "n": 17
+   "n": 47
   },
   {
    "claim": "Geolocation works",
    "metric": "median error",
-   "witness": 0.7,
-   "baseline": 2.5,
+   "witness": 1.2,
+   "baseline": 2.6,
    "unit": "km",
    "baseline_name": "Claude Opus 5.5 on 5 frames + caption (no video, no sound)",
-   "n": 17
+   "n": 47
   },
   {
    "claim": "Grouping",
@@ -160,32 +160,32 @@
  "ablation": {
   "metric": "fake accuracy (real strike or not)",
   "unit": "%",
-  "full_video": 100,
-  "frames_5": 100,
-  "transcript": 38,
-  "n": 24
+  "full_video": 98,
+  "frames_5": 95,
+  "transcript": 48,
+  "n": 60
  },
  "worst_misses": [
   {
-   "clip_id": "itsdonetsk_239921",
-   "thumb": null,
-   "expected": "real strike, 3 Hydrogen reads within 0 m of each other: Odes",
-   "got": "9.4 km from the published location (radius ±1000 m)",
-   "why": "model reads: 3 Hydrogen reads within 0 m of each other: Odesa, Ukraine; 3 map candidates"
+   "clip_id": "str_0005",
+   "thumb": "eval/miss_1.jpg",
+   "expected": "real strike, 3 Hydrogen reads within 1264 m of each other: I",
+   "got": "14.3 km from the published location (radius ±3527 m)",
+   "why": "model reads: 3 Hydrogen reads within 1264 m of each other: Industrialnyi District, Kharkiv, Ukraine; 3 map candidates"
   },
   {
-   "clip_id": "huyovy_kharkiv_150130",
+   "clip_id": "str_0006",
    "thumb": null,
-   "expected": "real strike, 3 Hydrogen reads within 297 m of each other: Ba",
-   "got": "4.0 km from the published location (radius ±1593 m)",
-   "why": "model reads: 3 Hydrogen reads within 297 m of each other: Balakliya, Kharkiv Oblast, Ukraine; 3 map candidates"
+   "expected": "real strike, 3 Hydrogen reads within 749 m of each other: In",
+   "got": "14.2 km from the published location (radius ±2498 m)",
+   "why": "model reads: 3 Hydrogen reads within 749 m of each other: Industrialnyi District, Kharkiv, Ukraine; 3 map candidates"
   },
   {
-   "clip_id": "uniannet_96605",
-   "thumb": null,
-   "expected": "real strike, 3 Hydrogen reads within 301 m of each other: Um",
-   "got": "2.1 km from the published location (radius ±1602 m)",
-   "why": "model reads: 3 Hydrogen reads within 301 m of each other: Uman, Cherkasy Oblast, Ukraine; 3 map candidates"
+   "clip_id": "str_0007",
+   "thumb": "eval/miss_3.jpg",
+   "expected": "real strike, 3 Hydrogen reads within 1448 m of each other: I",
+   "got": "12.8 km from the published location (radius ±3896 m)",
+   "why": "model reads: 3 Hydrogen reads within 1448 m of each other: Industrialnyi District, Kharkiv, Ukraine; 3 map candidates"
   }
  ]
 }
