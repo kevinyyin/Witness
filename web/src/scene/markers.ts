@@ -4,9 +4,9 @@ import * as THREE from 'three'
 import type { Incident } from '../types'
 import { toLocal } from './geo'
 
-const AMBER = new THREE.Color(1.0, 0.69, 0.18)
-const CYAN = new THREE.Color(0.5, 0.9, 1.0)
-const GREEN = new THREE.Color(0.3, 1.0, 0.53)
+// Two colours: red is the impact (and fire at it), white is everything that watched or measured it.
+const RED = new THREE.Color(1.0, 0.18, 0.12)
+const WHITE = new THREE.Color(1, 1, 1)
 const CONE_M = 150
 
 let glowTex: THREE.Texture | null = null
@@ -78,12 +78,12 @@ function hemisphere(n: number) {
 export function buildMarkers(inc: Incident): Markers {
   const o = inc.impact, group = new THREE.Group()
 
-  const dot = sprite(glow(), AMBER, 16, 2.5)
+  const dot = sprite(glow(), RED, 16, 2.5)
   dot.position.set(0, 2, 0)
   // Uncertainty sphere: radius = impact.radius_m (§7.1.3)
   const sphere = new THREE.Mesh(
     new THREE.SphereGeometry(o.radius_m, 24, 6, 0, Math.PI * 2, 0, Math.PI / 2), // upper half only: a dome on the ground
-    new THREE.MeshBasicMaterial({ color: AMBER, wireframe: true, transparent: true, opacity: 0.14, depthWrite: false }),
+    new THREE.MeshBasicMaterial({ color: RED, wireframe: true, transparent: true, opacity: 0.22, depthWrite: false }),
   )
   group.add(dot, sphere)
 
@@ -95,12 +95,12 @@ export function buildMarkers(inc: Incident): Markers {
   })]
   const cams = inc.sources.flatMap((s) => (s.camera ? [toLocal(o, s.camera.lat, s.camera.lon)] : []))
   const blasts: Blast[] = at.map(({ t, pos }) => {
-    const flash = sprite(glow(), new THREE.Color(1, 1, 1), 1, 6)
+    const flash = sprite(glow(), WHITE, 1, 6)
     flash.position.set(pos.x, 10, pos.z)
     flash.visible = false
     // Sound wave: translucent hemisphere of points, radius = 343 m/s × (t − t_impact), set per frame
     const wave = new THREE.Points(hemisphere(2500), new THREE.PointsMaterial({
-      color: CYAN, size: 2, sizeAttenuation: false, transparent: true, opacity: 0.5, depthWrite: false,
+      color: WHITE, size: 2, sizeAttenuation: false, transparent: true, opacity: 0.5, depthWrite: false,
     }))
     wave.position.copy(pos)
     wave.visible = false
@@ -118,21 +118,21 @@ export function buildMarkers(inc: Incident): Markers {
     const [x, z] = toLocal(o, cam.lat, cam.lon)
     const g = new THREE.Group()
     g.position.set(x, 2, z)
-    const icon = sprite(glow(), CYAN, 18, 1) // no bloom: only the impact glows, so camera, label and impact don't merge into blobs
+    const icon = sprite(glow(), WHITE, 18, 1) // no bloom: only the impact glows, so camera, label and impact don't merge into blobs
     icons[s.id] = icon
-    const label = sprite(letter(s.id), CYAN, 26, 1)
+    const label = sprite(letter(s.id), WHITE, 26, 1)
     label.position.y = 26
     g.add(icon, label)
     // Position uncertainty: ring of radius camera.radius_m (never a point without its ±)
-    g.add(line(circle(cam.radius_m), CYAN, 0.35, true))
+    g.add(line(circle(cam.radius_m), WHITE, 0.35, true))
     {
       const conf = cam.confidence // §7.1.3: cone opacity = location confidence
       const fov = (cam.fov_deg * Math.PI) / 180, h = (cam.heading_deg * Math.PI) / 180
       const ray = (a: number) => new THREE.Vector3(Math.sin(a) * CONE_M, 0, -Math.cos(a) * CONE_M) // compass: 0 = north (-z)
       const [l, r] = [ray(h - fov / 2), ray(h + fov / 2)]
       const tri = new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(), l, r])
-      const fill = new THREE.MeshBasicMaterial({ color: CYAN, transparent: true, opacity: conf * 0.3, side: THREE.DoubleSide, depthWrite: false })
-      const edge = line([l, new THREE.Vector3(), r], CYAN, conf)
+      const fill = new THREE.MeshBasicMaterial({ color: WHITE, transparent: true, opacity: conf * 0.3, side: THREE.DoubleSide, depthWrite: false })
+      const edge = line([l, new THREE.Vector3(), r], WHITE, conf)
       g.add(new THREE.Mesh(tri, fill), edge)
       cones[s.id] = { mats: [fill, edge.material as THREE.LineBasicMaterial], base: [conf * 0.3, conf] }
     }
@@ -146,7 +146,7 @@ export function buildMarkers(inc: Incident): Markers {
     if (!s.camera || s.boom_distance_m == null) continue
     const [x, z] = toLocal(o, s.camera.lat, s.camera.lon)
     const ring = new THREE.LineLoop(new THREE.BufferGeometry().setFromPoints(circle(s.boom_distance_m, 1)),
-      new THREE.LineDashedMaterial({ color: CYAN, dashSize: 14, gapSize: 10, transparent: true, opacity: 0.6 }))
+      new THREE.LineDashedMaterial({ color: WHITE, dashSize: 14, gapSize: 10, transparent: true, opacity: 0.6 }))
     ring.computeLineDistances()
     ring.position.set(x, 0, z)
     rings.add(ring)
@@ -163,9 +163,9 @@ export function buildMarkers(inc: Incident): Markers {
     if (!pos) continue
     let obj: THREE.Object3D, kind: Cue['kind']
     if (e.type === 'siren') {
-      obj = line(circle(1, 1), CYAN, 0.35, true); kind = 'pulse'
+      obj = line(circle(1, 1), WHITE, 0.35, true); kind = 'pulse'
     } else {
-      obj = sprite(letter(GLYPH[e.type] ?? '•'), e.type === 'fire' ? AMBER : e.type === 'rescue' ? GREEN : CYAN, 30, 1.6)
+      obj = sprite(letter(GLYPH[e.type] ?? '•'), e.type === 'fire' ? RED : WHITE, 30, 1.6)
       obj.position.y = 50
       kind = e.type === 'fire' || e.type === 'rescue' ? 'marker' : 'icon'
     }
@@ -182,9 +182,9 @@ export function buildMarkers(inc: Incident): Markers {
     const [x, z] = toLocal(o, inc.answer_key.lat, inc.answer_key.lon)
     answerKey = new THREE.Group()
     answerKey.position.set(x, 0, z)
-    const pin = sprite(glow(), GREEN, 14, 2.5)
+    const pin = sprite(glow(), WHITE, 14, 2.5)
     pin.position.y = 3
-    answerKey.add(pin, line([new THREE.Vector3(0, 0, 0), new THREE.Vector3(0, 80, 0)], GREEN, 0.8))
+    answerKey.add(pin, line([new THREE.Vector3(0, 0, 0), new THREE.Vector3(0, 80, 0)], WHITE, 0.8))
     answerKey.visible = false
     group.add(answerKey)
   }

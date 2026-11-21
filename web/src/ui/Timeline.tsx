@@ -74,7 +74,14 @@ export function Timeline({ inc, ruler }: { inc: Incident; ruler: Ruler }) {
   return (
     <div className="timeline">
       <div className="pb-info">
-        {hover && <span className="pb-tip" style={{ left: `clamp(0px, calc(${hover.x * 100}% - 20%), 40%)` }}>{hover.text}</span>}
+        {hover
+          ? <span className="pb-tip" style={{ left: `clamp(0px, calc(${hover.x * 100}% - 20%), 40%)` }}>{hover.text}</span>
+          : ( // the key to the bar, until a hover needs the line
+            <span className="pb-key">
+              <span><b className="flag">▲</b> flag</span><span><b className="impact">✦</b> impact</span><span><b className="note">●</b> review note</span>
+              <span><i className="k-clip" /> clip</span><span><i className="k-clip approx" /> clip, time approximate</span><span><i className="k-gap" /> no events, skipped</span>
+            </span>
+          )}
       </div>
       <div className="pb" ref={bar}
         onPointerDown={(e) => { dragging.current = true; e.currentTarget.setPointerCapture(e.pointerId); setT(ruler.xToT(ratio(e.clientX))) }}

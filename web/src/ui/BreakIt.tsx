@@ -9,15 +9,23 @@ import { loadYouTube, videoAdapter, youtubeAdapter, youtubeId, type Adapter } fr
 import { SampleBanner } from './SampleBanner'
 import { WeaponBars } from './Sidebar'
 
-const STAGES: [StageName, string][] = [
-  ['fetch', 'Fetching'], ['watch', 'Watching & listening (Hydrogen)'], ['physics', 'Physics checks'],
-  ['score', 'Scoring (Decisions API)'], ['locate', 'Locating'], ['verdict', 'Verdict'],
+// name + what the step does, in a judge's words: the rail explains the run before it starts and tracks it once it does
+const STAGES: [StageName, string, string][] = [
+  ['fetch', 'Fetch', 'Reads the video. Past 3 minutes, only the first 3 are used.'],
+  ['watch', 'Watch and listen', 'Hydrogen lists everything seen and heard, with times: flashes, blasts, sirens, speech.'],
+  ['physics', 'Physics checks', 'Sound travels 343 m/s. Does the boom arrive when it should? Is one blast sound reused?'],
+  ['score', 'Score', 'The Decisions API scores how likely this is war footage, a game, a movie or fireworks.'],
+  ['locate', 'Locate', 'Real footage only: where it was filmed, with an honest margin of error.'],
+  ['verdict', 'Verdict', 'Real, rejected or unsure, with every reason listed.'],
 ]
-const ICON = { start: '⟳', done: '✓', skipped: '–', error: '✗' }
 const TRUTHS: [Truth, string][] = [
-  ['real_strike', 'Real strike'], ['video_game', 'Game'], ['movie', 'Movie'], ['fireworks_demolition', 'Fireworks/demolition'], ['other', 'Other'],
+  ['real_strike', 'Real strike'], ['video_game', 'Game'], ['movie', 'Movie'], ['fireworks_demolition', 'Fireworks or demolition'], ['other', 'Other'],
 ]
 const LABEL: Record<string, string> = { video_game: 'video game', not_war: 'not war', real_strike: 'real strike' }
+const SAID: Record<string, string> = { fake: 'rejected', real: 'real', unsure: 'unsure' }
+
+const PATHS = { pass: 'M3 8.5l3.2 3.2L13 4.5', fail: 'M4 4l8 8M12 4l-8 8', error: 'M4 4l8 8M12 4l-8 8', 'n/a': 'M4 8h8', play: 'M5 3v10l8-5z' }
+const Icon = ({ name }: { name: keyof typeof PATHS }) => <svg className={name === 'play' ? 'ico fill' : 'ico'} viewBox="0 0 16 16" aria-hidden="true"><path d={PATHS[name]} /></svg>
 
 export function BreakIt() {
   const [h, setH] = useState<Health | null | undefined>(undefined)
@@ -30,25 +38,31 @@ export function BreakIt() {
   const [busy, setBusy] = useState(false)
   const [elapsed, setElapsed] = useState(0)
   const [board, setBoard] = useState<Scoreboard | null>(null)
-  const [judged, setJudged] = useState(false)
+  const [judged, setJudged] = useState<{ truth: Truth; right: boolean } | null>(null)
+  const [dragging, setDragging] = useState(false)
   // what this run was given: its video shows the moment Analyze is pressed, so nobody waits on a list of stage names
   const [sent, setSent] = useState<{ n: number; yt: string | null; file: File | null } | null>(null)
   const adapter = useRef<Adapter | null>(null)
   const started = useRef(0)
+  const rail = useRef<HTMLElement>(null)
   const ended = useRef(false) // a result or an error arrived: anything else is a dropped stream
 
   useEffect(() => { health().then(setH); scoreboard().then(setBoard) }, [])
   useEffect(() => { // a file dropped anywhere on the page is taken; without this a near miss makes the browser open the file
-    const over = (e: DragEvent) => e.preventDefault()
-    const drop = (e: DragEvent) => { e.preventDefault(); const f = e.dataTransfer?.files[0]; if (f) { setFile(f); setUrl('') } }
-    window.addEventListener('dragover', over); window.addEventListener('drop', drop)
-    return () => { window.removeEventListener('dragover', over); window.removeEventListener('drop', drop) }
+    const over = (e: DragEvent) => { e.preventDefault(); setDragging(true) }
+    const leave = (e: DragEvent) => { if (!e.relatedTarget) setDragging(false) } // left the window, not just one element
+    const drop = (e: DragEvent) => { e.preventDefault(); setDragging(false); const f = e.dataTransfer?.files[0]; if (f) { setFile(f); setUrl('') } }
+    window.addEventListener('dragover', over); window.addEventListener('dragleave', leave); window.addEventListener('drop', drop)
+    return () => { window.removeEventListener('dragover', over); window.removeEventListener('dragleave', leave); window.removeEventListener('drop', drop) }
   }, [])
   useEffect(() => {
     if (!busy) return
     const id = setInterval(() => setElapsed((performance.now() - started.current) / 1000), 200)
     return () => clearInterval(id)
   }, [busy])
+
+  // the steps and the verdict fit one screen once the intro is scrolled away (an effect: the page is only tall enough after the workspace renders)
+  useEffect(() => { if (busy) rail.current?.scrollIntoView({ behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth' }) }, [busy])
 
   const offline = h === null
   const onEvent = (e: StreamEvent) => {
@@ -57,7 +71,7 @@ export function BreakIt() {
     else { ended.current = true; setError(`${e.data.stage}: ${e.data.message}`) }
   }
   const run = async (go: () => Promise<void>) => {
-    setStages({}); setResult(null); setError(null); setJudged(false); setBusy(true)
+    setStages({}); setResult(null); setError(null); setJudged(null); setBusy(true)
     started.current = performance.now(); setElapsed(0); ended.current = false
     try {
       await go()
@@ -71,74 +85,138 @@ export function BreakIt() {
   const replay = (f: Fixture) => { setSent(null); return run(() => replayFixture(f, onEvent)) }
   const tell = async (truth: Truth) => {
     if (!result) return
-    try { setBoard(await judge(result.clip_id, truth)); setJudged(true) } catch (err) { setError(String((err as Error).message)) }
+    try { const b = await judge(result.clip_id, truth); setBoard(b); setJudged({ truth, right: !!b.history[b.history.length - 1]?.right }) } catch (err) { setError(String((err as Error).message)) }
   }
 
   const yt = sent && !sent.file ? (youtubeId(result?.embed_url ?? '') ?? sent.yt) : null
   const playable = !!sent && (!!yt || !!sent.file)
   const go = (ts: number) => { adapter.current?.seek(Math.max(0, ts - 1.5)); adapter.current?.play() } // start just before the moment
 
+  const ready = !busy && (!!file || !!url.trim())
+
   return (
-    <div className="page breakit">
+    <div className={`page breakit${dragging ? ' dragging' : ''}`}>
       <SampleBanner show={offline} />
-      <h2>Break it <span className="muted">· paste a YouTube link or drop a video · ≤ 60 s · first 3 min only</span></h2>
+      <header className="bk-head">
+        <div>
+          <h1>Try to fool Witness<i>.</i></h1>
+          <p className="bk-lede">Give it any video of an explosion: real war footage, a video game, a movie, fireworks. Within a minute it says whether the clip shows a real strike and lists its evidence. Then you say what it really was, and the result goes on the board.</p>
+        </div>
+        {board && (
+          <aside className="bk-tally" aria-label="Scoreboard">
+            <h2>Scoreboard</h2>
+            <p className="n" aria-label={`Witness right ${board.right} of ${board.tries}`}>{board.right}<span>/ {board.tries}</span></p>
+            <p>{board.tries === 0 ? 'No attempts yet.' : 'Verdicts Witness got right, of all a judge has marked.'} Wrong answers stay on the board.</p>
+          </aside>
+        )}
+      </header>
+
       {h === undefined && <p className="muted">Checking the pipeline server…</p>}
       {offline && (
-        <p className="warn">Pipeline server not reachable (/api/health). Replaying recorded runs:{' '}
-          <button onClick={() => replay('analyze_fake')} disabled={busy}>Replay: rejected clip</button>{' '}
-          <button onClick={() => replay('analyze_real')} disabled={busy}>Replay: real strike</button>
-        </p>
+        <div className="bk-offline">
+          <p>The pipeline server is not reachable, so nothing can be analyzed live. Replay a recorded run instead:</p>
+          <button onClick={() => replay('analyze_fake')} disabled={busy}>Replay a rejected clip</button>
+          <button onClick={() => replay('analyze_real')} disabled={busy}>Replay a real strike</button>
+        </div>
       )}
       {h && (
-        <div className="bk-input">
-          {h.youtube_url_input
-            ? <input placeholder="https://www.youtube.com/watch?v=…" value={url} onChange={(e) => { setUrl(e.target.value); setFile(null) }}
-                onKeyDown={(e) => { if (e.key === 'Enter' && !busy && url.trim()) submit() }} />
-            : <div className="muted">YouTube links are off for this run (K1); drop a video file instead.</div>}
-          <label className="drop" onDragOver={(e) => e.preventDefault()} >
-            {file ? `▶ ${file.name}` : 'or drop a video file here (any format)'}
-            <input type="file" accept="video/*,.webm,.mkv" hidden onChange={(e) => { const f = e.target.files?.[0]; if (f) { setFile(f); setUrl('') } }} />
-          </label>
-          <input placeholder="claimed place (optional, like the text of a post)" value={place} onChange={(e) => setPlace(e.target.value)} />
-          <button onClick={submit} disabled={busy || (!file && !url.trim())}>Analyze</button>
-        </div>
+        <form className="bk-form" onSubmit={(e) => { e.preventDefault(); if (ready) submit() }}>
+          <div className="bk-main">
+            {file
+              ? <div className="bk-file"><Icon name="play" /><span>{file.name}</span><button type="button" onClick={() => setFile(null)}>Remove</button></div>
+              : h.youtube_url_input
+                ? <input aria-label="YouTube link" inputMode="url" required placeholder="Paste a YouTube link" value={url} onChange={(e) => setUrl(e.target.value)} />
+                : <div className="bk-file"><span>YouTube links are off for this run. Choose a video file instead.</span></div>}
+            <button className="bk-go" disabled={busy || (!file && !h.youtube_url_input)}>{busy ? 'Analyzing…' : 'Analyze'}</button>
+          </div>
+          <div className="bk-sub">
+            <label className="bk-pick">
+              <input type="file" accept="video/*,.webm,.mkv" onChange={(e) => { const f = e.target.files?.[0]; if (f) { setFile(f); setUrl('') }; e.target.value = '' }} />
+              <span>Choose a video file</span> or drop one anywhere on this page. Any format.
+            </label>
+            <label className="bk-place">
+              <span>Claimed place <i>optional</i></span>
+              <input placeholder="e.g. Kharkiv" value={place} onChange={(e) => setPlace(e.target.value)} />
+              <small>Where the post says it was filmed. Witness starts locating from there.</small>
+            </label>
+          </div>
+        </form>
       )}
 
-      <div className="bk-cols">
-        <section className="bk-stages">
-          <h4>LIVE <span className="muted">{busy || result ? `${elapsed.toFixed(1)} s` : ''}</span></h4>
-          {STAGES.map(([k, name]) => {
-            const s = stages[k]
+      <section className="bk-rail" ref={rail}>
+        <div className="bk-rail-head">
+          <h2 role="status">{busy ? 'Witness is watching' : result ? 'Finished' : error ? 'Stopped' : 'What happens when you press Analyze'}</h2>
+          {(busy || result) && <span className="bk-clock">{elapsed.toFixed(1)} s</span>}
+        </div>
+        {/* the spec's promise, drawn: a verdict inside 60 s. The red line is this run's elapsed time. */}
+        <div className="bk-budget" aria-hidden="true">
+          <i style={{ transform: `scaleX(${Math.min(elapsed / 60, 1)})` }} />
+          <span>0 s</span><span>15</span><span>30</span><span>45</span><span>60 s target</span>
+        </div>
+        <ol>
+          {STAGES.map(([k, name, what], i) => {
+            const s = stages[k], st = s?.status ?? 'pending'
             return (
-              <div key={k} className={`stage-row ${s?.status ?? 'pending'}`}>
-                <span className="icon">{s ? ICON[s.status] : '·'}</span> {name}
-                {s?.summary && <span className="muted"> — {s.summary}</span>}
-                {s?.ms != null && <span className="muted"> ({(s.ms / 1000).toFixed(1)} s)</span>}
-              </div>
+              <li key={k} className={st}>
+                <p className="k"><span>0{i + 1}</span>{st === 'start' ? 'running' : st === 'done' ? `${((s?.ms ?? 0) / 1000).toFixed(1)} s` : st === 'pending' ? '' : st === 'error' ? 'failed' : st}<i /></p>
+                <h3>{name}</h3>
+                <p className="what">{what}</p>
+                {s?.summary && <p className="out">{s.summary}</p>}
+              </li>
             )
           })}
-          {error && <div className="warn">✗ {error}</div>}
-        </section>
-        <div className="bk-right">
-          {playable && <ClipPlayer key={sent!.n} yt={yt} file={sent!.file} graphic={result?.triage.graphic_level ?? 0} adapter={adapter} />}
-          {playable && busy && !result && <div className="muted">Play it while Witness works. The verdict lands here.</div>}
-          {result && <Verdict key={result.clip_id} r={result} playable={playable} go={go} />}
-        </div>
-      </div>
+        </ol>
+        {error && <p className="bk-error" role="alert"><Icon name="error" />{error}</p>}
+      </section>
 
-      {result && (
-        <section className="bk-judge">
-          <h4>WHAT WAS IT REALLY?</h4>
-          {TRUTHS.map(([t, label]) => <button key={t} disabled={offline || judged} onClick={() => tell(t)}>{label}</button>)}
-          {offline && <span className="muted"> (the scoreboard lives on the pipeline server)</span>}
-        </section>
+      {(busy || playable || result) && (
+        <div className="bk-work">
+          <div className="bk-left">
+            {playable && <ClipPlayer key={sent!.n} yt={yt} file={sent!.file} graphic={result?.triage.graphic_level ?? 0} adapter={adapter} />}
+            {result && result.timeline.length > 0 && (
+              <section className="bk-seen">
+                <h3>Seen and heard by Hydrogen{playable && <span> · click a line to play it</span>}</h3>
+                <ol>
+                  {result.timeline.map((e, i) => (
+                    <li key={i}><button disabled={!playable} onClick={() => go(e.clip_ts)}><span className="t">{mmss(e.clip_ts)}</span>{e.label}</button></li>
+                  ))}
+                </ol>
+              </section>
+            )}
+          </div>
+          <div className="bk-right">
+            {result
+              ? <Verdict key={result.clip_id} r={result} playable={playable} go={go} />
+              : <div className="bk-wait"><h3>Verdict pending</h3><p>Play the clip while Witness works. The verdict lands here, with every reason listed.</p></div>}
+            {result && (
+              <section className="bk-judge">
+                <h3>{judged ? `Logged. Witness got this one ${judged.right ? 'right' : 'wrong'}.` : 'Was Witness right? Say what the clip really was.'}</h3>
+                <div>
+                  {TRUTHS.map(([t, label]) => <button key={t} className={judged?.truth === t ? 'on' : ''} disabled={offline || !!judged} onClick={() => tell(t)}>{label}</button>)}
+                </div>
+                {offline && <p className="muted">Replays are not scored: the scoreboard lives on the pipeline server.</p>}
+              </section>
+            )}
+          </div>
+        </div>
       )}
-      {board && (
-        <section className="bk-board">
-          <h4>SCOREBOARD <span className="big">Judge tries: {board.tries} · Witness right: {board.right}</span></h4>
-          {board.history.map((x, i) => (
-            <div key={i} className={x.right ? 'ok' : 'wrong'}>{x.right ? '✓' : '✗'} {x.clip_id}: Witness said {x.verdict}{x.label ? ` (${LABEL[x.label] ?? x.label})` : ''}, judge said {x.truth.replace(/_/g, ' ')}</div>
-          ))}
+
+      {board && board.history.length > 0 && (
+        <section className="bk-log">
+          <h2>Every attempt <span>newest first · an "unsure" never counts as right</span></h2>
+          <table>
+            <thead><tr><th>Clip</th><th>Witness said</th><th>Judge said</th><th>Result</th></tr></thead>
+            <tbody>
+              {[...board.history].reverse().map((x, i) => (
+                <tr key={i} className={x.right ? 'ok' : 'wrong'}>
+                  <td className="id">{x.clip_id}</td>
+                  <td>{SAID[x.verdict] ?? x.verdict}{x.label && x.verdict === 'fake' ? `: ${LABEL[x.label] ?? x.label.replace(/_/g, ' ')}` : ''}</td>
+                  <td>{x.truth.replace(/_/g, ' ')}</td>
+                  <td className="res"><Icon name={x.right ? 'pass' : 'fail'} />{x.right ? 'Right' : 'Wrong'}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
         </section>
       )}
     </div>
@@ -188,38 +266,42 @@ function LocMap({ lat, lon, radius_m }: { lat: number; lon: number; radius_m: nu
 function Verdict({ r, playable, go }: { r: ClipRecord; playable: boolean; go: (ts: number) => void }) {
   const f = r.fake
   const rejected = f.verdict === 'fake'
-  const title = rejected ? `Rejected · ${LABEL[f.label ?? ''] ?? f.label ?? 'not real'}` : f.verdict === 'real' ? 'Real strike footage' : 'Unsure · needs a human reviewer'
+  const title = rejected ? `Rejected · ${LABEL[f.label ?? ''] ?? f.label?.replace(/_/g, ' ') ?? 'not real'}` : f.verdict === 'real' ? 'Real strike footage' : 'Unsure · needs a human reviewer'
   const loc = r.location
   return (
     <section className={`verdict ${f.verdict}`}>
-      <h3>{title} <span className="muted">conf {f.confidence.toFixed(2)}</span></h3>
-      {r.timeline.length > 0 && (
-        <div className="bk-events">
-          <span className="muted">What Hydrogen saw and heard{playable ? ' (click to check)' : ''}: </span>
-          {r.timeline.map((e, i) => <button key={i} className="mini" disabled={!playable} onClick={() => go(e.clip_ts)}>{mmss(e.clip_ts)} {e.label} ▸</button>)}
-        </div>
-      )}
-      {f.checks.map((c) => (
-        <div key={c.name} className={`check ${c.result === 'fail' ? 'fail' : ''}`}>
-          {c.result === 'pass' ? '✓' : c.result === 'fail' ? '✗' : '–'} {c.name.replace(/_/g, ' ')}: {c.detail}{c.clip_ts != null && (playable
-            ? <> <button className="mini" onClick={() => go(c.clip_ts!)}>▸ play {mmss(c.clip_ts)}</button></>
-            : <span className="muted"> @ {mmss(c.clip_ts)}</span>)}
-        </div>
-      ))}
+      <header>
+        <h2>{title}</h2>
+        <span>confidence {f.confidence.toFixed(2)}</span>
+      </header>
+      {rejected && <p className="note">Rejected clips are not located and never reach the map.</p>}
+      <h3>The checks</h3>
+      <ul className="checks">
+        {f.checks.map((c) => (
+          <li key={c.name} className={c.result === 'n/a' ? 'na' : c.result}>
+            <Icon name={c.result} />
+            <b>{c.name.replace(/_/g, ' ')}</b>
+            <span>{c.detail}{c.clip_ts != null && (playable
+              ? <button className="jump" onClick={() => go(c.clip_ts!)}><Icon name="play" />{mmss(c.clip_ts)}</button>
+              : <span className="t"> at {mmss(c.clip_ts)}</span>)}</span>
+          </li>
+        ))}
+      </ul>
       {!rejected && (
         <>
+          <h3>Where</h3>
           <div className="bk-loc">
-            {loc ? <>Location: {loc.level === 'city' ? 'city only' : loc.level} · {loc.lat.toFixed(4)}, {loc.lon.toFixed(4)} ± {(loc.radius_m / 1000).toFixed(1)} km
-              {loc.evidence.length > 0 && <div className="muted">{loc.evidence.join(' · ')}</div>}
+            {loc ? <><p className="coords">{loc.level === 'city' ? 'city only' : loc.level} · {loc.lat.toFixed(4)}, {loc.lon.toFixed(4)} ± {(loc.radius_m / 1000).toFixed(1)} km</p>
+              {loc.evidence.length > 0 && <p className="muted">{loc.evidence.join(' · ')}</p>}
               <LocMap lat={loc.lat} lon={loc.lon} radius_m={loc.radius_m} /></>
-              : r.triage.military_object >= 0.5 ? <span className="warn">Location withheld: military object visible</span>
-              : <span className="muted">Location: unknown</span>}
+              : r.triage.military_object >= 0.5 ? <p className="warn">Location withheld: military object visible</p>
+              : <p className="muted">Location unknown</p>}
           </div>
-          <div>Graphic level: {r.triage.graphic_level}</div>
-          {r.weapon && <h4>WEAPON INDICATORS</h4>}
+          {r.weapon && <h3>Weapon indicators</h3>}
           <WeaponBars weapon={r.weapon} />
-          <div>
-            {r.incident_id ? <>Matched incident #{r.incident_id} </> : <>New incident </>}
+          <div className="bk-foot">
+            <span>Graphic level {r.triage.graphic_level}</span>
+            <span>{r.incident_id ? `Matched incident #${r.incident_id}` : 'New incident'}</span>
             <button disabled={!r.incident_id} onClick={() => { window.location.hash = `#/incident/${r.incident_id}` }}>Open in reconstruction</button>
           </div>
         </>

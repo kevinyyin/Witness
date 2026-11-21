@@ -1,4 +1,4 @@
-// §7.3 Overview: map of the city, one dot per incident (size = sources, colour = corroboration),
+// §7.3 Overview: map of the city, one dot per incident (size = sources, mark = corroboration: white high, grey medium, red ring low),
 // its uncertainty radius as a ring, a "rejected: N" tray and "N clips → M incidents". Click a dot → §7.1.
 import { useEffect, useRef, useState } from 'react'
 import L from 'leaflet'
@@ -7,7 +7,8 @@ import type { IncidentIndex } from '../types'
 import { loadIndex } from '../data/load'
 import { SampleBanner } from './SampleBanner'
 
-const COLOR: Record<string, string> = { high: '#4dff88', medium: '#ffb02e', low: '#ff4d3d' }
+// [fill, stroke]: the same three marks as .dot in style.css
+const MARK: Record<string, [string, string]> = { high: ['#fff', '#000'], medium: ['#8a8a8a', '#fff'], low: ['#000', '#ff2d20'] }
 
 export function OverviewPage() {
   const [index, setIndex] = useState<IncidentIndex | null | undefined>(undefined)
@@ -23,9 +24,9 @@ export function OverviewPage() {
       maxZoom: 19, attribution: '© OpenStreetMap contributors (ODbL)', className: 'dark-tiles',
     }).addTo(map)
     for (const e of index.incidents) {
-      const c = COLOR[e.corroboration] ?? '#6c8591'
-      L.circle([e.lat, e.lon], { radius: e.radius_m, color: c, weight: 1, opacity: 0.6, fillOpacity: 0.08, interactive: false }).addTo(map)
-      L.circleMarker([e.lat, e.lon], { radius: 7 + 3 * Math.sqrt(e.n_sources), color: '#000', weight: 1, fillColor: c, fillOpacity: 0.9 })
+      const [fill, stroke] = MARK[e.corroboration] ?? MARK.medium
+      L.circle([e.lat, e.lon], { radius: e.radius_m, color: e.corroboration === 'low' ? stroke : '#fff', weight: 1, opacity: 0.7, fillOpacity: 0.06, interactive: false }).addTo(map)
+      L.circleMarker([e.lat, e.lon], { radius: 7 + 3 * Math.sqrt(e.n_sources), color: stroke, weight: 2, fillColor: fill, fillOpacity: 1 })
         .bindTooltip(`#${e.id} · ${e.title}<br>${e.n_sources} sources · corroboration ${e.corroboration} · ±${e.radius_m} m<br>${e.impact_local.replace('T', ' ').slice(0, 16)}`, { direction: 'top' })
         .on('click', () => { window.location.hash = `#/incident/${e.id}` })
         .addTo(map)
@@ -42,13 +43,26 @@ export function OverviewPage() {
   return (
     <div className="page overview">
       <SampleBanner show={index.is_sample} />
-      <h2>{index.city.toUpperCase()} · {index.n_clips} clips → {n} incident{n === 1 ? '' : 's'} <span className="tray">rejected: {index.n_rejected}</span></h2>
+      <div>
+        <h1>{index.city}<i>.</i></h1>
+        <p className="ov-lede">Every dot is one incident, rebuilt from the clips that show it. Open one to see the reconstruction.</p>
+        <dl className="ov-stats">
+          <div><dt>Clips</dt><dd>{index.n_clips}</dd></div>
+          <div><dt>Incident{n === 1 ? '' : 's'}</dt><dd>{n}</dd></div>
+          <div className="rej"><dt>Rejected</dt><dd>{index.n_rejected}</dd></div>
+        </dl>
+        <ul className="ov-list">
+          {index.incidents.map((e) => (
+            <li key={e.id}>
+              <a href={`#/incident/${e.id}`}>
+                <span className="k"><i className={`dot ${e.corroboration}`} />#{e.id} · {e.n_sources} sources · {e.corroboration} corroboration · ±{e.radius_m} m</span>
+                <b>{e.title}</b>
+              </a>
+            </li>
+          ))}
+        </ul>
+      </div>
       <div ref={box} className="map" />
-      <ul>
-        {index.incidents.map((e) => (
-          <li key={e.id}><a href={`#/incident/${e.id}`}>#{e.id} · {e.title}</a> <span className="muted">· {e.n_sources} sources · {e.corroboration} · ±{e.radius_m} m</span></li>
-        ))}
-      </ul>
     </div>
   )
 }

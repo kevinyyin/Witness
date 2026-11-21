@@ -25,7 +25,8 @@ export function Proof() {
   return (
     <div className="page proof">
       <SampleBanner show={r.split !== 'test'} text="DEV NUMBERS, NOT FINAL" />
-      <h2>Proof <span className="muted">· {r.split} set · {r.n_clips} clips{r.frozen_at ? ` · frozen ${r.frozen_at}` : ''} · scored against Bellingcat / GeoConfirmed answer keys</span></h2>
+      <h1>Proof<i>.</i></h1>
+      <p className="meta">{r.split} set · {r.n_clips} clips{r.frozen_at ? ` · frozen ${r.frozen_at}` : ''} · scored against Bellingcat / GeoConfirmed answer keys</p>
       <table>
         <thead><tr><th>Claim</th><th>Metric</th><th>Witness</th><th>Baseline</th><th>n</th></tr></thead>
         <tbody>
@@ -36,7 +37,7 @@ export function Proof() {
               <td>{same ? '' : x.claim}</td><td className="muted">{same ? '' : x.metric}</td>
               <td className="num">{fmt(x.witness, x.unit)}</td>
               <td className="num">{fmt(x.baseline, x.unit)}{x.baseline_name && <div className="muted small">{x.baseline_name}</div>}</td>
-              <td className="muted">{x.n}</td>
+              <td className="n">{x.n}</td>
             </tr>
             )
           })}

@@ -15,8 +15,8 @@ import { toLocal } from './geo'
 /** Frame counter read by the FPS box. */
 export const frameStats = { frames: 0 }
 
-// §7.1.2: cool white/cyan, brighter with height, distant points fade to black.
-// Target points heat white → amber → red with uHeat (0..1).
+// §7.1.2: grey to white, brighter with height, distant points fade to black.
+// Target points heat white → red with uHeat (0..1): the only colour in the city.
 const VERT = /* glsl */ `
 attribute float aTarget;
 uniform float uHeat, uSize, uDim, uFogNear, uFogFar;
@@ -24,9 +24,8 @@ varying vec3 vColor;
 void main() {
   vec4 mv = modelViewMatrix * vec4(position, 1.0);
   float d = -mv.z;
-  vec3 c = mix(vec3(0.36, 0.60, 0.70), vec3(0.82, 0.95, 1.0), clamp(position.y / 60.0, 0.0, 1.0)) * uDim;
-  vec3 amber = vec3(1.0, 0.62, 0.15);
-  vec3 hot = uHeat < 0.5 ? mix(vec3(1.0), amber, uHeat * 2.0) : mix(amber, vec3(1.0, 0.16, 0.08), uHeat * 2.0 - 1.0);
+  vec3 c = mix(vec3(0.50), vec3(0.92), clamp(position.y / 60.0, 0.0, 1.0)) * uDim;
+  vec3 hot = mix(vec3(1.0), vec3(1.0, 0.16, 0.08), uHeat);
   c = mix(c, hot, aTarget * step(0.001, uHeat));
   vColor = c * (1.0 - smoothstep(uFogNear, uFogFar, d));
   gl_PointSize = clamp(uSize / d, 1.0, 3.5);

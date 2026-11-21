@@ -22,7 +22,7 @@ export function Fps({ points }: { points: number }) {
   }, [])
   if (hidden) return null
   return (
-    <div className="fps" style={{ color: fps >= 30 ? 'var(--green)' : 'var(--red)' }}>
+    <div className="fps" style={{ color: fps >= 30 ? 'var(--text)' : 'var(--red)' }}>
       FPS {fps} · {Math.round(points / 1000)}k pts
     </div>
   )
