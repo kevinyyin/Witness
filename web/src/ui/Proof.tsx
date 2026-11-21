@@ -44,6 +44,7 @@ export function Proof() {
           })}
         </tbody>
       </table>
+      <p className="meta">Live link scoring uses the median of 3 Decisions calls; test-set link numbers used a single call.</p>
       {changes && changes.items.length > 0 && (
         <>
           <h3>What we changed after seeing failures</h3>

@@ -5,10 +5,11 @@
 import hashlib
 import json
 import re
+import statistics
 import sys
 import threading
 import time
-from concurrent.futures import ThreadPoolExecutor
+from concurrent.futures import ThreadPoolExecutor, as_completed, wait
 
 from datetime import datetime
 
@@ -92,14 +93,40 @@ def _timed(fn, *args):
     return fn(*args), int((time.time() - t0) * 1000)
 
 
-def analyze(path=None, url=None, claimed_place=None, posted_at=None, source_url=None, fresh=False, read_wait_s=None, retime_wait_s=None):
+def median_scores(results):
+    """The median of every score across 1 to 3 answers of gemini.score (same nested shape)."""
+    if isinstance(results[0], dict):
+        return {k: median_scores([r[k] for r in results]) for k in results[0]}
+    return statistics.median(results)
+
+
+def score_link(text, n, wait_s, pool, score=None):
+    """n concurrent Decisions calls on one description: a link's score varies between runs, the median is steadier.
+    Returns (median scores, the answers that came back). A call that fails or is not back after wait_s is left out;
+    if none is back by then, the first one to answer is used alone, as a single call would be."""
+    futures = [pool.submit(score or gemini.score, text) for _ in range(n)]
+    got = [f.result() for f in wait(futures, timeout=wait_s).done if not f.exception()]
+    if not got:
+        for f in as_completed(futures):
+            if not f.exception():
+                got = [f.result()]
+                break
+        else:
+            raise futures[0].exception()
+    return median_scores(got), got
+
+
+def analyze(path=None, url=None, claimed_place=None, posted_at=None, source_url=None, fresh=False, read_wait_s=None, retime_wait_s=None,
+            link_scores=1, link_score_wait_s=None):
     """Yields ("stage", {...}) events, then one ("result", record) or ("error", {...}).
 
     read_wait_s: how long the locate stage waits for the three place reads once scoring is done. None waits for all
     of them (bulk runs and the eval). The live server passes a few seconds: on a YouTube link one read can take
     over two minutes, and a late read only widens the radius.
-    retime_wait_s: the same for the finer flash and boom pass on a link (None waits; it has taken 14 to 40 s)."""
-    events, stage = [], "fetch"
+    retime_wait_s: the same for the finer flash and boom pass on a link (None waits; it has taken 14 to 40 s).
+    link_scores: how many Decisions calls score a link's description (their median is used). 1 for bulk runs and
+    the eval; the live server passes 3 and link_score_wait_s, the longest it waits for all of them."""
+    events, stage, spread = [], "fetch", None  # spread: the raw answers when a link was scored more than once
 
     def emit(ev):
         events.append(ev)
@@ -159,11 +186,16 @@ def analyze(path=None, url=None, claimed_place=None, posted_at=None, source_url=
                 # the Decisions API takes no YouTube URLs (docs/VERIFIED.md): it scores Hydrogen's written observations
                 text = json.dumps({"description": seen.get("observations", ""), "events": timeline,
                                    "game_or_film_interface_on_screen": bool(seen.get("hud_present"))})
-                scores, ms["score"] = _timed(gemini.score, text)
+                if link_scores > 1:
+                    (scores, spread), ms["score"] = _timed(score_link, text, link_scores, link_score_wait_s, pool)
+                else:
+                    scores, ms["score"] = _timed(gemini.score, text)
         finally:
             pool.shutdown(wait=False)  # a rejected clip never uses the three place reads: its verdict must not wait for them
         yield emit(_stage("score", "done", ms["score"],
-                          f"war-related {scores['war_related']:.2f} · real strike {scores['real_strike']:.2f}"))
+                          f"war-related {scores['war_related']:.2f} · real strike {scores['real_strike']:.2f}"
+                          + (f" (median of {len(spread)} calls: {', '.join(f'{x:.2f}' for x in sorted(r['real_strike'] for r in spread))})"
+                             if spread else "")))
 
         t0 = time.time()
         not_real = 1 - scores["real_strike"]

@@ -1,5 +1,6 @@
 """FastAPI server (§9.3). Run: uvicorn pipeline.app:app --host 127.0.0.1 --port 8000"""
 import json
+import os
 import re
 import sys
 import time
@@ -18,6 +19,10 @@ PLAIN = {
     "watch": "Gemini could not watch this video. It may be private, age-restricted, removed or blocked. Try another one.",
 }
 LIVE = {"read_wait_s": 8, "retime_wait_s": 20}  # live runs only, to keep a verdict under a minute: see analyze()
+# A link's score varies between runs, so the live path takes the median of 3 Decisions calls (each takes about 1 s;
+# 5 s is the longest it waits for all three). WITNESS_LINK_MEDIAN=0 goes back to one call. Never used by bulk or eval.
+if os.environ.get("WITNESS_LINK_MEDIAN", "1") != "0":
+    LIVE |= {"link_scores": 3, "link_score_wait_s": 5}
 TRUTHS = {"real_strike", "video_game", "movie", "fireworks_demolition", "other"}
 MEDIA_TYPES = {".mp4", ".webm", ".mov", ".mkv", ".m4v", ".jpg", ".jpeg", ".png"}
 BOARD = CACHE / "scoreboard.json"

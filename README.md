@@ -80,6 +80,7 @@ clip (video file, or a YouTube link) + optional text of the post
 - The answer keys are never used to locate anything. The eval reads them to score, one early test script read them, and the incident builder copies the published location into the incident file so the reconstruction can show it next to our estimate.
 - The server streams each stage as it finishes (`POST /api/analyze`), which is what the break-it screen shows ticking.
 - On the live path the server waits at most 8 seconds for the three location reads and 20 seconds for the finer timing pass, so a verdict arrives in under a minute. Bulk runs and the eval wait for everything.
+- On the live path a link is scored by three Decisions calls at once and the median of each score is used; the score step shows all three. Bulk runs and the eval use one call, so the test-set link numbers are single-call numbers. `WITNESS_LINK_MEDIAN=0` turns it off.
 
 Other endpoints: `GET /api/health`, `GET` and `POST /api/judge` (the scoreboard), `GET /api/media/<file>` (local video files for the reconstruction).
 
@@ -158,6 +159,7 @@ cd web && npm test                               # timing, scene and stream test
 .venv/bin/python -m pipeline.fake                # verdict rule self-check
 .venv/bin/python -m pipeline.physics             # audio self-check
 .venv/bin/python -m pipeline.contract --selftest
+.venv/bin/python -m pipeline.test_link_median   # median-of-3 link scoring, mocked scorer
 ```
 
 ## Repo layout
