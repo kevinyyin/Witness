@@ -255,12 +255,37 @@ function ClipPlayer({ yt, file, graphic, adapter }: { yt: string | null; file: F
   )
 }
 
-/** OpenStreetMap's own embed: the view spans the uncertainty radius, the pin is the best guess. */
-function LocMap({ lat, lon, radius_m }: { lat: number; lon: number; radius_m: number }) {
-  const dLat = (Math.max(radius_m, 150) * 1.2) / 111_320, dLon = dLat / Math.cos((lat * Math.PI) / 180)
+/** The map is the centre of a located verdict: OpenStreetMap's own embed, a red marker on the best guess and a red
+ *  circle for the uncertainty radius. The embed fits its box at a whole zoom level, so the circle is sized from
+ *  that same zoom (Web Mercator: metres per pixel = 156543.03 · cos(lat) / 2^zoom). */
+function LocMap({ lat, lon, radius_m, title, sub }: { lat: number; lon: number; radius_m: number; title: string; sub: string }) {
+  const box = useRef<HTMLDivElement>(null)
+  const [size, setSize] = useState<[number, number] | null>(null)
+  useEffect(() => {
+    const measure = () => box.current && setSize([box.current.clientWidth, box.current.clientHeight])
+    measure()
+    window.addEventListener('resize', measure)
+    return () => window.removeEventListener('resize', measure)
+  }, [])
+  const rad = Math.PI / 180
+  const dLat = (Math.max(radius_m, 150) * 1.6) / 111_320, dLon = dLat / Math.cos(lat * rad)
   const bbox = [lon - dLon, lat - dLat, lon + dLon, lat + dLat].map((x) => x.toFixed(5)).join(',')
-  return <iframe className="bk-map" title="Estimated location on OpenStreetMap" loading="lazy"
-    src={`https://www.openstreetmap.org/export/embed.html?bbox=${bbox}&layer=mapnik&marker=${lat.toFixed(5)},${lon.toFixed(5)}`} />
+  const mercY = (d: number) => (1 - Math.log(Math.tan(d * rad) + 1 / Math.cos(d * rad)) / Math.PI) / 2
+  let ring = 0
+  if (size) {
+    const zoom = Math.min(19, Math.floor(Math.log2(Math.min(
+      size[0] / (256 * ((2 * dLon) / 360)), size[1] / (256 * (mercY(lat - dLat) - mercY(lat + dLat)))))))
+    ring = (2 * radius_m) / ((156543.03392 * Math.cos(lat * rad)) / 2 ** zoom)
+  }
+  return (
+    <div className="bk-map" ref={box}>
+      <iframe title="Estimated location on OpenStreetMap" loading="lazy"
+        src={`https://www.openstreetmap.org/export/embed.html?bbox=${bbox}&layer=mapnik`} />
+      {ring > 0 && <i className="ring" style={{ width: ring, height: ring }} />}
+      <i className="pin" />
+      <div className="where"><b>{title}</b>{sub && <span>{sub}</span>}</div>
+    </div>
+  )
 }
 
 function Verdict({ r, playable, go }: { r: ClipRecord; playable: boolean; go: (ts: number) => void }) {
@@ -275,6 +300,22 @@ function Verdict({ r, playable, go }: { r: ClipRecord; playable: boolean; go: (t
         <span>confidence {f.confidence.toFixed(2)}</span>
       </header>
       {rejected && <p className="note">Rejected clips are not located and never reach the map.</p>}
+      {!rejected && (loc ? (
+        <div className="bk-loc">
+          <LocMap lat={loc.lat} lon={loc.lon} radius_m={loc.radius_m}
+            title={`${loc.level === 'city' ? 'City only' : loc.level === 'unknown' ? 'Location unknown' : loc.level} · ± ${loc.radius_m >= 1000 ? `${(loc.radius_m / 1000).toFixed(1)} km` : `${loc.radius_m} m`}`}
+            sub={loc.evidence[0] ?? ''} />
+          <p className="coords">
+            {loc.lat.toFixed(4)}, {loc.lon.toFixed(4)} · {loc.method} · {loc.candidates} candidate{loc.candidates === 1 ? '' : 's'}
+            {' · '}{f.checks.filter((c) => c.result === 'pass').length} of {f.checks.filter((c) => c.result !== 'n/a').length} checks passed
+            {' · '}{Math.round(Object.values(r.stages_ms).reduce((a: number, b) => a + (b ?? 0), 0) / 1000)} s
+          </p>
+        </div>
+      ) : (
+        <div className="bk-loc">
+          {r.triage.military_object >= 0.5 ? <p className="warn">Location withheld: military object visible</p> : <p className="muted">Location unknown</p>}
+        </div>
+      ))}
       <h3>The checks</h3>
       <ul className="checks">
         {f.checks.map((c) => (
@@ -289,14 +330,6 @@ function Verdict({ r, playable, go }: { r: ClipRecord; playable: boolean; go: (t
       </ul>
       {!rejected && (
         <>
-          <h3>Where</h3>
-          <div className="bk-loc">
-            {loc ? <><p className="coords">{loc.level === 'city' ? 'city only' : loc.level} · {loc.lat.toFixed(4)}, {loc.lon.toFixed(4)} ± {(loc.radius_m / 1000).toFixed(1)} km</p>
-              {loc.evidence.length > 0 && <p className="muted">{loc.evidence.join(' · ')}</p>}
-              <LocMap lat={loc.lat} lon={loc.lon} radius_m={loc.radius_m} /></>
-              : r.triage.military_object >= 0.5 ? <p className="warn">Location withheld: military object visible</p>
-              : <p className="muted">Location unknown</p>}
-          </div>
           {r.weapon && <h3>Weapon indicators</h3>}
           <WeaponBars weapon={r.weapon} />
           <div className="bk-foot">
