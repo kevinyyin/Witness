@@ -1,7 +1,28 @@
-// Small panels that read t at ≤10 Hz: clock, lower third, Now panel.
+// Small panels that read t at ≤10 Hz: clock, lower third, Now panel, title card, gap card.
 import type { Incident } from '../types'
+import type { Ruler } from '../time/ruler'
 import { useTime } from '../time/store'
 import { calloutState, clockAt, fmtT, mmss } from '../time/derive'
+
+/** Walkthrough establishing shot: incident title card fades in and out (§7.1.4). */
+export function TitleCard({ inc }: { inc: Incident }) {
+  const t = useTime((s) => Math.round(s.t * 10) / 10), mode = useTime((s) => s.mode)
+  const st = calloutState({ t: -19.5, t_end: -12 }, t)
+  if (mode !== 'walk' || st.state !== 'full') return null
+  return (
+    <div className="title-card" style={{ opacity: st.opacity }}>
+      <div className="muted">{inc.city.toUpperCase()} · {inc.time.impact_local.slice(0, 10)} · {inc.verification.n_sources} SOURCES</div>
+      <div className="big">{inc.title}</div>
+    </div>
+  )
+}
+
+/** After a hard cut over a compressed gap: "+17 min later" for 2.5 s (§7.1.4). */
+export function GapCard({ ruler }: { ruler: Ruler }) {
+  const t = useTime((s) => Math.round(s.t * 10) / 10)
+  const g = ruler.gaps.find((x) => t >= x.t1 && t < x.t1 + 2.5)
+  return g ? <div className="gap-card">+{Math.round((g.t1 - g.t0) / 60)} min later</div> : null
+}
 
 const useT10 = () => useTime((s) => Math.round(s.t * 10) / 10)
 

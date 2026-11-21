@@ -10,7 +10,7 @@ import { SampleBanner } from './SampleBanner'
 import { Fps } from './Fps'
 import { Timeline } from './Timeline'
 import { Callouts } from './Callouts'
-import { Clock, LowerThird, NowPanel } from './HudText'
+import { Clock, GapCard, LowerThird, NowPanel, TitleCard } from './HudText'
 import { SourceVideo } from './SourceVideo'
 import { FlagsList, Footer, Sources, Summary, WeaponBars } from './Sidebar'
 
@@ -76,10 +76,13 @@ export function IncidentPage({ id }: { id: string }) {
       <SampleBanner show={inc.is_sample} />
       <div className="stage">
         <div className="scene">
-          <canvas ref={canvas} onPointerDown={(e) => { down.current = [e.clientX, e.clientY] }} onPointerUp={onUp} />
+          <canvas ref={canvas} onPointerDown={(e) => { down.current = [e.clientX, e.clientY] }} onPointerUp={onUp}
+            onDoubleClick={(e) => { useTime.getState().setMode('free'); scene.current?.focusAt(e.clientX, e.clientY) }} />
+          <TitleCard inc={inc} />
+          {ruler && <GapCard ruler={ruler} />}
           <Callouts inc={inc} osm={osm?.osm ?? null} getScene={getScene} />
           <div className="hud-title">
-            {inc.city.toUpperCase()} · INCIDENT #{inc.id} · {inc.sources.length} SOURCES
+            {inc.city.toUpperCase()} · INCIDENT #{inc.id} · {inc.verification.n_sources} SOURCES
             <div className="muted">{inc.title}</div>
             {osm === null && <div className="warn">Building file {inc.osm_file} not found under web/public/.</div>}
             {osm && !osm.inside && <div className="warn">Impact is {Math.round(osm.distance_m ?? 0)} m from the centre of {osm.file}; buildings may be missing.</div>}

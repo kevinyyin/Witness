@@ -9,6 +9,7 @@ import { groundGrid, sampleCity, wireCity } from './pointcloud'
 import { buildMarkers, type Markers } from './markers'
 import { blinkAt, flashAt, heatAt, waveRadiusM } from '../time/derive'
 import type { Mode } from '../time/store'
+import { makeDirector, witnessAt, type Pose } from './walkthrough'
 
 /** Frame counter read by the FPS box. */
 export const frameStats = { frames: 0 }
@@ -57,7 +58,7 @@ export class WitnessScene {
     this.renderer.setClearColor(0x000000) // black void, no sky
     this.camera.position.set(-650, 420, 650)
     this.controls = new OrbitControls(this.camera, canvas)
-    Object.assign(this.controls, { enableDamping: true, maxPolarAngle: Math.PI * 0.49, minDistance: 30, maxDistance: 3000, autoRotateSpeed: 0.5 })
+    Object.assign(this.controls, { enableDamping: true, maxPolarAngle: Math.PI * 0.49, minDistance: 30, maxDistance: 3000 })
     this.controls.target.set(0, 20, 0)
     // Bloom only on light sources (§7.1.2): city colours stay below the threshold, markers are boosted above it.
     this.composer = new EffectComposer(this.renderer)
@@ -97,16 +98,25 @@ export class WitnessScene {
     this.markers = buildMarkers(inc)
     this.scene.add(this.markers.group)
     this.inc = inc
+    this.director = makeDirector(inc)
   }
 
   private inc: Incident | null = null
+  private director: ((t: number) => Pose) | null = null
 
   /** Everything time-dependent is set from `t` here, every frame (D14). */
   update(t: number, mode: Mode) {
-    this.controls.autoRotate = mode === 'walk' // V2 walkthrough-lite; V5 replaces with the director camera
+    if (mode === 'walk' && this.director) { // director camera (§7.1.4); Free mode leaves OrbitControls in charge
+      const p = this.director(t)
+      this.camera.position.copy(p.pos)
+      this.controls.target.copy(p.look)
+    }
     for (const m of this.mats) m.uniforms.uHeat.value = heatAt(t)
     if (!this.markers || !this.inc) return
-    const { blasts, sphere, icons } = this.markers
+    const { blasts, sphere, icons, cones } = this.markers
+    const w = witnessAt(this.inc, t)
+    // lit cone in the witness sweep: edge full, fill capped so it never turns into a solid wedge
+    for (const [id, c] of Object.entries(cones)) c.mats.forEach((m, i) => { m.opacity = id !== w ? c.base[i] : i === 0 ? Math.min(0.35, c.base[0] * 1.5) : 1 })
     for (const b of blasts) {
       const f = flashAt(t - b.t), r = waveRadiusM(t - b.t)
       b.flash.visible = f > 0
@@ -130,6 +140,17 @@ export class WitnessScene {
     const icons = Object.entries(this.markers?.icons ?? {})
     const hit = ray.intersectObjects(icons.map(([, s]) => s))[0]
     return hit ? icons.find(([, s]) => s === hit.object)![0] : null
+  }
+
+  /** Free mode: double-click → orbit around that spot on the ground, ~250 m away (§7.1.4). */
+  focusAt(clientX: number, clientY: number) {
+    const r = this.canvas.getBoundingClientRect(), ray = new THREE.Raycaster()
+    ray.setFromCamera(new THREE.Vector2(((clientX - r.left) / r.width) * 2 - 1, -((clientY - r.top) / r.height) * 2 + 1), this.camera)
+    const hit = ray.ray.intersectPlane(new THREE.Plane(new THREE.Vector3(0, 1, 0), 0), new THREE.Vector3())
+    if (!hit) return
+    const back = this.camera.position.clone().sub(this.controls.target).setLength(250)
+    this.controls.target.copy(hit)
+    this.camera.position.copy(hit).add(back)
   }
 
   /** Screen position (CSS px in the canvas) of a scene point. */

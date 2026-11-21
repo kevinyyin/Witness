@@ -6,11 +6,13 @@ import type { WitnessScene } from '../scene/Scene'
 import { resolveAnchor, type Resolved } from '../scene/anchors'
 import { calloutState, fmtT, mmss } from '../time/derive'
 import { overlays } from '../time/loop'
+import { witnesses } from '../scene/walkthrough'
+import { distanceM } from '../data/load'
 
-type Item = { kind: 'flag' | 'note' | 'boom'; label: string; sub: string; t: number; t_end: number | null; anchor: Resolved }
+type Item = { kind: 'flag' | 'note' | 'boom' | 'witness'; label: string; sub: string; t: number; t_end: number | null; anchor: Resolved }
 
 const conf = (c: number | null | undefined) => `conf ${c == null ? '—' : c.toFixed(2)}`
-const sym = { flag: '▲', note: '●', boom: '◎' }
+const sym = { flag: '▲', note: '●', boom: '◎', witness: '◉' }
 
 export function buildItems(inc: Incident, osm: OsmFile | null): Item[] {
   const items: Item[] = []
@@ -29,6 +31,17 @@ export function buildItems(inc: Incident, osm: OsmFile | null): Item[] {
       t: e.t, t_end: e.t + 3, anchor: resolveAnchor(inc, osm, { kind: 'camera', ref: e.source }),
     })
   }
+  // Walkthrough sweep (−10 → −2 s): "A · telegram · 1.06 km away" at each witness in turn (§7.1.4).
+  const ws = witnesses(inc), slot = 8 / Math.max(1, ws.length)
+  ws.forEach((w, i) => {
+    const s = inc.sources.find((x) => x.id === w.id)!, cam = s.camera!
+    const km = ((s.boom_distance_m ?? distanceM(inc.impact, cam)) / 1000).toFixed(2)
+    items.push({
+      kind: 'witness', label: `${s.id} · ${s.platform} · ${km} km away`,
+      sub: [s.boom_distance_m != null ? 'flash→boom distance' : 'from camera position', `camera ±${cam.radius_m} m`, `location conf ${cam.confidence.toFixed(2)}`].join(' · '),
+      t: -10 + i * slot, t_end: -10 + (i + 1) * slot, anchor: resolveAnchor(inc, osm, { kind: 'camera', ref: s.id }),
+    })
+  })
   return items
 }
 

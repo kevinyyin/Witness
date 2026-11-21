@@ -97,6 +97,16 @@ export type Incident = {
 export type IndexEntry = { id: string; title: string; lat: number; lon: number; radius_m: number; n_sources: number; corroboration: string; impact_local: string }
 export type IncidentIndex = { is_sample: boolean; city: string; n_clips: number; n_rejected: number; incidents: IndexEntry[] }
 
+// ---- §9.3 web/public/eval/results.json (proof slide) ----
+export type Results = {
+  split: 'dev' | 'test'
+  frozen_at: string | null
+  n_clips: number
+  rows: { claim: string; metric: string; witness: number; baseline: number | null; unit: string; baseline_name: string | null; n: number }[]
+  ablation: { metric: string; unit: string; full_video: number; frames_5: number; transcript: number; n: number }
+  worst_misses: { clip_id: string; thumb: string | null; expected: string; got: string; why: string }[]
+}
+
 // ---- OSM (Overpass `out geom` shape; the extracts store center as [lat, lon]) ----
 export type OsmWay = { type: 'way'; id: number; tags?: Record<string, string>; geometry?: { lat: number; lon: number }[] }
 export type OsmFile = { center?: [number, number]; radius_m?: number; elements: OsmWay[] }

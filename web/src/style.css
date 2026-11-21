@@ -42,7 +42,11 @@ button.on { border-color: var(--cyan); color: var(--cyan); }
 .leaders path { stroke-width: 1; fill: none; }
 .leaders path.flag { stroke: var(--red); } .leaders path.note { stroke: var(--yellow); } .leaders path.boom { stroke: var(--cyan); }
 .callout { position: absolute; top: 0; left: 0; max-width: 280px; background: rgba(0,0,0,0.78); border-left: 3px solid; padding: 5px 8px; pointer-events: none; }
-.callout.flag { border-color: var(--red); } .callout.note { border-color: var(--yellow); } .callout.boom { border-color: var(--cyan); font-size: 11px; }
+.callout.flag { border-color: var(--red); } .callout.note { border-color: var(--yellow); } .callout.boom, .callout.witness { border-color: var(--cyan); font-size: 11px; }
+.leaders path.witness { stroke: var(--cyan); } .pin.witness { display: none !important; }
+.title-card { position: absolute; top: 38%; left: 50%; transform: translate(-50%, -50%); text-align: center; pointer-events: none; letter-spacing: 0.08em; }
+.title-card .big { font-size: 26px; margin-top: 6px; }
+.gap-card { position: absolute; top: 45%; left: 50%; transform: translate(-50%, -50%); font-size: 28px; background: rgba(0,0,0,0.85); padding: 10px 24px; border: 1px solid var(--line); pointer-events: none; }
 .callout .basis { color: var(--dim); font-size: 10px; margin-top: 2px; }
 .clock-stack .callout { position: static; margin-top: 4px; }
 .pin { position: absolute; top: 0; left: 0; font-size: 12px; cursor: help; }
@@ -94,6 +98,18 @@ button.mini { padding: 1px 6px; font-size: 10px; margin: 2px 4px 2px 0; }
 .source-row { cursor: pointer; margin: 4px 0; } .source-row:hover b { color: var(--cyan); }
 .st-real { color: var(--green); } .st-unsure { color: var(--amber); } .st-fake { color: var(--red); }
 .footer { border-bottom: 0 !important; font-size: 11px; }
+
+/* proof (§7.4) + overview (§7.3) */
+.proof { max-width: 1200px; margin: 0 auto; font-size: 15px; }
+.proof table { width: 100%; border-collapse: collapse; margin: 12px 0 20px; }
+.proof th, .proof td { text-align: left; padding: 7px 10px; border-bottom: 1px solid var(--line); vertical-align: top; }
+.proof td.num { font-size: 20px; color: var(--cyan); } .proof .small { font-size: 11px; }
+.bar-row.wide { grid-template-columns: 120px 1fr 70px; max-width: 700px; }
+.misses { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+.miss img, .no-thumb { width: 100%; aspect-ratio: 16 / 9; object-fit: cover; background: var(--panel); display: flex; align-items: center; justify-content: center; }
+.overview { max-width: 960px; margin: 0 auto; }
+.dotmap { width: 100%; border: 1px solid var(--line); }
+.tray { font-size: 13px; color: var(--red); border: 1px solid var(--red); padding: 2px 8px; margin-left: 12px; }
 
 /* break-it (§7.2) */
 .breakit { max-width: 1200px; margin: 0 auto; font-size: 14px; }

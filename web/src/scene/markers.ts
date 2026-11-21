@@ -54,6 +54,7 @@ export type Markers = {
   blasts: Blast[]
   sphere: THREE.Mesh
   icons: Record<string, THREE.Sprite> // camera icons by source id (they blink)
+  cones: Record<string, { mats: (THREE.MeshBasicMaterial | THREE.LineBasicMaterial)[]; base: number[] }> // light up in the witness sweep
   answerKey: THREE.Object3D | null
   unknownCameras: string[]
 }
@@ -103,6 +104,7 @@ export function buildMarkers(inc: Incident): Markers {
   })
 
   const icons: Record<string, THREE.Sprite> = {}
+  const cones: Markers['cones'] = {}
   const unknownCameras: string[] = []
   for (const s of inc.sources) {
     const cam = s.camera
@@ -123,8 +125,10 @@ export function buildMarkers(inc: Incident): Markers {
       const ray = (a: number) => new THREE.Vector3(Math.sin(a) * CONE_M, 0, -Math.cos(a) * CONE_M) // compass: 0 = north (-z)
       const [l, r] = [ray(h - fov / 2), ray(h + fov / 2)]
       const tri = new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(), l, r])
-      g.add(new THREE.Mesh(tri, new THREE.MeshBasicMaterial({ color: CYAN, transparent: true, opacity: conf * 0.3, side: THREE.DoubleSide, depthWrite: false })))
-      g.add(line([l, new THREE.Vector3(), r], CYAN, conf))
+      const fill = new THREE.MeshBasicMaterial({ color: CYAN, transparent: true, opacity: conf * 0.3, side: THREE.DoubleSide, depthWrite: false })
+      const edge = line([l, new THREE.Vector3(), r], CYAN, conf)
+      g.add(new THREE.Mesh(tri, fill), edge)
+      cones[s.id] = { mats: [fill, edge.material as THREE.LineBasicMaterial], base: [conf * 0.3, conf] }
     }
     group.add(g)
   }
@@ -140,5 +144,5 @@ export function buildMarkers(inc: Incident): Markers {
     answerKey.visible = false
     group.add(answerKey)
   }
-  return { group, blasts, sphere, icons, answerKey, unknownCameras }
+  return { group, blasts, sphere, icons, cones, answerKey, unknownCameras }
 }
