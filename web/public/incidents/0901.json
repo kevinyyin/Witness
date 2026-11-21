@@ -1,5 +1,5 @@
 {
- "id": "0003",
+ "id": "0901",
  "city": "Kharkiv",
  "title": "Strike in Kharkiv, 2024-09-01",
  "osm_file": "osm/Kharkiv_buildings_2024-09-01_mall.json",
@@ -428,27 +428,9 @@
  ],
  "review_notes": [
   {
-   "type": "location_conflict",
-   "label": "Clip D camera location is kilometers away from clip A",
-   "confidence": 0.9,
-   "t": 30.0,
-   "t_end": null,
-   "anchor": {
-    "kind": "camera",
-    "ref": "D"
-   },
-   "source": "D",
-   "clip_ts": 0.0,
-   "basis": [
-    "D@0:00 camera 50.05986, 36.19467",
-    "A@0:00 camera 50.00964, 36.31881",
-    "Carbon cross-check"
-   ]
-  },
-  {
    "type": "time_conflict",
    "label": "Clip D near impact shows fire; A, B, C unaligned",
-   "confidence": 0.88,
+   "confidence": 0.9,
    "t": 30.0,
    "t_end": null,
    "anchor": {
@@ -463,10 +445,28 @@
    "source": "D",
    "clip_ts": 0.0,
    "basis": [
-    "D@0:00 fire at t=30s",
-    "C@0:00 rescue at t=3098s",
-    "B@0:00 fire at t=4894s",
-    "A@0:00 rescue at t=11414s",
+    "D@0:00 large flames and smoke",
+    "C@0:05.5 tall jet of flame",
+    "B@0:00 flames burning near building",
+    "A@0:08.5 tall orange flame",
+    "Carbon cross-check"
+   ]
+  },
+  {
+   "type": "location_conflict",
+   "label": "Clip D camera position is far from clip A",
+   "confidence": 0.85,
+   "t": 30.0,
+   "t_end": null,
+   "anchor": {
+    "kind": "camera",
+    "ref": "D"
+   },
+   "source": "D",
+   "clip_ts": 0.0,
+   "basis": [
+    "D@0:00 camera 50.05986, 36.19467",
+    "A@0:00 camera 50.00964, 36.31881",
     "Carbon cross-check"
    ]
   }
@@ -750,7 +750,7 @@
    ]
   }
  ],
- "summary": "A strike probably hit a commercial area near the Radmir building on Akademika Pavlova Street in Kharkiv on September 1, 2024. Four independent clips show fire and damaged buildings consistent with this aftermath around an estimated early afternoon time. However, one clip maps to a different part of the city, so location agreement remains uncertain.",
+ "summary": "A strike probably hit a commercial area near the Radmir office building on Akademika Pavlova Street in Kharkiv on September 1, 2024. Four independent clips show building damage, intense fire, and rescue work consistent with an estimated early afternoon strike. However, no clip captures the blast itself, leaving the exact timing uncertain.",
  "verification": {
   "agree_place": false,
   "agree_time": false,

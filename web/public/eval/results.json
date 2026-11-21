@@ -1,0 +1,79 @@
+{
+ "split": "dev",
+ "frozen_at": null,
+ "n_clips": 6,
+ "rows": [
+  {
+   "claim": "Fakes caught",
+   "metric": "precision",
+   "witness": 100,
+   "baseline": 100,
+   "unit": "%",
+   "baseline_name": "Single Hydrogen call, no physics or audio checks",
+   "n": 6
+  },
+  {
+   "claim": "Fakes caught",
+   "metric": "recall",
+   "witness": 100,
+   "baseline": 100,
+   "unit": "%",
+   "baseline_name": "Single Hydrogen call, no physics or audio checks",
+   "n": 6
+  },
+  {
+   "claim": "Geolocation works",
+   "metric": "within 1 km",
+   "witness": 0,
+   "baseline": 0,
+   "unit": "%",
+   "baseline_name": "Gemini asked directly",
+   "n": 1
+  },
+  {
+   "claim": "Geolocation works",
+   "metric": "within 5 km",
+   "witness": 100,
+   "baseline": 100,
+   "unit": "%",
+   "baseline_name": "Gemini asked directly",
+   "n": 1
+  },
+  {
+   "claim": "Geolocation works",
+   "metric": "median error",
+   "witness": 4.6,
+   "baseline": 1.5,
+   "unit": "km",
+   "baseline_name": "Gemini asked directly",
+   "n": 1
+  },
+  {
+   "claim": "Uncertainty is honest",
+   "metric": "true location inside the radius",
+   "witness": 100,
+   "baseline": null,
+   "unit": "%",
+   "baseline_name": "none (target ≥ 70%)",
+   "n": 1
+  },
+  {
+   "claim": "Grouping",
+   "metric": "hero clips grouped correctly",
+   "witness": 52,
+   "baseline": 81,
+   "unit": "%",
+   "baseline_name": "Group by claimed city + date",
+   "n": 27
+  }
+ ],
+ "ablation": {
+  "metric": "fake accuracy (real strike or not)",
+  "unit": "%",
+  "full_video": 100,
+  "frames_5": 100,
+  "transcript": 33,
+  "n": 6
+ },
+ "worst_misses": []
+}

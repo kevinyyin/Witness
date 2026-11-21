@@ -1,5 +1,6 @@
 """All Gemini calls. Shapes follow docs/VERIFIED.md (Interactions API + Decisions API)."""
 import json
+import threading
 import time
 
 from google import genai
@@ -14,11 +15,12 @@ class _Lazy:
     """Creates the client on first use, so the server can start (and serve media) on a laptop without a key."""
 
     def __init__(self, **kw):
-        self._kw, self._c = kw, None
+        self._kw, self._c, self._lock = kw, None, threading.Lock()
 
     def __getattr__(self, name):
-        if self._c is None:
-            self._c = genai.Client(**self._kw)
+        with self._lock:  # two threads must not each build a client: the loser's gets closed while in use
+            if self._c is None:
+                self._c = genai.Client(**self._kw)
         return getattr(self._c, name)
 
 
@@ -207,6 +209,27 @@ def crosscheck(document):
         response_format={"type": "text", "mime_type": "application/json", "schema": CROSSCHECK_SCHEMA},
     ).output_text
     return json.loads(out)
+
+
+def ask_directly(video_block, claimed_place=None):
+    """§11 baselines: one Hydrogen call asked for the answers outright. No funnel, no physics, no Decisions API."""
+    prompt = ("Answer directly. real_strike: is this authentic footage of a real armed attack or its aftermath "
+              "(not a video game, film, fireworks, demolition or unrelated footage)? "
+              "lat, lon: your best estimate of where it was filmed, in decimal degrees."
+              + (f' The post that carried it said: "{claimed_place}".' if claimed_place else ""))
+    out = _client.interactions.create(
+        model=HYDROGEN, input=[video_block, {"type": "text", "text": prompt}],
+        response_format={"type": "text", "mime_type": "application/json", "schema": {
+            "type": "object", "properties": {"real_strike": {"type": "boolean"}, "lat": {"type": "number"}, "lon": {"type": "number"}},
+            "required": ["real_strike", "lat", "lon"]}},
+    ).output_text
+    return json.loads(out)
+
+
+def real_strike_score(input_blocks):
+    """§11 ablation: the one 'real strike?' Decisions question on any input (video, frames, transcript)."""
+    return _decisions.decisions.create(model=DECISION, input=input_blocks,
+                                       questions={"real_strike": QUESTIONS["real_strike"]}).answers["real_strike"].noul
 
 
 def score(input_blocks):

@@ -1,11 +1,11 @@
 {
  "is_sample": false,
  "city": "Kharkiv",
- "n_clips": 26,
- "n_rejected": 0,
+ "n_clips": 82,
+ "n_rejected": 5,
  "incidents": [
   {
-   "id": "0001",
+   "id": "0622",
    "title": "Strike on apartment block, Kharkiv",
    "lat": 49.97908,
    "lon": 36.24601,
@@ -15,7 +15,7 @@
    "impact_local": "2024-06-22T15:47:06+03:00"
   },
   {
-   "id": "0003",
+   "id": "0901",
    "title": "Strike in Kharkiv, 2024-09-01",
    "lat": 50.00964,
    "lon": 36.31881,

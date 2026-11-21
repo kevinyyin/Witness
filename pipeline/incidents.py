@@ -15,13 +15,14 @@ from concurrent.futures import ThreadPoolExecutor
 from datetime import datetime, timezone
 from zoneinfo import ZoneInfo
 
-from . import CACHE, DATA, PUBLIC, contract, geo
+from . import CACHE, DATA, PUBLIC, ROOT, contract, geo
 from .clip import analyze, cached, mmss
 from .physics import SOUND_M_S
 
 KYIV = ZoneInfo("Europe/Kyiv")
-# Telegram/X clips play as seekable local files only if the organizers allow it (§13 Q3); otherwise official embeds.
-SOCIAL_FILES = os.environ.get("WITNESS_SOCIAL_FILES") == "1"
+# Telegram/X clips play as seekable local files: the organizers allowed it (§13 Q3, confirmed by the user Nov 21, 12:07).
+# WITNESS_SOCIAL_FILES=0 switches back to official embeds.
+SOCIAL_FILES = os.environ.get("WITNESS_SOCIAL_FILES", "1") == "1"
 FLAG_LABELS = {
     "residential": "Residential building", "protected_site": "Hospital / school / worship / shelter nearby",
     "dense_population": "Densely populated", "night_strike": "Night strike",
@@ -35,29 +36,24 @@ HOMES = {"apartments": "apartment block", "residential": "residential building",
 
 
 def heroes():
-    """The hero list. data_meta/heroes.csv does not exist yet (plan gap 8), so it comes from data/benchmark.csv:
-    one hero per (incident date, published location). That location only ever reaches `answer_key`."""
+    """The hero list from data_meta/heroes.csv (§4.3). Its answer-key columns only ever reach `answer_key`."""
     posted = {}
     for line in open(DATA / "custody" / "manifest.jsonl", encoding="utf-8"):
         d = json.loads(line)
         if d.get("posted_at") and d.get("source_url"):
             posted[d["source_url"]] = d["posted_at"]
-    groups = {}
-    for r in csv.DictReader(open(DATA / "benchmark.csv", encoding="utf-8-sig")):
-        groups.setdefault((r["incident"], r["truth_lat"], r["truth_lon"]), []).append(r)
-    out = []
-    for i, ((date, lat, lon), rows) in enumerate(sorted(groups.items(), key=lambda kv: (-len(kv[1]), kv[0])), 1):
-        osm = sorted((DATA / "osm").glob(f"*_buildings_{date}*.json"))
-        out.append({
-            "id": f"{i:04d}", "date": date, "city": osm[0].name.split("_")[0] if osm else "Kharkiv", "osm_files": osm,
-            "answer_key": {"source": rows[0]["truth_source"].capitalize(), "lat": float(lat), "lon": float(lon),
-                           "url": "https://ukraine.bellingcat.com"},
-            "clips": [{"path": DATA / r["clip_file"].replace("\\", "/"), "url": r["source_link"],
-                       # Telegram post times are UTC
-                       "posted_at": posted[r["source_link"]] + "+00:00" if r["source_link"] in posted else None}
-                      for r in rows],
-        })
-    return out
+    out = {}
+    for r in csv.DictReader(open(ROOT / "data_meta" / "heroes.csv", encoding="utf-8-sig")):
+        h = out.setdefault(r["hero_id"], {
+            "id": r["hero_id"], "date": r["date"], "city": r["city"], "osm_file": DATA / r["osm_file"], "clips": [],
+            "answer_key": {"source": r["answer_key_source"], "lat": float(r["answer_key_lat"]), "lon": float(r["answer_key_lon"]),
+                           "url": r["answer_key_url"]}})
+        if not r["local_file"].strip() or not (DATA / r["local_file"]).is_file():
+            continue  # listed but not downloaded (or not in this copy of the data folder): nothing to analyze
+        h["clips"].append({"path": DATA / r["local_file"], "url": r["clip_url"],
+                           # Telegram post times are UTC
+                           "posted_at": posted[r["clip_url"]] + "+00:00" if r["clip_url"] in posted else None})
+    return list(out.values())
 
 
 def _xy(origin, p):
@@ -202,21 +198,17 @@ def assemble(hero):
                                  "clip_ts": e["clip_ts"], "confidence": e["confidence"]})
     timeline.sort(key=lambda e: e["t"])
 
-    # 8. target: the OSM building nearest the impact, from the extract that contains the impact
-    def holds(f):
-        o = json.loads(f.read_text(encoding="utf-8"))
-        return geo.dist_m(tuple(o["center"]), ip) <= o["radius_m"], o
-
-    osm_path, osm = next(((f, o) for f, (ok, o) in ((f, holds(f)) for f in hero["osm_files"]) if ok), (None, None))
-    if osm is None:  # impact estimate is outside every extract: still name a file so the web can draw something
-        osm_path = hero["osm_files"][0]
-        osm = json.loads(osm_path.read_text(encoding="utf-8"))
+    # 8. target: the OSM building nearest the impact, from the hero's building extract (its centre is never read)
+    osm_path = hero["osm_file"]
+    assert osm_path.is_file(), "heroes.csv names no building extract for this hero: no reconstruction written"
+    osm = json.loads(osm_path.read_text(encoding="utf-8"))
     buildings = [e for e in osm["elements"] if e.get("geometry") and e.get("tags", {}).get("building")]
     near = sorted(buildings, key=lambda e: geo.dist_m(_centre(e), ip))
     saw_homes = any("apartment" in str(lm.get("kind", "")).lower() for s in live for lm in s["raw"]["seen"].get("landmarks") or [])
     # the nearest building, or the nearest home inside the radius when the clips show apartment blocks
     tb = next((e for e in near if saw_homes and e["tags"]["building"] in HOMES and geo.dist_m(_centre(e), ip) <= impact["radius_m"]), near[0])
     tags = tb["tags"]
+    assert geo.dist_m(_centre(near[0]), ip) <= impact["radius_m"] + 300, "the impact estimate is outside the hero's building extract: no reconstruction written"
     target = {"osm_id": f"{tb['type']}/{tb['id']}", "footprint": [[p["lon"], p["lat"]] for p in tb["geometry"]],
               "levels": int(float(tags.get("building:levels", 5))) if str(tags.get("building:levels", "5")).replace(".", "").isdigit() else 5,
               "osm_tags": tags,
@@ -405,7 +397,7 @@ if __name__ == "__main__":
     hs = heroes()
     if "--list" in sys.argv:
         for h in hs:
-            print(h["id"], h["date"], h["city"], len(h["clips"]), "clips", [f.name for f in h["osm_files"]])
+            print(h["id"], h["date"], h["city"], len(h["clips"]), "clips", h["osm_file"].name)
     else:
         want = sys.argv[sys.argv.index("--hero") + 1]
         for h in hs:

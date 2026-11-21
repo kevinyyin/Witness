@@ -182,6 +182,22 @@ def check_index(index):
     assert not problems, "\n".join(problems)
 
 
+def check_results(res):
+    """§9.3 eval/results.json."""
+    want = {"split": None, "frozen_at": None, "n_clips": None,
+            "rows": {k: None for k in ("claim", "metric", "witness", "baseline", "unit", "baseline_name", "n")},
+            "ablation": {k: None for k in ("metric", "unit", "full_video", "frames_5", "transcript", "n")},
+            "worst_misses": {k: None for k in ("clip_id", "thumb", "expected", "got", "why")}}
+    problems = key_diff(shape(res), want)
+    if res.get("split") not in ("dev", "test"):
+        problems.append("split must be dev or test")
+    if (res.get("split") == "test") != (res.get("frozen_at") is not None):
+        problems.append("frozen_at is set exactly on test runs")
+    text = json.dumps(res, ensure_ascii=False).lower()
+    problems += [f"verdict language: '{w}'" for w in VERDICT_WORDS if w in text]
+    assert not problems, "\n".join(problems)
+
+
 def check_stream(text):
     """A raw /api/analyze response body (§9.3): stage events in order, then exactly one result or error."""
     blocks = [b for b in text.strip().split("\n\n") if b.strip()]
@@ -228,6 +244,9 @@ if __name__ == "__main__":
         for f in sys.argv[sys.argv.index("--stream") + 1:]:
             ev = check_stream(open(f, encoding="utf-8").read())
             print(f"{f}: OK, {len(ev)} events, verdict {ev[-1][1].get('fake', {}).get('verdict', ev[-1][0])}")
+    elif "--results" in sys.argv:
+        check_results(json.load(open(sys.argv[sys.argv.index("--results") + 1], encoding="utf-8")))
+        print("results OK")
     elif "--index" in sys.argv:
         check_index(json.load(open(sys.argv[sys.argv.index("--index") + 1], encoding="utf-8")))
         print("index OK")

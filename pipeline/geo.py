@@ -77,6 +77,23 @@ def search(city, name):
     return hits
 
 
+def search_claim(city, text):
+    """OSM places in the city that the post text names outright (a full name of 8+ characters inside the text)."""
+    q = _norm(text)
+    hits = []
+    for e in _landmarks(city):
+        tags = e.get("tags", {})
+        for k in ("name", "name:en", "name:uk", "name:ru"):
+            n = _norm(tags.get(k))
+            if len(n) >= 8 and n in q:
+                c = e.get("center", e)
+                kind = tags.get("amenity") or tags.get("tourism") or tags.get("shop") or tags.get("leisure") or ""
+                hits.append((c["lat"], c["lon"], tags.get("name", n),
+                             "; ".join(x for x in (tags.get("name"), tags.get("name:en"), kind.replace("_", " "), tags.get("addr:street")) if x)))
+                break
+    return hits
+
+
 def locate(seen, claimed_place, decide_input):
     """§9.1 `location` for a clip. decide_input = what the Decisions API scores (video block list or text)."""
     city = find_city(claimed_place)
@@ -90,6 +107,9 @@ def locate(seen, claimed_place, decide_input):
                  "evidence": [f"{method}: {city}"], "candidates": 0}
 
     leads = []
+    named = search_claim(city, claimed_place)
+    if named:  # the post names a place on the map: a lead like any landmark, still scored against the footage below
+        leads.append(({"name": f"post text: {named[0][2]}", "clip_ts": 0}, named))
     for lm in seen.get("landmarks") or []:
         hits = search(city, lm.get("name")) or search(city, lm.get("name_en"))
         if hits:
@@ -128,4 +148,5 @@ if __name__ == "__main__":
     assert 7000 < dist_m((50, 36), (50, 36.1)) < 7300 and bearing_deg((50, 36), (51, 36)) == 0
     assert locate({"landmarks": [], "city_guess": ""}, None, "x")["level"] == "unknown"
     assert locate({"landmarks": [], "city_guess": ""}, "Kharkiv", "x")["level"] == "city"
+    assert search_claim("Kharkiv", "nothing named here, Kharkiv") == []
     print("geo selftest OK")

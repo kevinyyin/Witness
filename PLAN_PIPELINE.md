@@ -29,6 +29,7 @@ Written Sat Nov 21, 10:45 AM ET. Spec says "Teammate" for the pipeline owner: th
 - **Me (user):** repo URL · `~/witness-data` unzipped · Gemini key in `.env` (variable name per `docs/VERIFIED.md`) · go/fog at the gate · read the fps number at 11:50.
 - **Teammate (new, 11:26):** switch to Revision 2 of the spec: regenerate `web/public/sample_incident.json` and `sample_index.json` from §9.2/§9.3, show `authenticity: fake` as ✗, read the flat `index.json`, parse the §9.3 stream (`event:` lines, `summary`, 4 statuses, `verdict` stage); export the Sheet tabs to `data_meta/`; add `docs/*` + `!docs/VERIFIED.md` to `.gitignore` (§14).
 - **Teammate (original list):** repo pushed with `.gitignore`, `data_meta/{screen,heroes,break_it,rehearsal}.csv`, `web/public/sample_incident.json` with real `osm_file` + real clips, Vite proxy `/api` → `127.0.0.1:8000`, `web/` runnable by 11:50.
+- **Organizer answer received 12:07 (via the user): Q3 = yes**, downloaded Telegram clips may be used; hero clips are `player: file` under `/api/media/`. Q4 (temporary YouTube download) still open.
 - **Organizers (§13):** answers 1–4. Q3 decides Telegram/X analysis. Q4 decides the YouTube mode (§C.6).
 
 ## C. Design (mine; fixed parts of §9 are implemented as written)
@@ -143,12 +144,12 @@ Written Sat Nov 21, 10:45 AM ET. Spec says "Teammate" for the pipeline owner: th
   Fields: `review_notes[]` of type `time_conflict`, `location_conflict`, `single_source` (each with `t`, `anchor`, `source`, `clip_ts`, `basis`), `summary`, `verification.agree_place`, `verification.agree_time`.
   Check: `python -m pipeline.incidents --hero all --carbon`; contract exit 0 on every hero file; `grep -Eil 'war crime|illegal|guilty' web/public/incidents/*.json` prints nothing.
   Cut: `summary` stays `null` (first item in the cut order). The cross-check notes stay.
-- [ ] **P4b Bulk run + grouping + `index.json`**
+- [x] **P4b Bulk run + grouping + `index.json`** — done 12:14: `python -m pipeline.bulk` ran 57 clips (dev eval clips + 51 non-hero Telegram clips): 56 analyzed, 4 rejected, 0 located (no captions or post times, so no city to start the funnel), 52 singleton groups. Heroes now come from `data_meta/heroes.csv`; files are `0622.json` and `0901.json` (old `0001`, `0003` removed); `0228`, `0902`, `0624` are city-level only, `0903` has no building file, and most `0624` clips are missing on this Mac. `index.json`: 2 incidents, 82 clips, 5 rejected. Bulk groups are not written as incidents (no building extracts for them).
   Files: `pipeline/bulk.py` (run screened `ok` clips through `analyze_clip` in parallel, group per §C.9, write index).
   Fields: `index.json {is_sample, city, n_clips, n_rejected, incidents[] {id, title, lat, lon, radius_m, n_sources, corroboration, impact_local}}`.
   Check: `python -m pipeline.bulk --limit 150`; `python -m pipeline.contract --index web/public/incidents/index.json`; every listed id has a file.
   Cut: `--limit 50`.
-- [ ] **P4c Dev eval** (see P5 for the harness) → `eval/results.json` with `split: dev`, copied to `web/public/eval/results.json`.
+- [x] **P4c Dev eval** — done 12:11, `split: dev`, both files written and `contract --results` passes. n is tiny (6 dev clips; 27 hero clips for grouping): fakes 100/100 vs baseline 100/100; geolocation n=1 (4.6 km vs 1.5 km for Gemini asked directly); grouping 52% vs 81% for city+date (to fix before the freeze); ablation 100 / 100 / 33. `eval/split.csv` is my own split (gap 8); no weapon or area-type rows (the keys lack those fields); no video-only geolocation mode (cut). (see P5 for the harness) → `eval/results.json` with `split: dev`, copied to `web/public/eval/results.json`.
   **3:00 gate — pass:** hero files with Carbon notes, `index.json`, both `results.json` (`split: dev`) committed and pushed. → "pull now: index + summaries".
 
 ### P5 Eval harness (3:00 → 3:30), freeze, test run
