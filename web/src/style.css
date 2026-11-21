@@ -91,6 +91,8 @@ button.mini { padding: 1px 6px; font-size: 10px; margin: 2px 4px 2px 0; }
 .video-box video, .video-box iframe, .video-box > div:first-child { width: 100%; height: 100%; border: 0; display: block; }
 .video-box.blurred video, .video-box.blurred iframe, .video-box.blurred .moment { filter: blur(24px); }
 .blur-cover { position: absolute; inset: 0; display: flex; flex-direction: column; gap: 8px; align-items: center; justify-content: center; background: rgba(0,0,0,0.45); }
+.video-box.also { margin-top: 6px; cursor: pointer; }
+.also-tag { position: absolute; left: 6px; bottom: 6px; font: 11px var(--mono); background: rgba(0,0,0,0.7); padding: 2px 6px; }
 .no-embed { display: flex !important; align-items: center; justify-content: center; }
 .moment { position: absolute; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.75); padding: 3px 6px; font-size: 11px; color: var(--cyan); }
 .findings { margin-top: 4px; }
@@ -131,6 +133,10 @@ button.mini { padding: 1px 6px; font-size: 10px; margin: 2px 4px 2px 0; }
 .verdict h3 { margin: 4px 0 10px; font-size: 22px; }
 .check { margin: 3px 0; } .check.fail { color: var(--red); }
 .bk-loc { margin: 10px 0 4px; }
+.verdict .video-box { max-width: 560px; margin-bottom: 8px; }
+.bk-events { margin: 6px 0 10px; max-width: 720px; } .bk-events button.mini { font-size: 12px; padding: 2px 7px; }
+.check button.mini { font-size: 12px; }
+.bk-map { display: block; width: 100%; max-width: 560px; height: 220px; border: 1px solid var(--line); margin-top: 6px; filter: invert(1) hue-rotate(180deg) brightness(0.9) contrast(0.9); }
 .bk-judge button { margin-right: 8px; font-size: 14px; padding: 6px 12px; }
 .bk-board .big { font-size: 20px; color: var(--cyan); margin-left: 12px; }
 .bk-board .ok { color: var(--green); } .bk-board .wrong { color: var(--red); }

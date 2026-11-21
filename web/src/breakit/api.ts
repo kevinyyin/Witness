@@ -25,7 +25,7 @@ export async function analyze(input: Input, onEvent: (e: StreamEvent) => void): 
   } else {
     init = { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(input) }
   }
-  const r = await fetch('/api/analyze', init)
+  const r = await fetch('/api/analyze', { ...init, signal: AbortSignal.timeout(120_000) }) // a hung model call must not leave the panel spinning
   if (!r.ok || !r.body) throw new Error(`analyze failed: HTTP ${r.status}`)
   await readStream(r.body, onEvent)
 }

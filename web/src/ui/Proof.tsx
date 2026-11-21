@@ -5,6 +5,9 @@ import { getJSON } from '../data/load'
 import { SampleBanner } from './SampleBanner'
 
 const fmt = (v: number | null, unit: string) => (v == null ? 'n/a' : `${v}${unit === '%' ? '%' : ` ${unit}`}`)
+// Where Witness differs from the baseline comes first; the fake rows tie on easy fakes, so they go last.
+const CLAIMS = ['Geolocation works', 'Uncertainty is honest', 'Grouping', 'Fakes caught']
+const rank = (claim: string) => (CLAIMS.indexOf(claim) + 1) || CLAIMS.length + 1
 
 export function Proof() {
   const [r, setR] = useState<Results | null | undefined>(undefined)
@@ -12,6 +15,10 @@ export function Proof() {
   if (r === undefined) return <div className="page muted">Loading eval/results.json…</div>
   if (r === null) return <div className="page warn">No web/public/eval/results.json yet (the pipeline commits dev-set numbers by 3:00, test-set by 3:50).</div>
   const a = r.ablation, best = Math.max(a.full_video, a.frames_5, a.transcript, 1)
+  // results.json lists one row per baseline, not grouped: put each metric's rows together, the agreed baseline (D15) first.
+  const first = (x: Results['rows'][number]) => r.rows.findIndex((y) => y.claim === x.claim && y.metric === x.metric)
+  const d15 = (x: Results['rows'][number]) => (x.baseline_name?.startsWith('Claude') ? 0 : 1)
+  const rows = [...r.rows].sort((x, y) => rank(x.claim) - rank(y.claim) || first(x) - first(y) || d15(x) - d15(y))
   return (
     <div className="page proof">
       <SampleBanner show={r.split !== 'test'} text="DEV NUMBERS, NOT FINAL" />
@@ -19,8 +26,8 @@ export function Proof() {
       <table>
         <thead><tr><th>Claim</th><th>Metric</th><th>Witness</th><th>Baseline</th><th>n</th></tr></thead>
         <tbody>
-          {r.rows.map((x, i) => {
-            const same = i > 0 && r.rows[i - 1].claim === x.claim && r.rows[i - 1].metric === x.metric // one row per baseline: name the metric once
+          {rows.map((x, i) => {
+            const same = i > 0 && rows[i - 1].claim === x.claim && rows[i - 1].metric === x.metric // one row per baseline: name the metric once
             return (
             <tr key={i} className={same ? 'cont' : ''}>
               <td>{same ? '' : x.claim}</td><td className="muted">{same ? '' : x.metric}</td>
@@ -32,7 +39,7 @@ export function Proof() {
           })}
         </tbody>
       </table>
-      <h3>Needs Gemini's ears <span className="muted">· {a.metric} · n = {a.n}</span></h3>
+      <h3>Footage, not a description of it <span className="muted">· {a.metric} · n = {a.n}</span></h3>
       {([['full video', a.full_video], ['5 frames', a.frames_5], ['transcript', a.transcript]] as const).map(([k, v]) => (
         <div key={k} className="bar-row wide"><span>{k}</span><span className="bar"><span style={{ width: `${(v / best) * 100}%` }} /></span><span>{fmt(v, a.unit)}</span></div>
       ))}

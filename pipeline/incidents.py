@@ -122,7 +122,7 @@ def assemble(hero):
         seen_sha.add(rec["sha256"])
         raw = cached(rec["sha256"])["raw"]
         S.append({"id": chr(ord("A") + len(S)), "rec": rec, "raw": raw, "clip": clip, "phys": raw["phys"],
-                  "fake": rec["fake"]["verdict"] == "fake", "camera": None, "boom": None, "offset": None, "aligned": False})
+                  "fake": rec["fake"]["verdict"] == "fake", "camera": None, "boom": None, "offset": None, "aligned": False, "flash": False})
     live = [s for s in S if not s["fake"]]
     assert live, "no usable clip in this hero"
 
@@ -138,9 +138,15 @@ def assemble(hero):
     for s in live:
         ph = s["phys"]
         if ph["delta_s"] is not None:
-            s["offset"], s["aligned"] = round(-ph["flash_ts"], 2), True
+            s["offset"], s["aligned"], s["flash"] = round(-ph["flash_ts"], 2), True, True
             if ph["refined"] and ph["delta_s"] >= 0.05:
                 s["boom"] = round(SOUND_M_S * ph["delta_s"])
+        else:
+            # a clip that shows the flash but carries no boom (a silent CCTV camera) still marks t = 0.
+            # Hydrogen reads at 1 frame per second, so this alignment is good to about a second.
+            seen = next((e for e in s["rec"]["timeline"] if e["type"] == "flash" and e["confidence"] >= 0.8), None)
+            if seen:
+                s["offset"], s["aligned"], s["flash"] = round(-seen["clip_ts"], 2), True, True
 
     # 4. impact: evidence rings -> the best-located clip (landmarks) -> claimed place
     located = [s["rec"]["location"] for s in live if s["rec"]["location"]] + hidden_locs
@@ -300,7 +306,7 @@ def assemble(hero):
     if not with_flash:
         notes.append(_item("single_source", f"No clip shows the impact itself: t = 0 is the start of clip {star['id']}, not a measured moment",
                            0.9, 0.0, {"kind": "impact"}, star["id"], 0.0, ["no flash event in any clip"]))
-    if len([s for s in live if s["phys"]["delta_s"] is not None]) == 1 and with_flash:
+    if sum(s["flash"] for s in live) == 1 and with_flash:
         notes.append(_item("single_source", f"The impact is seen in one clip only ({star['id']})", 0.9, 0.0, {"kind": "impact"},
                            star["id"], star["phys"]["flash_ts"], [f"{star['id']}@{mmss(star['phys']['flash_ts'])} flash"]))
 

@@ -5,6 +5,7 @@ import type { ClipRecord } from '../types'
 import type { StageEvent, StageName, StreamEvent } from '../breakit/sse'
 import { analyze, health, judge, replayFixture, scoreboard, type Fixture, type Health, type Scoreboard, type Truth } from '../breakit/api'
 import { mmss } from '../time/derive'
+import { loadYouTube, videoAdapter, youtubeAdapter, youtubeId, type Adapter } from './players'
 import { SampleBanner } from './SampleBanner'
 import { WeaponBars } from './Sidebar'
 
@@ -30,9 +31,17 @@ export function BreakIt() {
   const [elapsed, setElapsed] = useState(0)
   const [board, setBoard] = useState<Scoreboard | null>(null)
   const [judged, setJudged] = useState(false)
+  const [ran, setRan] = useState<File | null>(null) // the file behind the current result, so the card can play it
   const started = useRef(0)
+  const ended = useRef(false) // a result or an error arrived: anything else is a dropped stream
 
   useEffect(() => { health().then(setH); scoreboard().then(setBoard) }, [])
+  useEffect(() => { // a file dropped anywhere on the page is taken; without this a near miss makes the browser open the file
+    const over = (e: DragEvent) => e.preventDefault()
+    const drop = (e: DragEvent) => { e.preventDefault(); const f = e.dataTransfer?.files[0]; if (f) { setFile(f); setUrl('') } }
+    window.addEventListener('dragover', over); window.addEventListener('drop', drop)
+    return () => { window.removeEventListener('dragover', over); window.removeEventListener('drop', drop) }
+  }, [])
   useEffect(() => {
     if (!busy) return
     const id = setInterval(() => setElapsed((performance.now() - started.current) / 1000), 200)
@@ -42,16 +51,22 @@ export function BreakIt() {
   const offline = h === null
   const onEvent = (e: StreamEvent) => {
     if (e.event === 'stage') setStages((s) => ({ ...s, [e.data.stage]: e.data }))
-    else if (e.event === 'result') setResult(e.data as ClipRecord)
-    else setError(`${e.data.stage}: ${e.data.message}`)
+    else if (e.event === 'result') { ended.current = true; setResult(e.data as ClipRecord) }
+    else { ended.current = true; setError(`${e.data.stage}: ${e.data.message}`) }
   }
   const run = async (go: () => Promise<void>) => {
     setStages({}); setResult(null); setError(null); setJudged(false); setBusy(true)
-    started.current = performance.now(); setElapsed(0)
-    try { await go() } catch (err) { setError(String((err as Error).message ?? err)) } finally { setBusy(false) }
+    started.current = performance.now(); setElapsed(0); ended.current = false
+    try {
+      await go()
+      if (!ended.current) setError('The connection closed before a verdict. Press Analyze again.')
+    } catch (err) {
+      setError((err as Error).name === 'TimeoutError' ? 'No verdict after 2 minutes, stopped. Press Analyze again, or try a shorter clip.' : String((err as Error).message ?? err))
+    }
+    finally { setBusy(false); setElapsed((performance.now() - started.current) / 1000) } // a hidden tab throttles the ticker: set the total here
   }
-  const submit = () => run(() => analyze(file ? { file, claimed_place: place || null } : { url: url.trim(), claimed_place: place || null }, onEvent))
-  const replay = (f: Fixture) => run(() => replayFixture(f, onEvent))
+  const submit = () => { setRan(file); return run(() => analyze(file ? { file, claimed_place: place || null } : { url: url.trim(), claimed_place: place || null }, onEvent)) }
+  const replay = (f: Fixture) => { setRan(null); return run(() => replayFixture(f, onEvent)) }
   const tell = async (truth: Truth) => {
     if (!result) return
     try { setBoard(await judge(result.clip_id, truth)); setJudged(true) } catch (err) { setError(String((err as Error).message)) }
@@ -71,9 +86,10 @@ export function BreakIt() {
       {h && (
         <div className="bk-input">
           {h.youtube_url_input
-            ? <input placeholder="https://www.youtube.com/watch?v=…" value={url} onChange={(e) => { setUrl(e.target.value); setFile(null) }} />
+            ? <input placeholder="https://www.youtube.com/watch?v=…" value={url} onChange={(e) => { setUrl(e.target.value); setFile(null) }}
+                onKeyDown={(e) => { if (e.key === 'Enter' && !busy && url.trim()) submit() }} />
             : <div className="muted">YouTube links are off for this run (K1); drop a video file instead.</div>}
-          <label className="drop" onDragOver={(e) => e.preventDefault()} onDrop={(e) => { e.preventDefault(); const f = e.dataTransfer.files[0]; if (f) { setFile(f); setUrl('') } }}>
+          <label className="drop" onDragOver={(e) => e.preventDefault()} >
             {file ? `▶ ${file.name}` : 'or drop a video file here (any format)'}
             <input type="file" accept="video/*,.webm,.mkv" hidden onChange={(e) => { const f = e.target.files?.[0]; if (f) { setFile(f); setUrl('') } }} />
           </label>
@@ -97,7 +113,7 @@ export function BreakIt() {
           })}
           {error && <div className="warn">✗ {error}</div>}
         </section>
-        {result && <Verdict r={result} />}
+        {result && <Verdict key={result.clip_id} r={result} file={ran} />}
       </div>
 
       {result && (
@@ -119,24 +135,74 @@ export function BreakIt() {
   )
 }
 
-function Verdict({ r }: { r: ClipRecord }) {
+/** The analyzed clip, playable on the card: every timed line below seeks it, so a claim can be checked in one click. */
+function ClipPlayer({ yt, file, graphic, adapter }: { yt: string | null; file: File | null; graphic: number; adapter: { current: Adapter | null } }) {
+  const box = useRef<HTMLDivElement>(null), vid = useRef<HTMLVideoElement>(null)
+  const [src, setSrc] = useState<string | null>(null)
+  const [shown, setShown] = useState(graphic < 2) // same rule as the reconstruction sidebar: graphic >= 2 starts blurred
+  useEffect(() => {
+    if (yt || !file) return
+    const u = URL.createObjectURL(file)
+    setSrc(u)
+    return () => URL.revokeObjectURL(u)
+  }, [yt, file])
+  useEffect(() => {
+    let alive = true
+    if (yt) loadYouTube().then((YT) => {
+      if (!alive || !box.current) return
+      const p = new YT.Player(box.current, { videoId: yt, playerVars: { playsinline: 1, rel: 0 }, events: { onReady: () => { if (alive) adapter.current = youtubeAdapter(p) } } })
+    })
+    else if (vid.current) adapter.current = videoAdapter(vid.current)
+    return () => { alive = false; adapter.current?.destroy(); adapter.current = null }
+  }, [yt, src, adapter])
+  return (
+    <div className={`video-box ${shown ? '' : 'blurred'}`}>
+      {yt ? <div><div ref={box} /></div> : <video ref={vid} src={src ?? undefined} playsInline controls preload="auto" />}
+      {!shown && <div className="blur-cover">Graphic content (level {graphic}) · blurred<button onClick={() => setShown(true)}>Show anyway</button></div>}
+    </div>
+  )
+}
+
+/** OpenStreetMap's own embed: the view spans the uncertainty radius, the pin is the best guess. */
+function LocMap({ lat, lon, radius_m }: { lat: number; lon: number; radius_m: number }) {
+  const dLat = (Math.max(radius_m, 150) * 1.2) / 111_320, dLon = dLat / Math.cos((lat * Math.PI) / 180)
+  const bbox = [lon - dLon, lat - dLat, lon + dLon, lat + dLat].map((x) => x.toFixed(5)).join(',')
+  return <iframe className="bk-map" title="Estimated location on OpenStreetMap" loading="lazy"
+    src={`https://www.openstreetmap.org/export/embed.html?bbox=${bbox}&layer=mapnik&marker=${lat.toFixed(5)},${lon.toFixed(5)}`} />
+}
+
+function Verdict({ r, file }: { r: ClipRecord; file: File | null }) {
   const f = r.fake
+  const adapter = useRef<Adapter | null>(null)
+  const yt = youtubeId(r.embed_url ?? r.source_url ?? '')
+  const playable = !!yt || !!file
+  const go = (ts: number) => { adapter.current?.seek(Math.max(0, ts - 1.5)); adapter.current?.play() } // start just before the moment
   const rejected = f.verdict === 'fake'
-  const title = rejected ? `Rejected · ${LABEL[f.label ?? ''] ?? f.label ?? 'not real'}` : f.verdict === 'real' ? 'Real strike footage' : 'Unsure'
+  const title = rejected ? `Rejected · ${LABEL[f.label ?? ''] ?? f.label ?? 'not real'}` : f.verdict === 'real' ? 'Real strike footage' : 'Unsure · needs a human reviewer'
   const loc = r.location
   return (
     <section className={`verdict ${f.verdict}`}>
       <h3>{title} <span className="muted">conf {f.confidence.toFixed(2)}</span></h3>
+      {playable && <ClipPlayer yt={yt} file={file} graphic={r.triage.graphic_level} adapter={adapter} />}
+      {r.timeline.length > 0 && (
+        <div className="bk-events">
+          <span className="muted">What Hydrogen saw and heard{playable ? ' (click to check)' : ''}: </span>
+          {r.timeline.map((e, i) => <button key={i} className="mini" disabled={!playable} onClick={() => go(e.clip_ts)}>{mmss(e.clip_ts)} {e.label} ▸</button>)}
+        </div>
+      )}
       {f.checks.map((c) => (
         <div key={c.name} className={`check ${c.result === 'fail' ? 'fail' : ''}`}>
-          {c.result === 'pass' ? '✓' : c.result === 'fail' ? '✗' : '–'} {c.name.replace(/_/g, ' ')}: {c.detail}{c.clip_ts != null && <span className="muted"> @ {mmss(c.clip_ts)}</span>}
+          {c.result === 'pass' ? '✓' : c.result === 'fail' ? '✗' : '–'} {c.name.replace(/_/g, ' ')}: {c.detail}{c.clip_ts != null && (playable
+            ? <> <button className="mini" onClick={() => go(c.clip_ts!)}>▸ play {mmss(c.clip_ts)}</button></>
+            : <span className="muted"> @ {mmss(c.clip_ts)}</span>)}
         </div>
       ))}
       {!rejected && (
         <>
           <div className="bk-loc">
             {loc ? <>Location: {loc.level === 'city' ? 'city only' : loc.level} · {loc.lat.toFixed(4)}, {loc.lon.toFixed(4)} ± {(loc.radius_m / 1000).toFixed(1)} km
-              {loc.evidence.length > 0 && <div className="muted">{loc.evidence.join(' · ')}</div>}</>
+              {loc.evidence.length > 0 && <div className="muted">{loc.evidence.join(' · ')}</div>}
+              <LocMap lat={loc.lat} lon={loc.lon} radius_m={loc.radius_m} /></>
               : r.triage.military_object >= 0.5 ? <span className="warn">Location withheld: military object visible</span>
               : <span className="muted">Location: unknown</span>}
           </div>
