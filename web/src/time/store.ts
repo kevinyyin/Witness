@@ -10,7 +10,7 @@ type TimeState = {
   pinned: string | null // source id the reviewer pinned in the sidebar (V3)
   seekNonce: number // bumps on scrub/jump so the video re-seeks (V3)
   setT: (t: number) => void // scrub
-  jump: (t: number) => void // click a marker: go there and play
+  jump: (t: number, source?: string | null) => void // click a marker: go there, play, show its clip (or auto)
   toggle: () => void
   setSpeed: (s: number) => void
   setMode: (m: Mode) => void
@@ -20,7 +20,7 @@ type TimeState = {
 export const useTime = create<TimeState>((set) => ({
   t: -20, playing: false, speed: 1, mode: 'walk', pinned: null, seekNonce: 0,
   setT: (t) => set((s) => ({ t, seekNonce: s.seekNonce + 1 })),
-  jump: (t) => set((s) => ({ t, playing: true, seekNonce: s.seekNonce + 1 })),
+  jump: (t, source = null) => set((s) => ({ t, playing: true, pinned: source, seekNonce: s.seekNonce + 1 })),
   toggle: () => set((s) => ({ playing: !s.playing })),
   setSpeed: (speed) => set({ speed, playing: true }),
   setMode: (mode) => set({ mode }),

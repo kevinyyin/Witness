@@ -1,5 +1,28 @@
 // Pure functions of scene time t (s, 0 = impact). Scrubbing backward just re-evaluates them (§7.1.5).
-import type { Incident } from '../types'
+import type { Anchor, Incident, Source } from '../types'
+
+/** A clip's span on the scene clock: offset_s → offset_s + duration. §9.2 has no duration yet (PLAN gap 4):
+ *  fall back to its last known moment + 5 s (`guessed`). null when the clip has no offset. */
+export function laneOf(inc: Incident, s: Source) {
+  if (s.offset_s == null) return null
+  const moments = [...(s.findings ?? []).map((f) => f.clip_ts), ...inc.timeline.filter((e) => e.source === s.id).map((e) => e.clip_ts ?? 0)]
+  const dur = s.duration_s ?? Math.max(5, ...moments) + 5
+  return { t0: s.offset_s, t1: s.offset_s + dur, guessed: s.duration_s == null }
+}
+
+/** Sidebar clip for the playhead (§7.1.7): the pinned one, else the clip that saw the impact if it covers t,
+ *  else the aligned clip covering t with the earliest offset, else an unaligned one. */
+export function pickClip(inc: Incident, t: number, pinned: string | null): Source | null {
+  if (pinned) return inc.sources.find((s) => s.id === pinned) ?? null
+  const covers = (s: Source) => { const l = laneOf(inc, s); return !!l && t >= l.t0 && t <= l.t1 }
+  const impact = inc.timeline.filter((e) => e.type === 'impact').sort((a, b) => Math.abs(a.t) - Math.abs(b.t))[0]?.source
+  const c = inc.sources.filter(covers).sort((a, b) => Number(b.aligned !== false) - Number(a.aligned !== false) || (a.offset_s ?? 0) - (b.offset_s ?? 0))
+  return c.find((s) => s.id === impact) ?? c[0] ?? null
+}
+
+/** Source a callout or marker is about, from its anchor (camera/cameras) — never from parsing `basis`. */
+export const anchorSource = (a: Anchor | null | undefined) =>
+  a?.kind === 'camera' ? a.ref : a?.kind === 'cameras' ? a.ref[0] : undefined
 
 /** Target heat 0..1: calm before impact, white → amber → red over 1.5 s, then stays red (§7.1.2). */
 export const heatAt = (t: number) => (t <= 0 ? 0 : Math.min(1, t / 1.5))

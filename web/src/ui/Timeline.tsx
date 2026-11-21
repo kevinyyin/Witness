@@ -1,31 +1,23 @@
 // §7.1.6 timeline: the reviewer's main control. Rows: flags, events, one lane per clip. Drives t.
 import { useEffect, useMemo, useRef } from 'react'
-import type { Incident, Source } from '../types'
+import type { Incident } from '../types'
 import type { Ruler } from '../time/ruler'
 import { useTime } from '../time/store'
-import { fmtT, mmss } from '../time/derive'
+import { anchorSource, fmtT, laneOf, mmss } from '../time/derive'
 
-type Mark = { t: number; row: 'flag' | 'note' | 'event'; text: string; tip: string }
+type Mark = { t: number; row: 'flag' | 'note' | 'event'; text: string; tip: string; src?: string }
 
 function marksOf(inc: Incident): Mark[] {
   const c = (x: number | null | undefined) => (x == null ? '—' : x.toFixed(2))
   return [
-    ...inc.flags.filter((f) => f.t != null).map((f) => ({ t: f.t!, row: 'flag' as const, text: '▲', tip: `${f.label}\n${f.basis.join(' · ')}\nconf ${c(f.confidence)}` })),
-    ...inc.review_notes.filter((f) => f.t != null).map((f) => ({ t: f.t!, row: 'note' as const, text: '●', tip: `${f.label}\n${f.basis.join(' · ')}\nconf ${c(f.confidence)}` })),
+    ...inc.flags.filter((f) => f.t != null).map((f) => ({ t: f.t!, row: 'flag' as const, text: '▲', src: anchorSource(f.anchor), tip: `${f.label}\n${f.basis.join(' · ')}\nconf ${c(f.confidence)}` })),
+    ...inc.review_notes.filter((f) => f.t != null).map((f) => ({ t: f.t!, row: 'note' as const, text: '●', src: anchorSource(f.anchor), tip: `${f.label}\n${f.basis.join(' · ')}\nconf ${c(f.confidence)}` })),
     ...inc.timeline.map((e) => ({
-      t: e.t, row: 'event' as const,
+      t: e.t, row: 'event' as const, src: e.source,
       text: e.type === 'impact' ? '✦' : e.type === 'boom_heard' ? `boom@${e.source}` : e.type.replace(/_/g, ' '),
       tip: `${e.type} ${fmtT(e.t)}\n${e.source ?? ''}${e.clip_ts != null ? `@${mmss(e.clip_ts)}` : ''}\nconf ${c(e.confidence)}`,
     })),
   ].sort((a, b) => a.t - b.t)
-}
-
-/** Lane span: offset_s → offset_s + duration. §9.2 has no duration yet (PLAN gap 4): last known moment + 5 s. */
-function lane(inc: Incident, s: Source) {
-  if (s.offset_s == null) return null
-  const moments = [...(s.findings ?? []).map((f) => f.clip_ts), ...inc.timeline.filter((e) => e.source === s.id).map((e) => e.clip_ts ?? 0)]
-  const dur = s.duration_s ?? Math.max(5, ...moments) + 5
-  return { t0: s.offset_s, t1: s.offset_s + dur, guessed: s.duration_s == null }
 }
 
 function niceStep(span: number) {
@@ -108,10 +100,10 @@ export function Timeline({ inc, ruler }: { inc: Incident; ruler: Ruler }) {
           ))}
           {marks.map((m, i) => (
             <div key={i} className={`mark ${m.row}`} style={{ left: x(m.t) }} title={m.tip}
-              onPointerDown={(e) => e.stopPropagation()} onClick={() => jump(m.t - 2)}>{m.text}</div>
+              onPointerDown={(e) => e.stopPropagation()} onClick={() => jump(m.t - 2, m.src ?? null)}>{m.text}</div>
           ))}
           {inc.sources.map((s, i) => {
-            const l = lane(inc, s)
+            const l = laneOf(inc, s)
             const boom = inc.timeline.find((e) => e.type === 'boom_heard' && e.source === s.id)
             return (
               <div key={s.id} className="lane-row" style={{ top: 40 + i * 16 }}>

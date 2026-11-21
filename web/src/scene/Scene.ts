@@ -119,6 +119,16 @@ export class WitnessScene {
     for (const [id, icon] of Object.entries(icons)) icon.scale.setScalar(blinkAt(this.inc, id, t) ? 60 : 18)
   }
 
+  /** Source id of the camera icon under a click, if any (§7.1.7: clicking a camera selects its clip). */
+  pickCamera(clientX: number, clientY: number): string | null {
+    const r = this.canvas.getBoundingClientRect()
+    const ray = new THREE.Raycaster()
+    ray.setFromCamera(new THREE.Vector2(((clientX - r.left) / r.width) * 2 - 1, -((clientY - r.top) / r.height) * 2 + 1), this.camera)
+    const icons = Object.entries(this.markers?.icons ?? {})
+    const hit = ray.intersectObjects(icons.map(([, s]) => s))[0]
+    return hit ? icons.find(([, s]) => s === hit.object)![0] : null
+  }
+
   /** Screen position (CSS px in the canvas) of a scene point. */
   project(p: THREE.Vector3) {
     const v = p.clone().project(this.camera)

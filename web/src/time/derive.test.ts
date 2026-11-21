@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest'
-import { blinkAt, calloutState, clockAt, flashAt, heatAt, markTimes, slowmo, waveRadiusM } from './derive'
+import { blinkAt, calloutState, clockAt, flashAt, heatAt, markTimes, pickClip, slowmo, waveRadiusM } from './derive'
 import { buildRuler } from './ruler'
+import { embeddable, playerKind } from '../ui/players'
 import sample from '../../public/sample_incident.json'
 import type { Incident } from '../types'
 
@@ -53,6 +54,25 @@ describe('physics + clock', () => {
     expect(clockAt(inc, 0)).toBe('02:41:07 (±6 min)')
     expect(clockAt(inc, 60)).toBe('02:42:07 (±6 min)')
   })
+})
+
+describe('pickClip (sidebar video follows the playhead)', () => {
+  const id = (t: number, pinned: string | null = null) => pickClip(inc, t, pinned)?.id ?? null
+  it('the clip that saw the impact, around t = 0', () => expect(id(0)).toBe('C'))
+  it('before C starts, the clip that covers t', () => expect(id(-14)).toBe('A'))
+  it('the unaligned aftermath clip after the gap', () => expect(id(1082)).toBe('D'))
+  it('nothing inside the gap', () => expect(id(500)).toBeNull())
+  it('a pinned clip wins', () => expect(id(0, 'B')).toBe('B'))
+})
+
+describe('playerKind', () => {
+  const s = (embed_url: string) => ({ id: 'X', camera: null, embed_url })
+  it('youtube / file / embed from embed_url', () => {
+    expect(playerKind(s('https://www.youtube.com/embed/dQw4w9WgXcQ'))).toBe('youtube')
+    expect(playerKind(s('/media/telegram/a/b.mp4'))).toBe('file')
+    expect(playerKind(s('https://t.me/x/1?embed=1'))).toBe('embed')
+  })
+  it('never iframes a placeholder', () => expect(embeddable('…')).toBe(false))
 })
 
 describe('buildRuler', () => {

@@ -11,6 +11,8 @@ import { Fps } from './Fps'
 import { Timeline } from './Timeline'
 import { Callouts } from './Callouts'
 import { Clock, LowerThird, NowPanel } from './HudText'
+import { SourceVideo } from './SourceVideo'
+import { FlagsList, Footer, Sources, Summary, WeaponBars } from './Sidebar'
 
 /** §7.1 Reconstruction view. Everything below reads scene time t from the store. `?wire=1` or key W = wireframe. */
 export function IncidentPage({ id }: { id: string }) {
@@ -47,11 +49,22 @@ export function IncidentPage({ id }: { id: string }) {
     scene.current = s
     if (import.meta.env.DEV) Object.assign(window, { __scene: s, __time: useTime }) // dev-only: console checks
     setPoints(s.points)
-    const toFree = () => useTime.getState().setMode('free') // any drag or scroll → Free (§7.1.4)
-    s.controls.addEventListener('start', toFree)
+    // Any drag or scroll → Free (§7.1.4). 'start' alone fires on a plain click, so wait for a user-driven 'change'.
+    let user = false
+    s.controls.addEventListener('start', () => { user = true })
+    s.controls.addEventListener('end', () => { user = false })
+    s.controls.addEventListener('change', () => { if (user) useTime.getState().setMode('free') })
     const stop = startLoop(ruler, (t) => { s.update(t, useTime.getState().mode); s.render() })
-    return () => { stop(); s.controls.removeEventListener('start', toFree); s.dispose(); scene.current = null }
+    return () => { stop(); s.dispose(); scene.current = null }
   }, [inc, osm, wire, ruler])
+
+  // Click (not drag) on a camera icon → show its clip.
+  const down = useRef<[number, number]>([0, 0])
+  const onUp = (e: React.PointerEvent) => {
+    if (Math.hypot(e.clientX - down.current[0], e.clientY - down.current[1]) > 4) return
+    const id = scene.current?.pickCamera(e.clientX, e.clientY)
+    if (id) useTime.getState().pin(id)
+  }
 
   useEffect(() => { scene.current?.showAnswerKey(showKey) }, [showKey, points])
 
@@ -63,7 +76,7 @@ export function IncidentPage({ id }: { id: string }) {
       <SampleBanner show={inc.is_sample} />
       <div className="stage">
         <div className="scene">
-          <canvas ref={canvas} />
+          <canvas ref={canvas} onPointerDown={(e) => { down.current = [e.clientX, e.clientY] }} onPointerUp={onUp} />
           <Callouts inc={inc} osm={osm?.osm ?? null} getScene={getScene} />
           <div className="hud-title">
             {inc.city.toUpperCase()} · INCIDENT #{inc.id} · {inc.sources.length} SOURCES
@@ -73,14 +86,6 @@ export function IncidentPage({ id }: { id: string }) {
           </div>
           <Clock inc={inc} />
           <LowerThird inc={inc} />
-          <div className="hud-tools">
-            {inc.answer_key && (
-              <button onClick={() => setShowKey((v) => !v)}>Investigators' location: {showKey ? 'shown' : 'reveal'}</button>
-            )}
-            {inc.sources.some((s) => !s.camera) && (
-              <div className="muted">Position unknown: {inc.sources.filter((s) => !s.camera).map((s) => s.id).join(', ')}</div>
-            )}
-          </div>
           <Fps points={points} />
           <div className="honesty">
             Geometry: OpenStreetMap footprints, heights estimated. Not a scan.{wire && ' (wireframe)'}<br />
@@ -90,8 +95,13 @@ export function IncidentPage({ id }: { id: string }) {
         {ruler && <Timeline inc={inc} ruler={ruler} />}
       </div>
       <aside className="sidebar">
-        <div className="muted">Source video (V3)</div>
+        <SourceVideo inc={inc} />
         <NowPanel inc={inc} />
+        <Summary inc={inc} />
+        <WeaponBars inc={inc} />
+        <FlagsList inc={inc} osm={osm?.osm ?? null} />
+        <Sources inc={inc} />
+        <Footer inc={inc} showKey={showKey} toggleKey={() => setShowKey((v) => !v)} />
       </aside>
     </div>
   )
