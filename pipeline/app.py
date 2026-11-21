@@ -17,6 +17,7 @@ PLAIN = {
     "fetch": "Could not read that file as a video. Drop a video file (mp4, mov, webm) or paste a YouTube link.",
     "watch": "Gemini could not watch this video. It may be private, age-restricted, removed or blocked. Try another one.",
 }
+LIVE = {"read_wait_s": 8, "retime_wait_s": 20}  # live runs only, to keep a verdict under a minute: see analyze()
 TRUTHS = {"real_strike", "video_game", "movie", "fireworks_demolition", "other"}
 MEDIA_TYPES = {".mp4", ".webm", ".mov", ".mkv", ".m4v", ".jpg", ".jpeg", ".png"}
 BOARD = CACHE / "scoreboard.json"
@@ -52,7 +53,7 @@ async def analyze_route(request: Request):
         body = await request.json()
         url, place = str(body.get("url") or "").strip(), body.get("claimed_place") or None
         if youtube_url(url):  # only YouTube links are passed on; nothing else is ever fetched
-            events = _plain(analyze(url=youtube_url(url), claimed_place=place))
+            events = _plain(analyze(url=youtube_url(url), claimed_place=place, **LIVE))
         else:
             events = iter([("error", {"stage": "fetch", "message": "Paste a YouTube link, or drop a video file."})])
     else:
@@ -66,7 +67,7 @@ async def analyze_route(request: Request):
         with open(dest, "wb") as out:
             while chunk := await upload.read(1 << 20):
                 out.write(chunk)
-        events = _plain(analyze(path=dest, claimed_place=form.get("claimed_place") or None))
+        events = _plain(analyze(path=dest, claimed_place=form.get("claimed_place") or None, **LIVE))
 
     def sse():
         for kind, data in events:

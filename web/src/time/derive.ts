@@ -14,6 +14,10 @@ export function pickClip(inc: Incident, t: number, pinned: string | null): Sourc
   return c.find((s) => s.id === impact) ?? c[0] ?? null
 }
 
+/** The other aligned clips that cover the playhead: played beside the main one, so two views of one moment run together. */
+export const alsoCovering = (inc: Incident, t: number, main: string | null) =>
+  inc.sources.filter((s) => { const l = laneOf(s); return !!l && s.aligned && s.id !== main && s.authenticity !== 'fake' && t >= l.t0 && t <= l.t1 })
+
 /** Target heat 0..1: calm before impact, white → amber → red over 1.5 s, then stays red (§7.1.2). */
 export const heatAt = (t: number) => (t <= 0 ? 0 : Math.min(1, t / 1.5))
 

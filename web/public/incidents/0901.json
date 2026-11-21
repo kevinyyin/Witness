@@ -428,6 +428,22 @@
  ],
  "review_notes": [
   {
+   "type": "time_conflict",
+   "label": "4 clips are placed by post time, not measured: position approximate",
+   "confidence": 0.9,
+   "t": null,
+   "t_end": null,
+   "anchor": {
+    "kind": "clock"
+   },
+   "source": null,
+   "clip_ts": null,
+   "basis": [
+    "placed by post time",
+    "clips A, B, C, D"
+   ]
+  },
+  {
    "type": "single_source",
    "label": "No clip shows the impact itself: t = 0 is the start of clip A, not a measured moment",
    "confidence": 0.9,
@@ -441,26 +457,6 @@
    "basis": [
     "no flash event in any clip"
    ]
-  },
-  {
-   "type": "time_conflict",
-   "label": "Clip A placed at impact already shows rescue and fire",
-   "confidence": 0.95,
-   "t": 0.0,
-   "t_end": null,
-   "anchor": {
-    "kind": "camera",
-    "ref": "A"
-   },
-   "source": "A",
-   "clip_ts": 0.0,
-   "basis": [
-    "A@0:00 impact",
-    "A@0:00 person tending someone on pavement",
-    "A@0:07 firefighter with hose",
-    "A@0:08 tall jet of flame",
-    "Carbon cross-check"
-   ]
   }
  ],
  "timeline": [
@@ -468,32 +464,102 @@
    "t": 0.0,
    "type": "impact",
    "source": "A",
-   "clip_ts": -0.0,
+   "clip_ts": -11391.4,
    "confidence": 0.3
   },
   {
-   "t": 0.0,
+   "t": 30.0,
+   "type": "fire",
+   "source": "D",
+   "clip_ts": 0.0,
+   "confidence": 0.98
+  },
+  {
+   "t": 3068.32,
+   "type": "rescue",
+   "source": "C",
+   "clip_ts": 0.0,
+   "confidence": 0.95
+  },
+  {
+   "t": 3068.32,
+   "type": "fire",
+   "source": "C",
+   "clip_ts": 0.0,
+   "confidence": 0.95
+  },
+  {
+   "t": 3073.82,
+   "type": "fire",
+   "source": "C",
+   "clip_ts": 5.5,
+   "confidence": 0.95
+  },
+  {
+   "t": 3073.82,
+   "type": "rescue",
+   "source": "C",
+   "clip_ts": 5.5,
+   "confidence": 0.9
+  },
+  {
+   "t": 3084.82,
+   "type": "rescue",
+   "source": "C",
+   "clip_ts": 16.5,
+   "confidence": 0.9
+  },
+  {
+   "t": 3089.82,
+   "type": "rescue",
+   "source": "C",
+   "clip_ts": 21.5,
+   "confidence": 0.95
+  },
+  {
+   "t": 3094.82,
+   "type": "rescue",
+   "source": "C",
+   "clip_ts": 26.5,
+   "confidence": 0.95
+  },
+  {
+   "t": 4847.83,
+   "type": "fire",
+   "source": "B",
+   "clip_ts": 0.0,
+   "confidence": 0.98
+  },
+  {
+   "t": 4847.83,
+   "type": "rescue",
+   "source": "B",
+   "clip_ts": 0.0,
+   "confidence": 0.95
+  },
+  {
+   "t": 11391.4,
    "type": "rescue",
    "source": "A",
    "clip_ts": 0.0,
    "confidence": 0.9
   },
   {
-   "t": 7.5,
+   "t": 11398.9,
    "type": "rescue",
    "source": "A",
    "clip_ts": 7.5,
    "confidence": 0.95
   },
   {
-   "t": 8.7,
+   "t": 11400.1,
    "type": "fire",
    "source": "A",
    "clip_ts": 8.7,
    "confidence": 0.98
   },
   {
-   "t": 14.0,
+   "t": 11405.4,
    "type": "rescue",
    "source": "A",
    "clip_ts": 14.0,
@@ -521,7 +587,7 @@
     "confidence": 0.7
    },
    "boom_distance_m": null,
-   "offset_s": 0.0,
+   "offset_s": 11391.4,
    "aligned": false,
    "authenticity": "real",
    "reject_reason": null,
@@ -568,7 +634,7 @@
    "duration_s": 46.17,
    "camera": null,
    "boom_distance_m": null,
-   "offset_s": null,
+   "offset_s": 4847.83,
    "aligned": false,
    "authenticity": "real",
    "reject_reason": null,
@@ -605,7 +671,7 @@
    "duration_s": 29.68,
    "camera": null,
    "boom_distance_m": null,
-   "offset_s": null,
+   "offset_s": 3068.32,
    "aligned": false,
    "authenticity": "real",
    "reject_reason": null,
@@ -657,7 +723,7 @@
    "duration_s": 16.57,
    "camera": null,
    "boom_distance_m": null,
-   "offset_s": null,
+   "offset_s": 30,
    "aligned": false,
    "authenticity": "real",
    "reject_reason": null,
@@ -677,7 +743,7 @@
    ]
   }
  ],
- "summary": "A strike probably hit near the Radmir office building on Akademika Pavlova Street in Kharkiv at an estimated afternoon time on September 1, 2024. Four independent clips agree on fires, building damage, and rescue work consistent with a strike aftermath. However, no clip captures the actual impact, making the exact timing uncertain.",
+ "summary": "A strike probably hit a commercial area near the Radmir office building on Akademika Pavlova Street in Kharkiv on September 1, 2024. Four independent clips are consistent with heavy building damage, fires, and rescue work. The main caveat is that no clip shows the impact, so the estimated timing relies only on post times.",
  "verification": {
   "agree_place": true,
   "agree_time": false,

@@ -92,8 +92,13 @@ def _timed(fn, *args):
     return fn(*args), int((time.time() - t0) * 1000)
 
 
-def analyze(path=None, url=None, claimed_place=None, posted_at=None, source_url=None, fresh=False):
-    """Yields ("stage", {...}) events, then one ("result", record) or ("error", {...})."""
+def analyze(path=None, url=None, claimed_place=None, posted_at=None, source_url=None, fresh=False, read_wait_s=None, retime_wait_s=None):
+    """Yields ("stage", {...}) events, then one ("result", record) or ("error", {...}).
+
+    read_wait_s: how long the locate stage waits for the three place reads once scoring is done. None waits for all
+    of them (bulk runs and the eval). The live server passes a few seconds: on a YouTube link one read can take
+    over two minutes, and a late read only widens the radius.
+    retime_wait_s: the same for the finer flash and boom pass on a link (None waits; it has taken 14 to 40 s)."""
     events, stage = [], "fetch"
 
     def emit(ev):
@@ -116,7 +121,8 @@ def analyze(path=None, url=None, claimed_place=None, posted_at=None, source_url=
 
         stage = "watch"
         yield emit(_stage("watch", "start"))
-        with ThreadPoolExecutor() as pool:
+        pool = ThreadPoolExecutor()
+        try:
             f_watch = pool.submit(_timed, gemini.watch, block, claimed_place)
             # with a file, the Decisions API scores the video itself, in parallel with Hydrogen
             f_score = pool.submit(_timed, gemini.score, [{**block, "resolution": "low"}]) if prep else None
@@ -134,7 +140,7 @@ def analyze(path=None, url=None, claimed_place=None, posted_at=None, source_url=
             phys = physics.measure(path, prep["wav"] if prep else None, timeline)
             if not prep and phys["delta_s"] is not None:
                 try:  # no file: one finer Hydrogen pass around the blast; its failure only costs precision
-                    finer = gemini.retime(block, phys["blast_ts"])
+                    finer = pool.submit(gemini.retime, block, phys["blast_ts"]).result(retime_wait_s)
                     if finer:
                         phys["flash_ts"], phys["blast_ts"] = round(finer[0], 2), round(finer[1], 2)
                         phys["delta_s"] = round(max(0.0, finer[1] - finer[0]), 2)
@@ -154,6 +160,8 @@ def analyze(path=None, url=None, claimed_place=None, posted_at=None, source_url=
                 text = json.dumps({"description": seen.get("observations", ""), "events": timeline,
                                    "game_or_film_interface_on_screen": bool(seen.get("hud_present"))})
                 scores, ms["score"] = _timed(gemini.score, text)
+        finally:
+            pool.shutdown(wait=False)  # a rejected clip never uses the three place reads: its verdict must not wait for them
         yield emit(_stage("score", "done", ms["score"],
                           f"war-related {scores['war_related']:.2f} · real strike {scores['real_strike']:.2f}"))
 
@@ -175,11 +183,12 @@ def analyze(path=None, url=None, claimed_place=None, posted_at=None, source_url=
             yield emit(_stage("locate", "start"))
             decide_input = [{**block, "resolution": "low"}] if prep else seen.get("observations", "")
             reads = []
+            deadline = None if read_wait_s is None else time.time() + read_wait_s
             for f in f_reads:
                 try:
-                    reads.append(f.result())
+                    reads.append(f.result(None if deadline is None else max(0.0, deadline - time.time())))
                 except Exception:
-                    pass  # a failed read only widens the radius
+                    pass  # a failed or late read only widens the radius
             location, ms["locate"] = _timed(geo.locate, seen, claimed_place, decide_input, reads)
             yield emit(_stage("locate", "done", ms["locate"],
                               f"{location['level']}: ±{location['radius_m']} m, {location['candidates']} candidates"))

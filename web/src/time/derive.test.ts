@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { blinkAt, calloutState, clockAt, flashAt, heatAt, markTimes, pickClip, slowmo, waveRadiusM } from './derive'
+import { alsoCovering, blinkAt, calloutState, clockAt, flashAt, heatAt, markTimes, pickClip, slowmo, waveRadiusM } from './derive'
 import { buildRuler } from './ruler'
 import { embeddable } from '../ui/players'
 import sample from '../../public/sample_incident.json'
@@ -63,6 +63,10 @@ describe('pickClip (sidebar video follows the playhead)', () => {
   it('the unaligned aftermath clip after the gap', () => expect(id(1082)).toBe('D'))
   it('nothing inside the gap', () => expect(id(500)).toBeNull())
   it('a pinned clip wins', () => expect(id(0, 'B')).toBe('B'))
+  it('the other aligned clips on the same moment: not the main one, not unaligned, not outside their lane', () => {
+    expect(alsoCovering(inc, 0, 'C').map((s) => s.id)).toEqual(['A', 'B'])
+    expect(alsoCovering(inc, 1082, 'D')).toEqual([])
+  })
 })
 
 describe('embeddable', () => {

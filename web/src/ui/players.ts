@@ -1,6 +1,6 @@
 // Video player plumbing for the sidebar (§7.1.7, §9.2 "How the sidebar plays a clip"). No React here.
 
-export const youtubeId = (u: string) => /(?:youtube\.com\/embed\/|youtu\.be\/|[?&]v=)([\w-]{11})/.exec(u)?.[1] ?? null
+export const youtubeId = (u: string) => /(?:youtube\.com\/(?:embed|shorts|live)\/|youtu\.be\/|[?&]v=)([\w-]{11})/.exec(u)?.[1] ?? null
 
 /** Only real web pages go into an iframe (the §9.2 example uses "…" placeholders). */
 export const embeddable = (u: string | null | undefined) => !!u && /^https:\/\//.test(u)

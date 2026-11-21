@@ -2,7 +2,7 @@
 import { useEffect, useRef, useState } from 'react'
 import type { Incident, Source } from '../types'
 import { useTime } from '../time/store'
-import { fmtT, laneOf, mmss, pickClip, slowmo } from '../time/derive'
+import { alsoCovering, fmtT, laneOf, mmss, pickClip, slowmo } from '../time/derive'
 
 /** Every clip in the reconstruction as a chip: playing one filled, clips covering the playhead bright, clips with no
  *  place in time dashed. Click = play that clip. The incident is many clips; this keeps that visible. */
@@ -45,13 +45,13 @@ function useSync(src: Source, get: () => Adapter | null) {
   }, [src, get])
 }
 
-function FilePlayer({ src }: { src: Source }) {
+function FilePlayer({ src, muted }: { src: Source; muted?: boolean }) {
   const v = useRef<HTMLVideoElement>(null)
   const a = useRef<Adapter | null>(null)
   useEffect(() => { a.current = v.current && videoAdapter(v.current); return () => a.current?.destroy() }, [])
   useSync(src, useRef(() => a.current).current)
   // offset_s null = not placed in time: no sync, so the reviewer plays it by hand
-  return <video ref={v} src={src.media_url ?? undefined} playsInline preload="auto" controls={src.offset_s == null} />
+  return <video ref={v} src={src.media_url ?? undefined} playsInline preload="auto" controls={src.offset_s == null} muted={muted} />
 }
 
 function YouTubePlayer({ src }: { src: Source }) {
@@ -100,6 +100,8 @@ function kindOf(s: Source) {
 export function SourceVideo({ inc }: { inc: Incident }) {
   const id = useTime((s) => pickClip(inc, s.t, s.pinned)?.id ?? null)
   const pinned = useTime((s) => s.pinned)
+  // ids as one string, so the sidebar re-renders only when the set of clips changes
+  const also = useTime((s) => alsoCovering(inc, s.t, id).filter((o) => kindOf(o) === 'file' && (o.graphic_level ?? 0) < 2).map((o) => o.id).join(','))
   const [unblurred, setUnblurred] = useState<Record<string, boolean>>({})
   const src = inc.sources.find((s) => s.id === id) ?? null
   const kind = src && kindOf(src)
@@ -124,6 +126,15 @@ export function SourceVideo({ inc }: { inc: Incident }) {
           </div>
         )}
       </div>
+      {also && also.split(',').map((oid) => {
+        const o = inc.sources.find((s) => s.id === oid)!
+        return ( // a second camera on the same moment, silent so the two soundtracks do not overlap; click = make it the main clip
+          <div key={oid} className="video-box also" onClick={() => useTime.getState().pin(oid)} title={`Pin clip ${oid}`}>
+            <FilePlayer src={o} muted />
+            <span className="also-tag">clip {oid} · same moment, another camera</span>
+          </div>
+        )
+      })}
       {src && src.findings.length > 0 && (
         <div className="findings">
           {src.findings.map((f, i) => (

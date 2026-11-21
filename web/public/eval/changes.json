@@ -1,0 +1,22 @@
+{
+ "items": [
+  {
+   "saw": "Dev run at 1:50 PM: 25% of clips within 1 km, median error 2.8 km, true location inside the radius 50% (n = 16). Two clips landed 465 and 468 km away, because the town-name lookup returned the wrong Dnipro.",
+   "changed": "Three independent Hydrogen reads of the place. Two reads that agree overrule the name lookup, and how far the three disagree sets the radius.",
+   "now": "Dev after the change: 59% within 1 km, median 0.7 km, inside the radius 76% (n = 17).",
+   "evidence": "commit 9da10f4, pipeline/geo.py · the 1:50 PM run was overwritten before it was committed"
+  },
+  {
+   "saw": "Hero incidents drew a camera for every clip with a model estimate, and spread aftermath clips along the timeline by upload time.",
+   "changed": "A camera is drawn only where a landmark confirms the spot. A clip with no flash and no boom stays off the timeline.",
+   "now": "0901 keeps one camera and 0622 none. Clips that cannot be timed are listed as sources, not placed on the timeline.",
+   "evidence": "commit 9b2b103, pipeline/incidents.py"
+  },
+  {
+   "saw": "In 0622 only one clip was placed at the impact. A silent CCTV clip that shows the flash was dropped because it has no boom.",
+   "changed": "A clip with a confident flash and no sound is aligned by the flash alone, to about a second.",
+   "now": "0622 plays two cameras at the impact.",
+   "evidence": "commit a34f363, pipeline/incidents.py"
+  }
+ ]
+}
