@@ -10,7 +10,7 @@ type Mark = { t: number; row: 'flag' | 'note' | 'event'; text: string; tip: stri
 
 function marksOf(inc: Incident): Mark[] {
   const c = (x: number | null | undefined) => (x == null ? '—' : x.toFixed(2))
-  return [
+  const all: Mark[] = [
     ...inc.flags.filter((f) => f.t != null).map((f) => ({ t: f.t!, row: 'flag' as const, text: '▲', src: f.source, tip: `${f.label}\n${f.basis.join(' · ')}\nconf ${c(f.confidence)}` })),
     ...inc.review_notes.filter((f) => f.t != null).map((f) => ({ t: f.t!, row: 'note' as const, text: '●', src: f.source, tip: `${f.label}\n${f.basis.join(' · ')}\nconf ${c(f.confidence)}` })),
     ...inc.timeline.map((e) => ({
@@ -19,6 +19,16 @@ function marksOf(inc: Incident): Mark[] {
       tip: `${e.type} ${fmtT(e.t)}\n${e.source ?? ''}${e.clip_ts != null ? `@${mmss(e.clip_ts)}` : ''}\nconf ${c(e.confidence)}`,
     })),
   ].sort((a, b) => a.t - b.t)
+  // Events less than a second apart share one label; drawn separately they print on top of each other.
+  const out: Mark[] = []
+  for (const m of all) {
+    const last = out[out.length - 1]
+    if (m.row === 'event' && last?.row === 'event' && m.t - last.t < 1) {
+      last.text += ` · ${m.text}`
+      last.tip += `\n\n${m.tip}`
+    } else out.push({ ...m })
+  }
+  return out
 }
 
 function niceStep(span: number) {
@@ -71,6 +81,8 @@ export function Timeline({ inc, ruler }: { inc: Incident; ruler: Ruler }) {
   }, [marks])
 
   const checkedNone = inc.flags.filter((f) => f.t == null && f.status === 'checked_none')
+  // A clip without a place in time gets no row: ten "not placed" rows buried the few clips that are timed.
+  const placed = inc.sources.filter((s) => laneOf(s)), unplaced = inc.sources.filter((s) => !laneOf(s))
   return (
     <div className="timeline">
       <div className="tl-controls">
@@ -87,9 +99,9 @@ export function Timeline({ inc, ruler }: { inc: Incident; ruler: Ruler }) {
       <div className="tl-body">
         <div className="tl-labels">
           <div>flags</div><div>events</div>
-          {inc.sources.map((s) => <div key={s.id}>{s.id}</div>)}
+          {placed.map((s) => <div key={s.id}>{s.id}</div>)}
         </div>
-        <div className="tl-track" ref={track}
+        <div className="tl-track" ref={track} style={{ minHeight: 44 + 16 * placed.length + (unplaced.length ? 18 : 0) }}
           onPointerDown={(e) => { dragging.current = true; (e.target as HTMLElement).setPointerCapture(e.pointerId); scrub(e.clientX) }}
           onPointerMove={(e) => dragging.current && scrub(e.clientX)}
           onPointerUp={() => { dragging.current = false }}>
@@ -103,7 +115,7 @@ export function Timeline({ inc, ruler }: { inc: Incident; ruler: Ruler }) {
             <div key={i} className={`mark ${m.row}`} style={{ left: x(m.t) }} title={m.tip}
               onPointerDown={(e) => e.stopPropagation()} onClick={() => jump(m.t - 2, m.src)}>{m.text}</div>
           ))}
-          {inc.sources.map((s, i) => {
+          {placed.map((s, i) => {
             const l = laneOf(s)
             const boom = inc.timeline.find((e) => e.type === 'boom_heard' && e.source === s.id)
             return (
@@ -118,6 +130,11 @@ export function Timeline({ inc, ruler }: { inc: Incident; ruler: Ruler }) {
               </div>
             )
           })}
+          {unplaced.length > 0 && (
+            <div className="lane-row muted lane-note" style={{ top: 42 + placed.length * 16 }}>
+              not placed in time: {unplaced.map((s) => (s.authenticity === 'fake' ? `${s.id} (rejected)` : s.id)).join(' · ')} · open them from Sources
+            </div>
+          )}
           <Playhead ruler={ruler} />
         </div>
       </div>

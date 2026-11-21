@@ -79,7 +79,8 @@ button.on { border-color: var(--cyan); color: var(--cyan); }
 .lane-note { font-size: 9px; }
 .boom-tag { position: absolute; top: -1px; font-size: 8px; color: var(--cyan); white-space: nowrap; }
 .playhead { position: absolute; top: 0; bottom: 0; width: 2px; background: var(--cyan); transform: translateX(-1px); pointer-events: none; }
-.tl-track { min-height: calc(44px + 16px * 5); }
+.tl-track { min-height: 76px; }
+.lane-note { font-size: 10px; white-space: nowrap; }
 
 /* sidebar */
 .sidebar { font-size: 12px; }
