@@ -46,6 +46,7 @@ export function OverviewPage() {
       <div>
         <h1>{index.city}<i>.</i></h1>
         <p className="ov-lede">Every dot is one incident, rebuilt from the clips that show it. Open one to see the reconstruction.</p>
+        <p className="label">Showing {n} hand-selected incident{n === 1 ? '' : 's'}. Automatic grouping is scored on the Proof page, not shown here.</p>
         <dl className="ov-stats">
           <div><dt>Clips</dt><dd>{index.n_clips}</dd></div>
           <div><dt>Incident{n === 1 ? '' : 's'}</dt><dd>{n}</dd></div>

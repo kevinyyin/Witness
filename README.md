@@ -6,7 +6,7 @@ Built at the Gemini 4 NYC Hackathon, Nov 21, 2026. Track: **Element 119** (video
 
 ## Contents
 1. [What it does](#what-it-does)
-2. [What was built during the hackathon, and what was not](#what-was-built-during-the-hackathon-and-what-was-not)
+2. [Built before vs during the event](#built-before-vs-during-the-event)
 3. [How Gemini 4 is used](#how-gemini-4-is-used)
 4. [How it works](#how-it-works)
 5. [Proof](#proof)
@@ -23,18 +23,22 @@ There are four screens (`web/`), all fed by one Python pipeline (`pipeline/`).
 |---|---|---|
 | **Break it** | `#/break` | Paste any YouTube link or drop any video file. Witness watches and listens to it live and answers: real strike footage, a fake (video game, film, fireworks, demolition, unrelated), or unsure. The clip plays on the page, and every reason on the verdict card is a button that jumps the video to the moment it is about. A real clip is placed on a map with its uncertainty radius. A scoreboard keeps every answer, wrong ones included. |
 | **Reconstruction** | `#/incident/<id>` | One strike, rebuilt from several clips. A point-cloud city block from OpenStreetMap, a clock, the impact, flags and review notes that appear in the scene at the moment they apply, and the source video that covers the playhead. Where two cameras caught the same moment, both play together. Drag the timeline and everything rewinds. |
-| **Overview** | `#/` | A map of every incident the bulk run found, with its radius and how many clips back it. |
+| **Overview** | `#/` | A map of the rebuilt incidents (two, chosen by hand), each with its radius and how many clips back it. |
 | **Proof** | `#/proof` | Scores against published answer keys, each next to a baseline, plus what we changed after seeing failures and the worst misses. |
 
 Witness never says who did it, never says "war crime", and never names a weapon as fact. It shows indicators, each with its evidence and a confidence.
 
-## What was built during the hackathon, and what was not
-The first commit in this repository is from 10:46 AM on Nov 21, 2026. Every line of product code in `pipeline/`, `web/` and `eval/` was written after that.
+## Built before vs during the event
+**Before** (no product code):
+- **The plan.** `WITNESS_SPEC.md`, a planning document. Its current revision is dated Nov 20.
+- **The data download script.** `prep_data.py` downloaded openly licensed videos, OpenStreetMap extracts and published answer keys.
+- **The data folder** that script filled. It is not in git (see [Data](#data-sources-and-licenses)).
+- **Human screening lists**, in `data_meta/*.csv`: which clips are fit to show, which incidents to use as hero examples, and the YouTube links for testing. This started the night before and the screening of hero clips continued during the event.
+- **Camera poses**, in `data_meta/camera_poses.csv`: where each camera stood and which way it faced, from matching the skyline in a frame against OpenStreetMap buildings. The pipeline reads these positions; it does not compute them.
 
-Prepared before the event (no product code):
-- **The plan.** `WITNESS_SPEC.md` is a planning document. Its current revision is dated Nov 20.
-- **The data download.** A script (`prep_data.py`, not in this repository) downloaded openly licensed videos, OpenStreetMap extracts and published answer keys into a folder that is not in git (see [Data](#data-sources-and-licenses)).
-- **Human decisions about that data.** Which clips are fit to show, which incidents to use as hero examples, and the lists of YouTube links for testing. This started the night before and the screening of hero clips continued during the event; all of it is in `data_meta/*.csv`.
+**During**: every line in `pipeline/`, `web/` and `eval/`. The first commit in this repository is from 10:46 AM on Nov 21, 2026.
+
+**The incidents on screen are a human list.** The Overview and Reconstruction screens show the incidents in `data_meta/heroes.csv`: a person picked which clips belong to each one, by Bellingcat incident id. They are not the output of the grouping algorithm. Automatic grouping is scored on the Proof screen (the "Grouping" row) and its groups are not displayed.
 
 Nothing was trained. The models are used as they come; the data is only used to test against.
 

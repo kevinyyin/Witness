@@ -112,8 +112,9 @@ export function IncidentPage({ id }: { id: string }) {
           <Legend inc={inc} />
           <Fps points={points} />
           <div className="honesty">
-            Geometry: OpenStreetMap footprints, heights estimated. Not a scan.{wire && ' (wireframe)'}<br />
-            © OpenStreetMap contributors (ODbL)
+            Geometry: OpenStreetMap footprints, heights estimated. Not a scan.{wire && ' (wireframe)'} © OpenStreetMap contributors (ODbL)<br />
+            Incident membership human-curated from Bellingcat incident ids.
+            {inc.sources.some((s) => s.camera) && <><br />Camera positions supplied from skyline matching, not computed by the pipeline.</>}
           </div>
         </div>
         {ruler && <Timeline inc={inc} ruler={ruler} />}
