@@ -9,7 +9,10 @@
   --amber: #ffb02e;
   --yellow: #ffe066;
   --green: #4dff88;
-  --mono: ui-monospace, 'Cascadia Mono', 'SF Mono', Menlo, Consolas, monospace;
+  /* One family, two cuts: Atkinson Hyperlegible keeps look-alike characters apart (0/O, 1/l/I), which matters for
+     clip ids, times and coordinates. Mono = data and measurement; Next = anything meant to be read. */
+  --mono: 'Atkinson Hyperlegible Mono Variable', ui-monospace, 'SF Mono', 'Cascadia Mono', Menlo, Consolas, monospace;
+  --sans: 'Atkinson Hyperlegible Next Variable', system-ui, -apple-system, 'Segoe UI', sans-serif;
   color-scheme: dark;
 }
 * { box-sizing: border-box; }
@@ -171,3 +174,26 @@ button.mini { padding: 1px 6px; font-size: 10px; margin: 2px 4px 2px 0; }
 .sidebar .source-row .muted { font-size: 10px; }
 .muted { color: var(--dim); }
 .warn { color: var(--amber); }
+
+/* --- sidebar type system (Operate surface): four roles, two cuts of one family ---
+   label  mono 11/600 tracked   section names
+   read   sans 14/1.55          Carbon's summary: the one paragraph meant to be read
+   row    sans 13/1.4           flags, weapons, sources, findings
+   data   mono 11 tabular       times, scores, ids */
+.sidebar { font-family: var(--sans); font-size: 13px; line-height: 1.4; letter-spacing: 0.01em; font-variant-numeric: tabular-nums;
+  scrollbar-color: var(--line) transparent; scrollbar-width: thin; }
+.sidebar ::selection { background: var(--cyan); color: #000; }
+.sidebar :focus-visible { outline: 1px solid var(--cyan); outline-offset: 2px; }
+.sidebar h4 { font-family: var(--mono); font-size: 11px; font-weight: 600; letter-spacing: 0.1em; line-height: 1.5; }
+.sidebar h4 .muted, .sidebar h4 button { font-weight: 400; letter-spacing: 0.02em; }
+.sidebar section > div:not([class]) { font-size: 14px; line-height: 1.55; max-width: 62ch; text-wrap: pretty; }
+.sidebar .flag-row, .sidebar .now-flag, .sidebar .now-note { font-weight: 500; }
+.sidebar .flag-row > span, .sidebar .now-flag > span, .sidebar .now-note > span,
+.sidebar .bar-row > span:last-child, .sidebar .source-row b, .sidebar .moment { font-family: var(--mono); font-weight: 400; font-size: 11px; }
+.sidebar .flag-row > span:last-child { font-size: 11px; }
+.sidebar .source-row b { font-size: 12px; font-weight: 600; }
+.sidebar .source-row .muted, .sidebar .why, .sidebar .foot, .sidebar section > div[class="muted"], .sidebar .footer { font-size: 11px; line-height: 1.45; }
+.sidebar .findings button.mini { font-family: var(--sans); font-size: 12px; line-height: 1.5; }
+.sidebar .unclear { font-family: var(--sans); font-weight: 700; letter-spacing: 0; }
+.sidebar button.mini { font-family: var(--mono); }
+.sidebar .footer { margin-top: 12px; padding-top: 10px; border-top: 1px solid var(--line); }
