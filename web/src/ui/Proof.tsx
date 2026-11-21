@@ -24,7 +24,8 @@ export function Proof() {
   const rows = [...r.rows].sort((x, y) => rank(x.claim) - rank(y.claim) || first(x) - first(y) || d15(x) - d15(y))
   return (
     <div className="page proof">
-      <SampleBanner show={r.split !== 'test'} text="DEV NUMBERS, NOT FINAL" />
+      {/* the banner follows the results file: a test run is final only once it carries its freeze time */}
+      <SampleBanner show text={r.split === 'dev' || r.frozen_at == null ? 'DEV NUMBERS, NOT FINAL' : `TEST SET, run once, frozen at ${r.frozen_at}`} />
       <h1>Proof<i>.</i></h1>
       <p className="meta">{r.split} set · {r.n_clips} clips{r.frozen_at ? ` · frozen ${r.frozen_at}` : ''} · scored against Bellingcat / GeoConfirmed answer keys</p>
       <table>
