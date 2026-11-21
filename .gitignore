@@ -1,0 +1,27 @@
+# Data folder (prep_data.py output; size + licenses). Never in git. See README.
+/data
+/witness-data/
+
+# Secrets
+.env
+*.session
+*.session-journal
+
+# Python
+.venv/
+venv/
+__pycache__/
+*.pyc
+
+# Node / web
+node_modules/
+web/dist/
+
+# OS / editor
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+
+# Logs
+*.log
