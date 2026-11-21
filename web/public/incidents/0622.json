@@ -324,8 +324,8 @@
   },
   {
    "type": "location_conflict",
-   "label": "Clips A and J show different site from C and G",
-   "confidence": 0.8,
+   "label": "Clips A and J show pedimented building; J faces away",
+   "confidence": 0.75,
    "t": 3438.33,
    "t_end": null,
    "anchor": {
@@ -335,16 +335,34 @@
    "source": "J",
    "clip_ts": 0.0,
    "basis": [
-    "J@0:00 camera 445m north facing 29 deg away",
     "J@0:00 building with triangular pediment",
+    "A@0:00 building with tall vertical features",
     "C@0:04 five-story apartment block",
-    "G@0:08 fireball at target intersection",
+    "Carbon cross-check"
+   ]
+  },
+  {
+   "type": "location_conflict",
+   "label": "Clips D and K show classical building on a square",
+   "confidence": 0.7,
+   "t": 6147.3,
+   "t_end": null,
+   "anchor": {
+    "kind": "camera",
+    "ref": "D"
+   },
+   "source": "D",
+   "clip_ts": 6.5,
+   "basis": [
+    "D@0:06.5 paved square and multi-story building",
+    "K@0:06.0 classical-style building on square",
+    "B@0:00 five-story apartment block",
     "Carbon cross-check"
    ]
   },
   {
    "type": "single_source",
-   "label": "Only clip I reports three hits and shows distant smoke",
+   "label": "Only clip I reports three strikes in the area",
    "confidence": 0.85,
    "t": 30.0,
    "t_end": null,
@@ -354,25 +372,7 @@
    "source": "I",
    "clip_ts": 0.0,
    "basis": [
-    "I@0:00 man speaks about three hits",
-    "I@0:00 smoke plume in distance",
-    "Carbon cross-check"
-   ]
-  },
-  {
-   "type": "single_source",
-   "label": "Only clip F shows medics evacuating casualty and ambulance sirens",
-   "confidence": 0.9,
-   "t": 16183.73,
-   "t_end": null,
-   "anchor": {
-    "kind": "impact"
-   },
-   "source": "F",
-   "clip_ts": 6.5,
-   "basis": [
-    "F@0:06.5 medics load patient into ambulance",
-    "F@0:09.5 ambulance leaves with siren",
+    "I@0:00 Man speaks profanely about three hits",
     "Carbon cross-check"
    ]
   }
@@ -381,9 +381,9 @@
   {
    "t": 0.0,
    "type": "impact",
-   "source": "E",
-   "clip_ts": 2.8,
-   "confidence": 0.95
+   "source": "G",
+   "clip_ts": 8.0,
+   "confidence": 0.98
   },
   {
    "t": 0.02,
@@ -889,7 +889,7 @@
    ]
   }
  ],
- "summary": "A daytime strike probably damaged a five-story apartment building in Kharkiv on June 22, 2024. Eight of nine independent clips are consistent with the blast and rescue work around the estimated afternoon time. The main caveat is that the pinpointed location relies on a screened-out video not included here.",
+ "summary": "A daytime strike probably hit a five-story apartment block in Kharkiv on June 22, 2024. Nine independent clips are consistent with the explosion and the aftermath rescue effort. The main caveat is that the estimated location rests on a single clip that was screened out during review.",
  "verification": {
   "agree_place": false,
   "agree_time": false,

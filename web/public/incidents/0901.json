@@ -445,7 +445,7 @@
   },
   {
    "type": "single_source",
-   "label": "No clip shows the impact itself: t = 0 is the start of clip A, not a measured moment",
+   "label": "No clip shows the impact itself: t = 0 is a placeholder, not a measured moment",
    "confidence": 0.9,
    "t": 0.0,
    "t_end": null,
@@ -457,6 +457,25 @@
    "basis": [
     "no flash event in any clip"
    ]
+  },
+  {
+   "type": "time_conflict",
+   "label": "Clip A placed at impact already shows damage and rescue work",
+   "confidence": 0.95,
+   "t": 11391.4,
+   "t_end": null,
+   "anchor": {
+    "kind": "camera",
+    "ref": "A"
+   },
+   "source": "A",
+   "clip_ts": 0.0,
+   "basis": [
+    "A@0:00 impact",
+    "A@0:00 rescue on pavement",
+    "A@0:08 tall jet of flame",
+    "Carbon cross-check"
+   ]
   }
  ],
  "timeline": [
@@ -464,7 +483,7 @@
    "t": 0.0,
    "type": "impact",
    "source": "A",
-   "clip_ts": -11391.4,
+   "clip_ts": 0.0,
    "confidence": 0.3
   },
   {
@@ -743,7 +762,7 @@
    ]
   }
  ],
- "summary": "A strike probably hit a commercial area near the Radmir office building on Akademika Pavlova Street in Kharkiv on September 1, 2024. Four independent clips are consistent with heavy building damage, fires, and rescue work. The main caveat is that no clip shows the impact, so the estimated timing relies only on post times.",
+ "summary": "A strike probably hit commercial buildings on Akademika Pavlova Street in Kharkiv on 1 September 2024. Four independent clips agree on heavy flames, building damage, and rescue work consistent with a strike in a densely populated area. However, no video shows the impact itself, so the estimated strike time relies only on the earliest post.",
  "verification": {
   "agree_place": true,
   "agree_time": false,

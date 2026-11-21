@@ -17,6 +17,18 @@ export function TitleCard({ inc }: { inc: Incident }) {
   )
 }
 
+/** What the symbols in the scene mean (bottom-left, small). */
+export function Legend({ inc }: { inc: Incident }) {
+  return (
+    <div className="legend">
+      <span><i className="lg-impact">●</i> estimated impact · dome = ±{inc.impact.radius_m} m</span>
+      <span><i className="lg-target">■</i> target building</span>
+      <span><i className="lg-cam">◢</i> camera view (fainter = less sure where it stood)</span>
+      <span><i className="lg-cam">○</i> camera position ±</span>
+    </div>
+  )
+}
+
 /** After a hard cut over a compressed gap: "+17 min later" for 2.5 s (§7.1.4). */
 export function GapCard({ ruler }: { ruler: Ruler }) {
   const t = useTime((s) => Math.round(s.t * 10) / 10)

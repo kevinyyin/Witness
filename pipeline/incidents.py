@@ -217,15 +217,14 @@ def assemble(hero):
         return max((e["confidence"] for e in s["rec"]["timeline"] if e["type"] == "flash"), default=0)
 
     seekable = [s for s in live if s["player"] in ("youtube", "file")]
-    with_flash = [s for s in seekable if s["phys"]["delta_s"] is not None]
+    with_flash = [s for s in seekable if s["flash"]]
     assert seekable, "no seekable clip: the impact clip must be 'youtube' or 'file' (set WITNESS_SOCIAL_FILES=1 once organizers allow it)"
     star = max(with_flash, key=flash_conf) if with_flash else seekable[0]
-    if not with_flash and star["offset"] is None:
-        star["offset"] = 0.0
 
     # 7. incident timeline: t = clip_ts + offset_s
     timeline = [{"t": 0.0, "type": "impact", "source": star["id"],
-                 "clip_ts": star["phys"]["flash_ts"] if with_flash else round(-star["offset"], 2),
+                 # no clip shows the flash: t = 0 is a placeholder (a review note says so) and points at the clip's start
+                 "clip_ts": round(-star["offset"], 2) if with_flash else 0.0,
                  "confidence": flash_conf(star) if with_flash else 0.3}]
     for s in live:
         if s["offset"] is None:
@@ -337,11 +336,11 @@ def assemble(hero):
         notes.append(_item("time_conflict", f"{len(by_post)} clip{'s are' if len(by_post) > 1 else ' is'} placed by post time, not measured: position approximate",
                            0.9, None, {"kind": "clock"}, None, None, ["placed by post time", "clips " + ", ".join(by_post)]))
     if not with_flash:
-        notes.append(_item("single_source", f"No clip shows the impact itself: t = 0 is the start of clip {star['id']}, not a measured moment",
+        notes.append(_item("single_source", "No clip shows the impact itself: t = 0 is a placeholder, not a measured moment",
                            0.9, 0.0, {"kind": "impact"}, star["id"], 0.0, ["no flash event in any clip"]))
     if sum(s["flash"] for s in live) == 1 and with_flash:
         notes.append(_item("single_source", f"The impact is seen in one clip only ({star['id']})", 0.9, 0.0, {"kind": "impact"},
-                           star["id"], star["phys"]["flash_ts"], [f"{star['id']}@{mmss(star['phys']['flash_ts'])} flash"]))
+                           star["id"], round(-star["offset"], 2), [f"{star['id']}@{mmss(-star['offset'])} flash"]))
 
     # 13. sources: every clip, rejected ones too
     sources = []

@@ -118,9 +118,9 @@ export function buildMarkers(inc: Incident): Markers {
     const [x, z] = toLocal(o, cam.lat, cam.lon)
     const g = new THREE.Group()
     g.position.set(x, 2, z)
-    const icon = sprite(glow(), CYAN, 18, 2.2)
+    const icon = sprite(glow(), CYAN, 18, 1) // no bloom: only the impact glows, so camera, label and impact don't merge into blobs
     icons[s.id] = icon
-    const label = sprite(letter(s.id), CYAN, 26, 1.6)
+    const label = sprite(letter(s.id), CYAN, 26, 1)
     label.position.y = 26
     g.add(icon, label)
     // Position uncertainty: ring of radius camera.radius_m (never a point without its ±)

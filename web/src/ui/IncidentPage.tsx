@@ -10,7 +10,7 @@ import { SampleBanner } from './SampleBanner'
 import { Fps } from './Fps'
 import { Timeline } from './Timeline'
 import { Callouts } from './Callouts'
-import { Clock, GapCard, TitleCard } from './HudText'
+import { Clock, GapCard, Legend, TitleCard } from './HudText'
 import { SourceVideo } from './SourceVideo'
 import { FlagsList, Footer, Sources, Summary, WeaponSection } from './Sidebar'
 
@@ -109,6 +109,7 @@ export function IncidentPage({ id }: { id: string }) {
             <button className="pip-toggle mini" onClick={() => setPipOpen((v) => !v)}>{pipOpen ? 'hide video' : 'show video'}</button>
             {pipOpen && <SourceVideo inc={inc} />}
           </div>
+          <Legend inc={inc} />
           <Fps points={points} />
           <div className="honesty">
             Geometry: OpenStreetMap footprints, heights estimated. Not a scan.{wire && ' (wireframe)'}<br />
