@@ -1,5 +1,8 @@
 """All Gemini calls. Shapes follow docs/VERIFIED.md (Interactions API + Decisions API)."""
+import hashlib
 import json
+import os
+import tempfile
 import threading
 import time
 
@@ -78,7 +81,15 @@ confidence is 0 to 1."""
 
 def upload(path):
     """Files API upload; returns a video block usable by Hydrogen and by the Decisions API."""
-    f = _client.files.upload(file=str(path))
+    path = str(path)
+    if not path.isascii():
+        # The SDK sends the file name in an HTTP header, which must be ASCII: "Wilhelmstraße" in a name crashed the
+        # upload (and the test run). Upload through a plain-named link to the same file instead.
+        link = os.path.join(tempfile.gettempdir(), "witness_" + hashlib.sha1(path.encode()).hexdigest()[:12] + os.path.splitext(path)[1])
+        if not os.path.lexists(link):
+            os.symlink(path, link)
+        path = link
+    f = _client.files.upload(file=path)
     while not f.state or f.state.name != "ACTIVE":
         if f.state and f.state.name == "FAILED":
             raise RuntimeError("Gemini could not process the video file")

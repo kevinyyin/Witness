@@ -11,6 +11,12 @@
    "changed": "A clip with a confident flash and no sound is aligned by the flash alone, to about a second.",
    "now": "0622 plays two cameras at the impact.",
    "evidence": "commit a34f363, pipeline/incidents.py"
+  },
+  {
+   "saw": "The first test run crashed 20 minutes in, before any result was written: a clip with \"ß\" in its file name could not be uploaded.",
+   "changed": "A file whose name is not plain ASCII is uploaded through a plain-named link to the same file.",
+   "now": "The run resumed from the clips already analyzed. All 70 test clips are scored.",
+   "evidence": "pipeline/gemini.py, upload()"
   }
  ]
 }

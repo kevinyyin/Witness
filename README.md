@@ -87,32 +87,39 @@ Other endpoints: `GET /api/health`, `GET` and `POST /api/judge` (the scoreboard)
 ## Proof
 Ground truth is published investigator work (Bellingcat Civilian Harm in Ukraine, GeoConfirmed, CIR, Texty). `eval/split.csv` fixes which clips are `dev` and which are `test`. Clips were assigned by a hash of their id before any tuning on them, and one clip that was run by mistake before the freeze is excluded. Everything was tuned on `dev` only. The `test` split is run once, after the pipeline is frozen; the script refuses to run it a second time.
 
-`eval/results.json` is the source of truth and carries a `split` field. The numbers below are the **dev set as of 2:45 PM** and are replaced by the test-set numbers after the freeze.
+`eval/results.json` is the source of truth and carries a `split` field. The numbers below are the **test set: 70 clips the pipeline had never been run on, scored once after the freeze** (finished 3:47 PM, Nov 21).
 
 | Claim | Metric | Witness | Claude Opus 5.5 (5 frames + caption) | Hydrogen asked directly | n |
 |---|---|---|---|---|---|
-| Geolocation | within 1 km | 59% | 18% | 53% | 17 |
-| Geolocation | within 5 km | 94% | 94% | 88% | 17 |
-| Geolocation | median error | 0.7 km | 2.5 km | 0.8 km | 17 |
-| Honest uncertainty | true location inside the stated radius | 76% (target 70%) | n/a | n/a | 17 |
-| Fakes caught | precision and recall | 100% | 100% | 100% | 24 to 29 |
+| Geolocation | within 1 km | 47% | 23% | 40% | 47 |
+| Geolocation | within 5 km | 83% | 77% | 81% | 47 |
+| Geolocation | median error | 1.2 km | 2.6 km | 1.2 km | 47 |
+| Honest uncertainty | true location inside the stated radius | 66% (target 70%, missed) | n/a | n/a | 47 |
+| Fakes caught | recall | 100% | 100% | 100% | 70 |
+| Fakes caught | precision | 95% | 100% (file clips; Witness 92% on the same 60) | 100% | 70 |
 | Grouping | hero clips grouped correctly | 82% | 79% (group by city and date) | | 28 |
 
-Which input matters, on the real-or-fake question (n = 24): full video 100%, five still frames 100%, transcript only 38%.
+Which input matters, on the real-or-fake question (n = 60): full video 98%, five still frames 95%, transcript only 48%.
 
 Read these honestly:
-- The clear win is geolocation precision against the other lab's model. Against one direct Hydrogen call the margin is small.
-- Fake detection ties with every baseline. The fakes in the set (fireworks, demolitions, games, films) are easy for any current model.
-- Five still frames do as well as full video on real-or-fake. Sound and motion earn their place in the flash-to-boom measurement and in the event timeline, not in that score.
-- The sets are small.
+- **Geolocation is the win, against the other lab's model.** Twice as many clips land within 1 km (47% against 23%) and the median error is less than half (1.2 km against 2.6 km). Against a single direct Hydrogen call the edge is small: 47% against 40% within 1 km, and the same median.
+- **The uncertainty radius is too tight.** The true location is inside it 66% of the time, under our 70% target. On the dev set it was 76%, because the radius rule was tuned there.
+- **Fake detection is slightly worse than a single call on this set.** Witness rejected all 19 fakes, and also rejected one real strike clip as "not war". Every baseline was right on every clip it was given (Opus sees only the 60 file clips). These fakes (fireworks, demolitions, games, films) are easy for any current model.
+- **The dev numbers were optimistic.** Within 1 km fell from 59% on dev to 47% on test, and the median error rose from 0.7 km to 1.2 km.
+- **Full video beats still frames only slightly** on real-or-fake. Sound and motion earn their place in the flash-to-boom measurement and the event timeline.
 
-Reproduce: `python eval/run_eval.py --split dev`. It needs the data folder and API keys (see [How to run](#how-to-run)).
+How the test run went: the first attempt crashed 20 minutes in, before any result was written, on a file whose name contains "ß" (see below). The upload was fixed and the run resumed from the clips already analyzed. No result had been computed or seen when the fix was made.
+
+Reproduce the dev numbers: `python eval/run_eval.py --split dev`. It needs the data folder and API keys (see [How to run](#how-to-run)).
 
 ## Where it breaks
 Found by pushing on it during the event. The fixes we made are listed on the proof screen with their commits.
 
 - **A link is judged from a description, and descriptions vary.** The Decisions API cannot take a YouTube link, so for links it scores Hydrogen's written description. Five runs of one real clip gave not-real scores of 0.05, 0.14, 0.15, 0.35 and 0.64. A link is therefore rejected only at 0.8 or higher; between 0.45 and 0.8 the answer is "unsure, needs a human". A dropped file is scored on the footage itself and is steadier.
 - **Location reads on a link are slow.** One read took over two minutes. The live path stops waiting after 8 seconds, so a fresh link is usually placed at city level only.
+- **A real clip was rejected on the test set.** One Telegram clip of a real strike scored 0.89 not-real and was called "not war". It is the only wrong verdict in 70.
+- **Three reads can agree and still be wrong.** The three worst test misses are 13 to 14 km off. In each, the three location reads agreed with each other to about 1 km (all naming Industrialnyi District, Kharkiv), so the radius was 2.5 to 3.9 km and the true location fell outside it.
+- **A file name broke the upload.** A clip with "ß" in its name could not be uploaded, because the file name travels in an HTTP header that must be plain ASCII. It crashed the first test run. Such files are now uploaded through a plain-named link.
 - **Town names are ambiguous.** A name lookup once returned the wrong Dnipro, 468 km away. Two location reads that agree now overrule the lookup.
 - **Most footage is aftermath.** In the two rebuilt incidents no clip gives a usable flash-to-boom distance: one dashcam is inside the blast and one street camera has no sound. The impact location comes from landmarks, and the impact time is only known to about an hour, from upload times.
 - **Alignment by flash alone is rough.** Hydrogen reads one frame per second, so two cameras aligned by their flash agree to about a second.
