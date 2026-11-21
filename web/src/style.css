@@ -207,3 +207,16 @@ button.mini { padding: 1px 6px; font-size: 10px; margin: 2px 4px 2px 0; }
 .sidebar .unclear { font-family: var(--sans); font-weight: 700; letter-spacing: 0; }
 .sidebar button.mini { font-family: var(--mono); }
 .sidebar .footer { margin-top: 12px; padding-top: 10px; border-top: 1px solid var(--line); }
+
+/* ===== case-file layout (branch case-file): full-screen scene, video as picture-in-picture, everything else in a drawer ===== */
+.recon { grid-template-columns: 1fr; }
+.cf-btn { position: absolute; top: 64px; right: 14px; z-index: 30; font-size: 14px; padding: 6px 14px; background: rgba(11,14,18,0.85); }
+.pip { position: absolute; right: 16px; bottom: 16px; width: min(40%, 620px); min-width: 380px; z-index: 20; padding: 8px 10px 10px; background: rgba(11,14,18,0.92); border: 1px solid var(--line); border-left: 1px solid var(--line); overflow: visible; }
+.pip.min { width: auto; min-width: 0; }
+.pip > section { border: 0; padding-bottom: 0; }
+.pip h4 { margin: 0 0 6px !important; padding: 0 !important; border: 0 !important; }
+.pip-toggle { position: absolute; top: -26px; right: 0; }
+.drawer { position: fixed; top: 0; right: 0; bottom: 0; width: 460px; z-index: 60; transform: translateX(100%); transition: transform 0.2s ease; box-shadow: -12px 0 30px rgba(0,0,0,0.6); }
+.drawer.open { transform: none; }
+.drawer-head { display: flex; gap: 8px; align-items: center; margin-bottom: 8px; font-family: var(--mono); font-size: 12px; letter-spacing: 0.08em; }
+.drawer-head button { margin-left: auto; }
