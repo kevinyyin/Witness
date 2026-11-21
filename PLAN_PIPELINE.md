@@ -14,17 +14,21 @@ Written Sat Nov 21, 10:45 AM ET. Spec says "Teammate" for the pipeline owner: th
 5. **`camera.fov_deg`** cannot be measured. → 60 for every phone clip.
 6. **Ids.** `clip_id` = `c_` + 4 digits from a counter file in the cache (stable per sha256/URL). Incident `id` = 4-digit string; hero ids from `heroes.csv` if it has them.
 7. **Unspecified numbers** (dense-population threshold, flag confidences for code rules, `fake.confidence`): set in §C, tuned on dev only until 3:30.
-8. **CSV columns** of `data_meta/*.csv` are unknown until the repo arrives. → Read the headers in step S2 and record them in the S2 tick line.
+8. **`data_meta/` is empty** (only `.gitkeep`, 11:23): no `screen.csv`, `heroes.csv`, `break_it.csv`, `rehearsal.csv`, so no `split` column exists. → Until they arrive: heroes = the incidents in `data/benchmark.csv` (2024-06-22 Kharkiv 14 clips, 2024-09-01 Kharkiv 9, 2025-02-28 Zaporizhzhia 3); kill tests ran on hero clips (§10: scored only in the grouping row). The eval (P4c, P5) cannot run as specified without `screen.csv` and `break_it.csv`: ask again at 12:30.
 9. **Answer keys.** Only `eval/` and the kill test K3-mini read `data/answer_keys/`. The pipeline copies `answer_key` into an incident from `heroes.csv` as the last write step and never reads it for geolocation.
 10. **"3 runs per clip"** (§8) is not done on the break-it path (60 s limit); bulk uses one run + cache.
 11. **Impact clip must be `youtube` or `file`.** If a hero has a flash only in Telegram/X clips, I stop and ask (swap hero, or organizer answer 3).
 12. **§14 "ready-to-paste prompt per step"** is replaced by the resume sentence above (per the prompt).
 13. **K1 "does the Decisions API accept YouTube URLs?"** The docs say no (`docs/VERIFIED.md`); Hydrogen does. Read to the letter, §12 would then hide the URL box. → I keep `youtube_url_input: true` if Hydrogen accepts the URL in K1: for URL inputs the Decisions API scores Hydrogen's written observations (text), or the downloaded file if organizers say yes to Q4. **The user confirms this at the gate.**
+15. **The teammate's `web/` was built to a pre-Revision-2 spec** (sample incident lacks `osm_file`, `player`, `media_url`, `duration_s`, `reject_reason`, flag `source`/`clip_ts`, `camera.confidence`; proxy strips `/api`; expects `authenticity: rejected`, a nested `index.json`, `detail` in stream events). **User decided 11:26: both sides use Revision 2.** → I write Revision 2 exactly. I also serve every route at both `/api/x` and `/x`. Key check: against `web/public/sample_incident.json` once the teammate regenerates it; until then against the §9.2 example read from the local `WITNESS_SPEC.md`.
+16. **No city landmarks file in `data/osm/`** (only building extracts). → I fetch `data/osm/Kharkiv_landmarks.json` from Overpass (ODbL, pipeline-only, not in git).
+17. **`manifest.csv` `local_path` is a Windows path**, 27 rows (9 strike, 18 negatives), `screen` empty. → Resolve files by basename under `data/videos/`; bulk run size is whatever is there.
 14. **Hydrogen samples video at 1 FPS**, so its timestamps are about ±1 s (±343 m). → Flash and boom times are refined in code (§C.2).
 
 ## B. Needed from others
 - **Me (user):** repo URL · `~/witness-data` unzipped · Gemini key in `.env` (variable name per `docs/VERIFIED.md`) · go/fog at the gate · read the fps number at 11:50.
-- **Teammate:** repo pushed with `.gitignore`, `data_meta/{screen,heroes,break_it,rehearsal}.csv`, `web/public/sample_incident.json` with real `osm_file` + real clips, Vite proxy `/api` → `127.0.0.1:8000`, `web/` runnable by 11:50.
+- **Teammate (new, 11:26):** switch to Revision 2 of the spec: regenerate `web/public/sample_incident.json` and `sample_index.json` from §9.2/§9.3, show `authenticity: fake` as ✗, read the flat `index.json`, parse the §9.3 stream (`event:` lines, `summary`, 4 statuses, `verdict` stage); export the Sheet tabs to `data_meta/`; add `docs/*` + `!docs/VERIFIED.md` to `.gitignore` (§14).
+- **Teammate (original list):** repo pushed with `.gitignore`, `data_meta/{screen,heroes,break_it,rehearsal}.csv`, `web/public/sample_incident.json` with real `osm_file` + real clips, Vite proxy `/api` → `127.0.0.1:8000`, `web/` runnable by 11:50.
 - **Organizers (§13):** answers 1–4. Q3 decides Telegram/X analysis. Q4 decides the YouTube mode (§C.6).
 
 ## C. Design (mine; fixed parts of §9 are implemented as written)
@@ -87,15 +91,15 @@ Written Sat Nov 21, 10:45 AM ET. Spec says "Teammate" for the pipeline owner: th
   Files: `docs/*.md` (saved pages, ignored), `docs/VERIFIED.md` (committed).
   Check: `grep -c 'Source:' docs/VERIFIED.md` ≥ 10 and each identifier in the prompt's CRITICAL paragraph has a line marked VERIFIED (with file + quote) or NOT FOUND.
   Fallback: an identifier NOT FOUND → tell the user before any call uses it.
-- [ ] **S2 Repo + env** (5 min, as soon as the URL, data and key exist) — PARTIAL 10:54: remote `https://github.com/kevinyyin/Witness.git` is empty (no `.gitignore`, `data_meta/`, `web/`); local `main` has one commit, **not pushed** until the teammate's root commit exists (then `git pull --rebase origin main`, push). `.venv` ready (google-genai 3.6.1), key works. Private files are in `.git/info/exclude`. Still missing: `~/witness-data`, `data` symlink, `data_meta/*.csv` headers.
+- [x] **S2 Repo + env** — done 11:23: rebased on the teammate's `da5444e`; data is at `witness/data` (real folder) with `~/witness-data` linked to it; `.venv` ready, key works. `data_meta/` has no CSVs (gap 8). Earlier note 10:54: remote `https://github.com/kevinyyin/Witness.git` is empty (no `.gitignore`, `data_meta/`, `web/`); local `main` has one commit, **not pushed** until the teammate's root commit exists (then `git pull --rebase origin main`, push). `.venv` ready (google-genai 3.6.1), key works. Private files are in `.git/info/exclude`. Still missing: `~/witness-data`, `data` symlink, `data_meta/*.csv` headers.
   Goal: `git init`, remote, pull; spec + `PROMPT_*.md` in `.git/info/exclude`; `.venv` (Python 3.11) with `pipeline/requirements.txt`; `data` symlink → `~/witness-data`; commit this plan.
   Check: `git check-ignore -q .env data docs/x.md && git status --short | grep -v '^??' | wc -l` = 0; `ls data/manifest.csv data_meta/heroes.csv web/public/sample_incident.json`; `head -1 data_meta/*.csv`.
   Fallback: no repo yet → work locally, commit when it exists.
-- [ ] **G1 K1 safety + URL input** — `pipeline/killtests/k1_safety.py`
+- [x] **G1 K1 safety + URL input** — PASS 11:26: Hydrogen 5/5 and Decisions 5/5 answered on five hero impact clips (7–14 s and 1–5 s each); no refusals. Hydrogen accepts a YouTube URL (docs' sample link, 10.9 s); the Decisions API rejects it. `youtube_url_input: true` under gap 13. — `pipeline/killtests/k1_safety.py`
   5 `dev` strike clips through Hydrogen and the Decisions API; 1 `dev` YouTube link from `break_it.csv` as URL input to each.
   Check: `python pipeline/killtests/k1_safety.py` prints `answered N/5`, `refused N`, `youtube_url_input true|false`. Pass: 5/5 answered.
   If it fails: refusals → report for the fog decision. No URL support → `youtube_url_input: false`.
-- [ ] **G2 K6 latency** — `pipeline/killtests/k6_latency.py`
+- [x] **G2 K6 latency** — PASS 11:25: 25.3 s for one 6.8 MB hero clip (ffmpeg 0.4, upload 3.9, Hydrogen 21.0 ‖ Decisions 1.3). — `pipeline/killtests/k6_latency.py`
   One `dev` clip: ffmpeg + Hydrogen + Decisions, wall-clock per stage.
   Check: prints total seconds. Pass: ≤ 60 s. Fail → 180 s cap, parallel calls, lower fps.
 - [ ] **G3 K3-mini geolocation** — `pipeline/killtests/k3_geo.py`
@@ -110,7 +114,7 @@ Written Sat Nov 21, 10:45 AM ET. Spec says "Teammate" for the pipeline owner: th
   Fields: `clip_id`, `source_url`, `platform`, `embed_url`, `sha256`, `duration_s`, `posted_at`, `claimed_place`, `timeline[] {clip_ts, type, label, confidence}`, `triage {war_related, event_type{strike, aftermath, other}, graphic_level, civilian_objects, uxo, military_object}`, `weapon {options{8}, evidence}`, `stages_ms {fetch, watch, score}`.
   Check: `python -m pipeline.clip data/videos/<dev clip>` prints the record; `python -m pipeline.contract --selftest` passes (enum and key asserts on that record).
   Cut: none (P0).
-- [ ] **11:50 fps check.** Pull, `cd web && npm i && npm run dev`, ask the user to read the fps number → teammate (12:00 point-cloud decision).
+- [ ] **11:50 fps check.** (11:27: web runs here; in-app pane showed "FPS 34 · 495k pts" at 800×600 — the user must read it in a full-size browser.) Pull, `cd web && npm i && npm run dev`, ask the user to read the fps number → teammate (12:00 point-cloud decision).
 
 ### P2 Fake checks + break-it API (12:30 → 1:15) — deadline 1:30
 - [ ] **P2**
