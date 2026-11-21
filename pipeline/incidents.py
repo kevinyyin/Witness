@@ -303,7 +303,8 @@ def assemble(hero):
             "aligned": s["aligned"], "authenticity": rec["fake"]["verdict"],
             "reject_reason": f"{rec['fake']['label']}: {failed[0]['detail']}" if s["fake"] else None,
             "graphic_level": rec["triage"]["graphic_level"],
-            "license": "CC BY 4.0 · dsns.gov.ua" if rec["platform"] == "commons" else "embed only",
+            "license": "CC BY 4.0 · dsns.gov.ua" if rec["platform"] == "commons" else
+                       f"source: t.me/{link.split('/')[3]}" if s["player"] == "file" and rec["platform"] == "telegram" else "embed only",
             "findings": [{"clip_ts": e["clip_ts"], "label": e["label"], "confidence": e["confidence"]} for e in rec["timeline"][:6]],
         })
 
@@ -327,7 +328,13 @@ def add_carbon(incident):
     by_id = {s["id"]: s for s in incident["sources"]}
     doc = {k: v for k, v in incident.items() if k not in ("answer_key", "summary")}
     doc["clip_descriptions"] = {s["id"]: cached_observations(s["clip_id"]) for s in incident["sources"]}
-    out = gemini.crosscheck(doc)
+    for _ in range(3):  # Carbon sometimes returns an empty answer; the cross-check is never skipped silently
+        out = gemini.crosscheck(doc)
+        summary = str(out.get("summary") or "").strip()
+        if summary and not any(w in summary.lower() for w in contract.VERDICT_WORDS):
+            break
+    else:
+        raise AssertionError("Carbon returned no usable summary in 3 tries: incident not written")
     have = {(n["type"], n["source"]) for n in incident["review_notes"]}
     for n in (out.get("notes") or [])[:5]:  # model output is untrusted: keep only well-formed notes
         src = by_id.get(n.get("source"))
@@ -343,8 +350,7 @@ def add_carbon(incident):
             n["type"], str(n.get("label", ""))[:120], round(min(max(float(n.get("confidence") or 0.5), 0.0), 1.0), 2),
             None if src["offset_s"] is None else round(ts + src["offset_s"], 2), anchor, src["id"], round(ts, 2),
             [str(b)[:80] for b in (n.get("basis") or [])[:4]] + ["Carbon cross-check"]))
-    summary = str(out.get("summary") or "").strip()
-    incident["summary"] = summary if summary and not any(w in summary.lower() for w in contract.VERDICT_WORDS) else None
+    incident["summary"] = summary
     types = {n["type"] for n in incident["review_notes"]}
     incident["verification"]["agree_time"] = "time_conflict" not in types
     incident["verification"]["agree_place"] = "location_conflict" not in types

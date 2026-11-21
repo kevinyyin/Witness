@@ -273,6 +273,48 @@
    "basis": [
     "graphic_level=2"
    ]
+  },
+  {
+   "type": "time_conflict",
+   "label": "Clip G places fireball hours after blast in E, L, M",
+   "confidence": 0.95,
+   "t": 60774.0,
+   "t_end": null,
+   "anchor": {
+    "kind": "cameras",
+    "ref": [
+     "G",
+     "E",
+     "L",
+     "M"
+    ]
+   },
+   "source": "G",
+   "clip_ts": 8.0,
+   "basis": [
+    "G@0:08 Bright orange fireball erupts near street corner",
+    "E@0:03 Shockwave knocks dashcam inside vehicle",
+    "L@0:04 Loud explosion heard while facing sky",
+    "M@0:03 Loud explosion shakes and detaches dashcam",
+    "Carbon cross-check"
+   ]
+  },
+  {
+   "type": "single_source",
+   "label": "Only clip L captures diving object and second and third blasts",
+   "confidence": 0.9,
+   "t": 7.76,
+   "t_end": null,
+   "anchor": {
+    "kind": "impact"
+   },
+   "source": "L",
+   "clip_ts": 11.5,
+   "basis": [
+    "L@0:11 Second loud blast heard after object dives",
+    "L@0:17 Third loud explosion heard behind smoke",
+    "Carbon cross-check"
+   ]
   }
  ],
  "timeline": [
@@ -976,10 +1018,10 @@
    ]
   }
  ],
- "summary": null,
+ "summary": "A daytime strike probably hit a five-story apartment building in Kharkiv at an estimated afternoon hour. Eleven independent clips show explosions, smoke, and rescue work consistent with heavy blast damage. The main caveat is uncertain timing, as one security camera clip of a fireball is placed the next morning.",
  "verification": {
   "agree_place": true,
-  "agree_time": true,
+  "agree_time": false,
   "corroboration": "high",
   "n_sources": 14,
   "n_rejected": 0
