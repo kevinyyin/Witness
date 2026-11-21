@@ -180,7 +180,7 @@
    "type": "graphic",
    "label": "Graphic content in clip A (blurred)",
    "confidence": 0.9,
-   "t": null,
+   "t": 2351.33,
    "t_end": null,
    "anchor": {
     "kind": "camera",
@@ -193,10 +193,27 @@
    ]
   },
   {
+   "type": "weak_camera",
+   "label": "Camera B position is weak (±300 m)",
+   "confidence": 0.9,
+   "t": 3121.43,
+   "t_end": null,
+   "anchor": {
+    "kind": "camera",
+    "ref": "B"
+   },
+   "source": "B",
+   "clip_ts": 0.0,
+   "basis": [
+    "camera.radius_m=300",
+    "skyline match, data_meta/camera_poses.csv"
+   ]
+  },
+  {
    "type": "graphic",
    "label": "Graphic content in clip F (blurred)",
    "confidence": 0.9,
-   "t": null,
+   "t": 16177.23,
    "t_end": null,
    "anchor": {
     "kind": "camera",
@@ -209,10 +226,27 @@
    ]
   },
   {
+   "type": "weak_camera",
+   "label": "Camera J position is weak (±300 m)",
+   "confidence": 0.9,
+   "t": 3438.33,
+   "t_end": null,
+   "anchor": {
+    "kind": "camera",
+    "ref": "J"
+   },
+   "source": "J",
+   "clip_ts": 0.0,
+   "basis": [
+    "camera.radius_m=300",
+    "skyline match, data_meta/camera_poses.csv"
+   ]
+  },
+  {
    "type": "graphic",
    "label": "Graphic content in clip J (blurred)",
    "confidence": 0.9,
-   "t": null,
+   "t": 3438.33,
    "t_end": null,
    "anchor": {
     "kind": "camera",
@@ -228,7 +262,7 @@
    "type": "recycled_or_edited",
    "label": "Clip J is the same video as clip A",
    "confidence": 0.9,
-   "t": null,
+   "t": 3438.33,
    "t_end": null,
    "anchor": {
     "kind": "camera",
@@ -244,7 +278,7 @@
    "type": "recycled_or_edited",
    "label": "Clip K is the same video as clip D",
    "confidence": 0.9,
-   "t": null,
+   "t": 6330.78,
    "t_end": null,
    "anchor": {
     "kind": "camera",
@@ -273,28 +307,46 @@
    ]
   },
   {
-   "type": "single_source",
-   "label": "Geolocation relies on removed footage; check apartment block in clip B",
+   "type": "time_conflict",
+   "label": "9 clips are placed by post time, not measured: position approximate",
    "confidence": 0.9,
    "t": null,
    "t_end": null,
    "anchor": {
-    "kind": "impact"
+    "kind": "clock"
    },
-   "source": "B",
+   "source": null,
+   "clip_ts": null,
+   "basis": [
+    "placed by post time",
+    "clips A, B, C, D, F, H, I, J, K"
+   ]
+  },
+  {
+   "type": "location_conflict",
+   "label": "Clips A and J show different site from C and G",
+   "confidence": 0.8,
+   "t": 3438.33,
+   "t_end": null,
+   "anchor": {
+    "kind": "camera",
+    "ref": "J"
+   },
+   "source": "J",
    "clip_ts": 0.0,
    "basis": [
-    "landmark: Автовокзал 0:21",
-    "clip screened out by a human reviewer",
-    "B@0:00 apartment block",
+    "J@0:00 camera 445m north facing 29 deg away",
+    "J@0:00 building with triangular pediment",
+    "C@0:04 five-story apartment block",
+    "G@0:08 fireball at target intersection",
     "Carbon cross-check"
    ]
   },
   {
    "type": "single_source",
-   "label": "Only clip I mentions three hits in the area",
+   "label": "Only clip I reports three hits and shows distant smoke",
    "confidence": 0.85,
-   "t": null,
+   "t": 30.0,
    "t_end": null,
    "anchor": {
     "kind": "impact"
@@ -302,23 +354,25 @@
    "source": "I",
    "clip_ts": 0.0,
    "basis": [
-    "I@0:00 Man speaks profanely about three hits",
+    "I@0:00 man speaks about three hits",
+    "I@0:00 smoke plume in distance",
     "Carbon cross-check"
    ]
   },
   {
    "type": "single_source",
-   "label": "Blast shockwave evidence comes solely from clip E",
-   "confidence": 0.8,
-   "t": 0.2,
+   "label": "Only clip F shows medics evacuating casualty and ambulance sirens",
+   "confidence": 0.9,
+   "t": 16183.73,
    "t_end": null,
    "anchor": {
     "kind": "impact"
    },
-   "source": "E",
-   "clip_ts": 3.0,
+   "source": "F",
+   "clip_ts": 6.5,
    "basis": [
-    "E@0:03 Shockwave shatters windshield and dislodges dashcam",
+    "F@0:06.5 medics load patient into ambulance",
+    "F@0:09.5 ambulance leaves with siren",
     "Carbon cross-check"
    ]
   }
@@ -344,6 +398,132 @@
    "source": "G",
    "clip_ts": 9.0,
    "confidence": 0.95
+  },
+  {
+   "t": 30.0,
+   "type": "fire",
+   "source": "I",
+   "clip_ts": 0.0,
+   "confidence": 0.95
+  },
+  {
+   "t": 3125.43,
+   "type": "rescue",
+   "source": "B",
+   "clip_ts": 4.0,
+   "confidence": 0.9
+  },
+  {
+   "t": 4056.8,
+   "type": "rescue",
+   "source": "C",
+   "clip_ts": 0.0,
+   "confidence": 0.9
+  },
+  {
+   "t": 4060.8,
+   "type": "rescue",
+   "source": "C",
+   "clip_ts": 4.0,
+   "confidence": 0.95
+  },
+  {
+   "t": 5180.73,
+   "type": "rescue",
+   "source": "H",
+   "clip_ts": 0.0,
+   "confidence": 0.95
+  },
+  {
+   "t": 6147.3,
+   "type": "rescue",
+   "source": "D",
+   "clip_ts": 6.5,
+   "confidence": 0.55
+  },
+  {
+   "t": 6336.78,
+   "type": "rescue",
+   "source": "K",
+   "clip_ts": 6.0,
+   "confidence": 0.75
+  },
+  {
+   "t": 16177.23,
+   "type": "rescue",
+   "source": "F",
+   "clip_ts": 0.0,
+   "confidence": 0.95
+  },
+  {
+   "t": 16183.73,
+   "type": "rescue",
+   "source": "F",
+   "clip_ts": 6.5,
+   "confidence": 0.98
+  },
+  {
+   "t": 16186.73,
+   "type": "siren",
+   "source": "F",
+   "clip_ts": 9.5,
+   "confidence": 0.98
+  },
+  {
+   "t": 16200.73,
+   "type": "siren",
+   "source": "F",
+   "clip_ts": 23.5,
+   "confidence": 0.98
+  },
+  {
+   "t": 16205.23,
+   "type": "rescue",
+   "source": "F",
+   "clip_ts": 28.0,
+   "confidence": 0.95
+  },
+  {
+   "t": 16212.23,
+   "type": "rescue",
+   "source": "F",
+   "clip_ts": 35.0,
+   "confidence": 0.95
+  },
+  {
+   "t": 16221.23,
+   "type": "rescue",
+   "source": "F",
+   "clip_ts": 44.0,
+   "confidence": 0.9
+  },
+  {
+   "t": 16225.23,
+   "type": "rescue",
+   "source": "F",
+   "clip_ts": 48.0,
+   "confidence": 0.95
+  },
+  {
+   "t": 16232.23,
+   "type": "rescue",
+   "source": "F",
+   "clip_ts": 55.0,
+   "confidence": 0.95
+  },
+  {
+   "t": 16249.23,
+   "type": "rescue",
+   "source": "F",
+   "clip_ts": 72.0,
+   "confidence": 0.9
+  },
+  {
+   "t": 16263.23,
+   "type": "rescue",
+   "source": "F",
+   "clip_ts": 86.0,
+   "confidence": 0.95
   }
  ],
  "sources": [
@@ -360,7 +540,7 @@
    "duration_s": 2.67,
    "camera": null,
    "boom_distance_m": null,
-   "offset_s": null,
+   "offset_s": 2351.33,
    "aligned": false,
    "authenticity": "real",
    "reject_reason": null,
@@ -379,9 +559,16 @@
    "uploader": "itsdonetsk",
    "posted_at": "2024-06-22T16:39:15+03:00",
    "duration_s": 7.57,
-   "camera": null,
+   "camera": {
+    "lat": 49.981719,
+    "lon": 36.244994,
+    "heading_deg": 101,
+    "fov_deg": 55,
+    "radius_m": 300,
+    "confidence": 0.3
+   },
    "boom_distance_m": null,
-   "offset_s": null,
+   "offset_s": 3121.43,
    "aligned": false,
    "authenticity": "real",
    "reject_reason": null,
@@ -408,7 +595,7 @@
    "duration_s": 7.2,
    "camera": null,
    "boom_distance_m": null,
-   "offset_s": null,
+   "offset_s": 4056.8,
    "aligned": false,
    "authenticity": "real",
    "reject_reason": null,
@@ -440,7 +627,7 @@
    "duration_s": 11.2,
    "camera": null,
    "boom_distance_m": null,
-   "offset_s": null,
+   "offset_s": 6140.8,
    "aligned": false,
    "authenticity": "real",
    "reject_reason": null,
@@ -499,7 +686,7 @@
    "duration_s": 90.77,
    "camera": null,
    "boom_distance_m": null,
-   "offset_s": null,
+   "offset_s": 16177.23,
    "aligned": false,
    "authenticity": "real",
    "reject_reason": null,
@@ -549,7 +736,14 @@
    "uploader": "itsdonetsk",
    "posted_at": "2024-06-23T08:39:52+03:00",
    "duration_s": 29.37,
-   "camera": null,
+   "camera": {
+    "lat": 49.979159,
+    "lon": 36.246041,
+    "heading_deg": 132,
+    "fov_deg": 55,
+    "radius_m": 150,
+    "confidence": 0.6
+   },
    "boom_distance_m": null,
    "offset_s": -8.0,
    "aligned": true,
@@ -583,7 +777,7 @@
    "duration_s": 27.27,
    "camera": null,
    "boom_distance_m": null,
-   "offset_s": null,
+   "offset_s": 5180.73,
    "aligned": false,
    "authenticity": "real",
    "reject_reason": null,
@@ -615,7 +809,7 @@
    "duration_s": 13.9,
    "camera": null,
    "boom_distance_m": null,
-   "offset_s": null,
+   "offset_s": 30,
    "aligned": false,
    "authenticity": "real",
    "reject_reason": null,
@@ -650,9 +844,16 @@
    "uploader": "XU_kraine",
    "posted_at": "2024-06-22T16:44:27+03:00",
    "duration_s": 2.67,
-   "camera": null,
+   "camera": {
+    "lat": 49.982977,
+    "lon": 36.247438,
+    "heading_deg": 29,
+    "fov_deg": 85,
+    "radius_m": 300,
+    "confidence": 0.3
+   },
    "boom_distance_m": null,
-   "offset_s": null,
+   "offset_s": 3438.33,
    "aligned": false,
    "authenticity": "real",
    "reject_reason": null,
@@ -673,7 +874,7 @@
    "duration_s": 11.22,
    "camera": null,
    "boom_distance_m": null,
-   "offset_s": null,
+   "offset_s": 6330.78,
    "aligned": false,
    "authenticity": "real",
    "reject_reason": null,
@@ -688,11 +889,11 @@
    ]
   }
  ],
- "summary": "A strike probably hit a five-story apartment block in Kharkiv during an estimated afternoon period on June 22, 2024. Nine independent clips agree, showing scenes consistent with a powerful explosion, severe structural damage, and rescue work. However, pinpointing the exact site rests on one clip that a reviewer screened out.",
+ "summary": "A daytime strike probably damaged a five-story apartment building in Kharkiv on June 22, 2024. Eight of nine independent clips are consistent with the blast and rescue work around the estimated afternoon time. The main caveat is that the pinpointed location relies on a screened-out video not included here.",
  "verification": {
-  "agree_place": true,
-  "agree_time": true,
-  "corroboration": "high",
+  "agree_place": false,
+  "agree_time": false,
+  "corroboration": "medium",
   "n_sources": 11,
   "n_rejected": 0
  },

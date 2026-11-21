@@ -195,6 +195,8 @@ posted about the same reported strike. Work only from the JSON below. Do not add
    - location_conflict: a clip seems to show a different place from the others.
    - single_source: an important event that only one independent clip shows. Reposts of the same video are not independent.
    Report only what the JSON supports. An empty list is a valid answer.
+   A source with aligned: false was placed by when it was posted, which only says it was filmed before that.
+   Do not report a time_conflict that rests on that placement alone.
 2. summary: 2 or 3 short sentences, at most 60 words in total, on what probably happened.
    Use "probably", "estimated" and "consistent with". Give the place, how many independent clips agree, and the one main caveat.
    Plain words; no coordinates, no field names, no seconds.

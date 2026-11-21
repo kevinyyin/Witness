@@ -59,6 +59,22 @@ def heroes():
     return list(out.values())
 
 
+AFTER_S = 30  # earliest scene time for a clip placed by post time
+
+
+def camera_poses():
+    """data_meta/camera_poses.csv -> {hero id: {clip url: §9.2 camera}}. Poses come from the visualizer's skyline
+    matching against the hero's building file; they are an input like heroes.csv, not something this pipeline measured."""
+    f = ROOT / "data_meta" / "camera_poses.csv"
+    out = {}
+    if f.exists():
+        for r in csv.DictReader(open(f, encoding="utf-8-sig")):
+            out.setdefault(r["hero_id"], {})[r["clip_url"]] = {
+                "lat": float(r["lat"]), "lon": float(r["lon"]), "heading_deg": round(float(r["heading_deg"])),
+                "fov_deg": round(float(r["fov_deg"])), "radius_m": int(float(r["radius_m"])), "confidence": float(r["confidence"])}
+    return out
+
+
 def _xy(origin, p):
     """Local metres east/north of origin (fine at city scale)."""
     return ((p[1] - origin[1]) * 111320 * math.cos(math.radians(origin[0])), (p[0] - origin[0]) * 110540)
@@ -134,6 +150,13 @@ def assemble(hero):
             s["camera"] = {"lat": loc["lat"], "lon": loc["lon"], "heading_deg": 0, "fov_deg": 60, "radius_m": loc["radius_m"],
                            "confidence": round(min(0.9, max(0.1, 1 - loc["radius_m"] / 1000)), 2)}
 
+    # 2b. camera poses solved outside the clip pipeline (skyline matching against the hero's building file)
+    poses = camera_poses().get(hero["id"], {})
+    for s in live:
+        p = poses.get(s["clip"]["url"])
+        if p:
+            s["camera"], s["pose"] = p, True
+
     # 3. clips with a flash: t = 0 is their flash; flash-to-boom gives the evidence ring
     for s in live:
         ph = s["phys"]
@@ -165,7 +188,7 @@ def assemble(hero):
         impact = {"lat": loc["lat"], "lon": loc["lon"], "radius_m": loc["radius_m"], "method": "claimed_place", "confidence": 0.15}
     ip = (impact["lat"], impact["lon"])
     for s in live:
-        if s["camera"]:
+        if s["camera"] and not s.get("pose"):  # a solved pose keeps its own heading
             s["camera"]["heading_deg"] = geo.bearing_deg((s["camera"]["lat"], s["camera"]["lon"]), ip)
 
     # 5. remaining offsets: boom-only clips by sound travel
@@ -180,8 +203,11 @@ def assemble(hero):
                 s["offset"], s["aligned"] = round(d / SOUND_M_S - s["phys"]["blast_times"][0], 2), True
             else:
                 s["offset"] = round(-s["phys"]["blast_times"][0], 2)  # approx: camera distance unknown
-        # A clip with no flash and no boom stays unplaced (offset_s: null). Its post time only says when it was
-        # uploaded, and spreading ten aftermath clips over 17 hours of post times made the timeline unreadable.
+        elif s["clip"]["posted_at"] and first_post:
+            # Approximate placement (§9.2, aligned: false): the clip is assumed to end when it was posted. Aftermath
+            # cannot sit on the impact itself, so nothing is placed before AFTER_S.
+            lag = (datetime.fromisoformat(s["clip"]["posted_at"]) - first_post).total_seconds() - s["rec"]["duration_s"]
+            s["offset"], s["by_post"] = round(max(AFTER_S, lag), 2), True
 
     # 6. the impact event comes from a seekable clip (§9.2)
     for s in S:
@@ -289,7 +315,10 @@ def assemble(hero):
             if abs(d - s["boom"]) > cam["radius_m"] + impact["radius_m"]:  # the §9.2 ring guarantee
                 notes.append(_item("location_conflict", f"Camera {s['id']} is {d:.0f} m from the impact but its boom delay says {s['boom']} m",
                                    0.8, t0, anchor, s["id"], s["phys"]["blast_ts"], [f"camera distance {d:.0f} m", f"boom_distance_m={s['boom']}"]))
-        if cam and cam["radius_m"] > 300:
+        if cam and cam["radius_m"] >= 300 and s.get("pose"):
+            notes.append(_item("weak_camera", f"Camera {s['id']} position is weak (±{cam['radius_m']} m)", 0.9, t0, anchor, s["id"], 0.0,
+                               [f"camera.radius_m={cam['radius_m']}", "skyline match, data_meta/camera_poses.csv"]))
+        elif cam and cam["radius_m"] > 300:
             notes.append(_item("weak_camera", f"Camera {s['id']} position is weak (±{cam['radius_m']} m)", 0.9, t0, anchor, s["id"], 0.0,
                                [f"camera.radius_m={cam['radius_m']}"]))
         if s["rec"]["triage"]["graphic_level"] >= 2:
@@ -303,6 +332,10 @@ def assemble(hero):
     if from_hidden and impact["method"] == "landmarks":
         notes.append(_item("single_source", "The location rests on one clip that was screened out and is not shown", 0.9, 0.0,
                            {"kind": "impact"}, None, None, [f"landmark: {', '.join(loc['evidence'][:2])}", "clip screened out by a human reviewer"]))
+    by_post = [s["id"] for s in live if s.get("by_post")]
+    if by_post:
+        notes.append(_item("time_conflict", f"{len(by_post)} clip{'s are' if len(by_post) > 1 else ' is'} placed by post time, not measured: position approximate",
+                           0.9, None, {"kind": "clock"}, None, None, ["placed by post time", "clips " + ", ".join(by_post)]))
     if not with_flash:
         notes.append(_item("single_source", f"No clip shows the impact itself: t = 0 is the start of clip {star['id']}, not a measured moment",
                            0.9, 0.0, {"kind": "impact"}, star["id"], 0.0, ["no flash event in any clip"]))
