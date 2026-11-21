@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react'
 import type { Incident } from '../types'
 import { loadIncident, loadOsmFor, type OsmPick } from '../data/load'
 import { WitnessScene } from '../scene/Scene'
+import { useTime } from '../time/store'
 import { SampleBanner } from './SampleBanner'
 import { Fps } from './Fps'
 
@@ -11,7 +12,10 @@ export function IncidentPage({ id }: { id: string }) {
   const [osm, setOsm] = useState<OsmPick | null | undefined>(undefined)
   const [wire, setWire] = useState(() => new URLSearchParams(window.location.search).get('wire') === '1')
   const [points, setPoints] = useState(0)
+  const [showKey, setShowKey] = useState(false)
   const canvas = useRef<HTMLCanvasElement>(null)
+  const scene = useRef<WitnessScene | null>(null)
+  const { t, setT } = useTime()
 
   useEffect(() => {
     loadIncident(id).then((i) => {
@@ -30,12 +34,16 @@ export function IncidentPage({ id }: { id: string }) {
     if (!inc || !osm || !canvas.current) return
     const s = new WitnessScene(canvas.current)
     s.load(inc, osm.osm, wire)
+    scene.current = s
+    if (import.meta.env.DEV) (window as any).__scene = s // dev-only: lets us time frames from the console
     setPoints(s.points)
     let raf = 0
-    const tick = () => { s.render(); raf = requestAnimationFrame(tick) }
+    const tick = () => { s.update(useTime.getState().t); s.render(); raf = requestAnimationFrame(tick) }
     tick()
-    return () => { cancelAnimationFrame(raf); s.dispose() }
+    return () => { cancelAnimationFrame(raf); s.dispose(); scene.current = null }
   }, [inc, osm, wire])
+
+  useEffect(() => { scene.current?.showAnswerKey(showKey) }, [showKey, points])
 
   if (inc === undefined) return <div className="page muted">Loading incident {id}…</div>
   if (inc === null) return <div className="page warn">Incident {id} not found (incidents/{id}.json).</div>
@@ -52,6 +60,20 @@ export function IncidentPage({ id }: { id: string }) {
           {osm && !osm.inside && <div className="warn">Impact is {Math.round(osm.distance_m)} m from the nearest OSM extract ({osm.entry.file}); buildings may be missing.</div>}
         </div>
         <Fps points={points} />
+        <div className="hud-tools">
+          {/* temp until the V2 timeline */}
+          <label>t = {t >= 0 ? '+' : ''}{t.toFixed(1)} s{' '}
+            <input type="range" min={-20} max={30} step={0.1} value={t} onChange={(e) => setT(Number(e.target.value))} />
+          </label>
+          {inc.answer_key && (
+            <button onClick={() => setShowKey((v) => !v)}>
+              Investigators' location: {showKey ? 'shown' : 'reveal'}
+            </button>
+          )}
+          {inc.sources.some((s) => !s.camera) && (
+            <div className="muted">Position unknown: {inc.sources.filter((s) => !s.camera).map((s) => s.id).join(', ')}</div>
+          )}
+        </div>
         <div className="honesty">
           Geometry: OpenStreetMap footprints, heights estimated. Not a scan.{wire && ' (wireframe)'}<br />
           © OpenStreetMap contributors (ODbL)

@@ -1,7 +1,13 @@
 import * as THREE from 'three'
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js'
+import { EffectComposer } from 'three/examples/jsm/postprocessing/EffectComposer.js'
+import { RenderPass } from 'three/examples/jsm/postprocessing/RenderPass.js'
+import { UnrealBloomPass } from 'three/examples/jsm/postprocessing/UnrealBloomPass.js'
+import { OutputPass } from 'three/examples/jsm/postprocessing/OutputPass.js'
 import type { Incident, OsmFile } from '../types'
 import { groundGrid, sampleCity, wireCity } from './pointcloud'
+import { buildMarkers, type Markers } from './markers'
+import { flashAt, heatAt } from '../time/derive'
 
 /** Frame counter read by the FPS box. */
 export const frameStats = { frames: 0 }
@@ -40,7 +46,9 @@ export class WitnessScene {
   readonly camera = new THREE.PerspectiveCamera(45, 1, 1, 8000)
   readonly controls: OrbitControls
   points = 0
+  markers: Markers | null = null
   private mats: THREE.ShaderMaterial[] = []
+  private composer: EffectComposer
 
   constructor(private canvas: HTMLCanvasElement) {
     this.renderer = new THREE.WebGLRenderer({ canvas, antialias: false, powerPreference: 'high-performance' })
@@ -50,6 +58,11 @@ export class WitnessScene {
     this.controls = new OrbitControls(this.camera, canvas)
     Object.assign(this.controls, { enableDamping: true, maxPolarAngle: Math.PI * 0.49, minDistance: 30, maxDistance: 3000 })
     this.controls.target.set(0, 20, 0)
+    // Bloom only on light sources (§7.1.2): city colours stay below the threshold, markers are boosted above it.
+    this.composer = new EffectComposer(this.renderer)
+    this.composer.addPass(new RenderPass(this.scene, this.camera))
+    this.composer.addPass(new UnrealBloomPass(new THREE.Vector2(256, 256), 1.2, 0.5, 0.95))
+    this.composer.addPass(new OutputPass())
   }
 
   private material(dim: number) {
@@ -80,34 +93,50 @@ export class WitnessScene {
     const g = groundGrid(osm.radius_m ?? 900, 8)
     this.scene.add(new THREE.Points(geometry(g, new Float32Array(g.length / 3)), this.material(0.22)))
     this.points += g.length / 3
+    this.markers = buildMarkers(inc)
+    this.scene.add(this.markers.group)
   }
 
-  setHeat(h: number) { for (const m of this.mats) m.uniforms.uHeat.value = h }
+  /** Everything time-dependent is set from `t` here, every frame (D14). */
+  update(t: number) {
+    for (const m of this.mats) m.uniforms.uHeat.value = heatAt(t)
+    if (!this.markers) return
+    const f = flashAt(t), { flash, sphere } = this.markers
+    flash.visible = f > 0
+    flash.scale.setScalar(60 + 220 * (1 - f))
+    flash.material.opacity = f
+    sphere.scale.setScalar(1 + 0.15 * f) // pulse at impact
+    ;(sphere.material as THREE.MeshBasicMaterial).opacity = 0.22 + 0.5 * f
+  }
+
+  showAnswerKey(on: boolean) { if (this.markers?.answerKey) this.markers.answerKey.visible = on }
 
   render() {
     const { clientWidth: w, clientHeight: h } = this.canvas
     if (w && h && (this.canvas.width !== Math.floor(w * this.renderer.getPixelRatio()) || this.camera.aspect !== w / h)) {
       this.renderer.setSize(w, h, false)
+      this.composer.setPixelRatio(this.renderer.getPixelRatio())
+      this.composer.setSize(w, h)
       this.camera.aspect = w / h
       this.camera.updateProjectionMatrix()
     }
     this.controls.update()
-    this.renderer.render(this.scene, this.camera)
+    this.composer.render()
     frameStats.frames++
   }
 
   private clear() {
-    for (const o of [...this.scene.children]) {
-      this.scene.remove(o)
-      ;(o as THREE.Mesh).geometry?.dispose()
-    }
+    this.scene.traverse((o) => (o as THREE.Mesh).geometry?.dispose())
+    this.scene.clear()
     for (const m of this.mats) m.dispose()
     this.mats = []
+    this.markers = null
   }
 
   dispose() {
     this.clear()
     this.controls.dispose()
+    this.composer.dispose()
     this.renderer.dispose()
   }
 }
