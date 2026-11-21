@@ -1,6 +1,7 @@
 """FastAPI server (§9.3). Run: uvicorn pipeline.app:app --host 127.0.0.1 --port 8000"""
 import json
 import re
+import sys
 import time
 
 from fastapi import APIRouter, FastAPI, HTTPException, Request
@@ -9,13 +10,34 @@ from fastapi.responses import FileResponse, StreamingResponse
 from . import CACHE, DATA
 from .clip import analyze, cached_by_clip_id
 
-YOUTUBE = re.compile(r"^https?://(www\.|m\.)?(youtube\.com/(watch\?v=|shorts/|embed/|live/)|youtu\.be/)[\w-]{11}")
+YT_HOST = re.compile(r"^(?:https?://)?(?:[\w-]+\.)?(?:youtube\.com|youtu\.be)/", re.I)
+YT_ID = re.compile(r"(?:[?&]v=|youtu\.be/|/shorts/|/embed/|/live/)([\w-]{11})(?![\w-])")
+# what a judge reads when a stage fails; the raw exception goes to the server log
+PLAIN = {
+    "fetch": "Could not read that file as a video. Drop a video file (mp4, mov, webm) or paste a YouTube link.",
+    "watch": "Gemini could not watch this video. It may be private, age-restricted, removed or blocked. Try another one.",
+}
 TRUTHS = {"real_strike", "video_game", "movie", "fireworks_demolition", "other"}
 MEDIA_TYPES = {".mp4", ".webm", ".mov", ".mkv", ".m4v", ".jpg", ".jpeg", ".png"}
 BOARD = CACHE / "scoreboard.json"
 UPLOADS = CACHE / "uploads"
 
 api = APIRouter()
+
+
+def youtube_url(text):
+    """Any YouTube link shape (no scheme, m., music., list= before v=, shorts, youtu.be) -> the one form verified
+    with Gemini, or None. Nothing but YouTube is ever passed on."""
+    m = YT_ID.search(text)
+    return f"https://www.youtube.com/watch?v={m[1]}" if m and YT_HOST.match(text) else None
+
+
+def _plain(events):
+    for kind, data in events:
+        if kind == "error":
+            print(f"analyze error [{data['stage']}]: {data['message']}", file=sys.stderr, flush=True)
+            data = {**data, "message": PLAIN.get(data["stage"], "This step failed. Press Analyze again.")}
+        yield kind, data
 
 
 @api.get("/health")
@@ -29,8 +51,8 @@ async def analyze_route(request: Request):
     if request.headers.get("content-type", "").startswith("application/json"):
         body = await request.json()
         url, place = str(body.get("url") or "").strip(), body.get("claimed_place") or None
-        if YOUTUBE.match(url):  # only YouTube links are passed on; nothing else is ever fetched
-            events = analyze(url=url, claimed_place=place)
+        if youtube_url(url):  # only YouTube links are passed on; nothing else is ever fetched
+            events = _plain(analyze(url=youtube_url(url), claimed_place=place))
         else:
             events = iter([("error", {"stage": "fetch", "message": "Paste a YouTube link, or drop a video file."})])
     else:
@@ -44,7 +66,7 @@ async def analyze_route(request: Request):
         with open(dest, "wb") as out:
             while chunk := await upload.read(1 << 20):
                 out.write(chunk)
-        events = analyze(path=dest, claimed_place=form.get("claimed_place") or None)
+        events = _plain(analyze(path=dest, claimed_place=form.get("claimed_place") or None))
 
     def sse():
         for kind, data in events:

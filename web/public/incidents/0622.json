@@ -49,23 +49,23 @@
   },
   "visual_basis": [
    "B@0:00 apartment block",
-   "C@0:00 apartment block",
-   "F@0:18 apartment block"
+   "C@0:04 apartment block",
+   "H@0:00 apartment block"
   ]
  },
  "weapon": {
   "options": {
-   "shahed_drone": 0.06,
-   "cruise_missile": 0.02,
-   "ballistic_missile": 0.4,
+   "shahed_drone": 0.05,
+   "cruise_missile": 0.01,
+   "ballistic_missile": 0.42,
    "glide_bomb": 0.03,
-   "rocket_cluster": 0.05,
+   "rocket_cluster": 0.06,
    "tube_artillery": 0.04,
    "fpv_drone": 0.17,
-   "unknown": 0.24
+   "unknown": 0.22
   },
   "evidence": [
-   "E@0:03 Shockwave knocks dashcam inside vehicle"
+   "E@0:03 Shockwave shatters windshield and dislodges dashcam"
   ]
  },
  "flags": [
@@ -180,7 +180,7 @@
    "type": "graphic",
    "label": "Graphic content in clip A (blurred)",
    "confidence": 0.9,
-   "t": 2354.0,
+   "t": null,
    "t_end": null,
    "anchor": {
     "kind": "camera",
@@ -193,58 +193,10 @@
    ]
   },
   {
-   "type": "recycled_or_edited",
-   "label": "Clip A is the same video as clip J",
-   "confidence": 0.9,
-   "t": 2354.0,
-   "t_end": null,
-   "anchor": {
-    "kind": "camera",
-    "ref": "A"
-   },
-   "source": "A",
-   "clip_ts": 0.0,
-   "basis": [
-    "pHash match"
-   ]
-  },
-  {
-   "type": "recycled_or_edited",
-   "label": "Clip D is the same video as clip K",
-   "confidence": 0.9,
-   "t": 6152.0,
-   "t_end": null,
-   "anchor": {
-    "kind": "camera",
-    "ref": "D"
-   },
-   "source": "D",
-   "clip_ts": 0.0,
-   "basis": [
-    "pHash match"
-   ]
-  },
-  {
-   "type": "recycled_or_edited",
-   "label": "Clip E is the same video as an earlier upload",
-   "confidence": 0.9,
-   "t": 0.0,
-   "t_end": null,
-   "anchor": {
-    "kind": "camera",
-    "ref": "E"
-   },
-   "source": "E",
-   "clip_ts": 0.0,
-   "basis": [
-    "pHash match"
-   ]
-  },
-  {
    "type": "graphic",
    "label": "Graphic content in clip F (blurred)",
    "confidence": 0.9,
-   "t": 16268.0,
+   "t": null,
    "t_end": null,
    "anchor": {
     "kind": "camera",
@@ -260,7 +212,7 @@
    "type": "graphic",
    "label": "Graphic content in clip J (blurred)",
    "confidence": 0.9,
-   "t": 3441.0,
+   "t": null,
    "t_end": null,
    "anchor": {
     "kind": "camera",
@@ -270,6 +222,38 @@
    "clip_ts": 0.0,
    "basis": [
     "graphic_level=2"
+   ]
+  },
+  {
+   "type": "recycled_or_edited",
+   "label": "Clip J is the same video as clip A",
+   "confidence": 0.9,
+   "t": null,
+   "t_end": null,
+   "anchor": {
+    "kind": "camera",
+    "ref": "J"
+   },
+   "source": "J",
+   "clip_ts": 0.0,
+   "basis": [
+    "pHash match"
+   ]
+  },
+  {
+   "type": "recycled_or_edited",
+   "label": "Clip K is the same video as clip D",
+   "confidence": 0.9,
+   "t": null,
+   "t_end": null,
+   "anchor": {
+    "kind": "camera",
+    "ref": "K"
+   },
+   "source": "K",
+   "clip_ts": 0.0,
+   "basis": [
+    "pHash match"
    ]
   },
   {
@@ -284,7 +268,7 @@
    "source": null,
    "clip_ts": null,
    "basis": [
-    "landmark: АВТОВОКЗАЛ 0:21",
+    "landmark: Автовокзал 0:21",
     "clip screened out by a human reviewer"
    ]
   },
@@ -298,71 +282,45 @@
     "kind": "impact"
    },
    "source": "E",
-   "clip_ts": 2.82,
+   "clip_ts": 2.8,
    "basis": [
     "E@0:02 flash"
    ]
   },
   {
-   "type": "time_conflict",
-   "label": "Clip G shows an explosion hours after impact in clip E",
-   "confidence": 0.95,
-   "t": 60774.0,
+   "type": "single_source",
+   "label": "Only clip I reports three hits and shows distant smoke",
+   "confidence": 0.85,
+   "t": null,
    "t_end": null,
    "anchor": {
-    "kind": "cameras",
-    "ref": [
-     "E",
-     "G"
-    ]
+    "kind": "impact"
    },
-   "source": "G",
-   "clip_ts": 8.0,
-   "basis": [
-    "E@0:03 impact flash",
-    "G@0:08 fireball at t=60774.5s",
-    "Carbon cross-check"
-   ]
-  },
-  {
-   "type": "time_conflict",
-   "label": "Duplicate clips A and J are placed eighteen minutes apart",
-   "confidence": 0.9,
-   "t": 3441.0,
-   "t_end": null,
-   "anchor": {
-    "kind": "cameras",
-    "ref": [
-     "A",
-     "J"
-    ]
-   },
-   "source": "J",
+   "source": "I",
    "clip_ts": 0.0,
    "basis": [
-    "A@0:00 offset 2354s",
-    "J@0:00 pHash match offset 3441s",
+    "I@0:00 large smoke plume",
+    "I@0:00 man speaks about three hits",
     "Carbon cross-check"
    ]
   },
   {
-   "type": "time_conflict",
-   "label": "Duplicate clips D and K are placed three minutes apart",
-   "confidence": 0.9,
-   "t": 6349.0,
+   "type": "location_conflict",
+   "label": "Clips A, D, J, K differ visually from B, C, H",
+   "confidence": 0.7,
+   "t": null,
    "t_end": null,
    "anchor": {
-    "kind": "cameras",
-    "ref": [
-     "D",
-     "K"
-    ]
+    "kind": "camera",
+    "ref": "A"
    },
-   "source": "K",
-   "clip_ts": 7.0,
+   "source": "A",
+   "clip_ts": 0.0,
    "basis": [
-    "D@0:00 offset 6152s",
-    "K@0:07 pHash match offset 6342s",
+    "A@0:00 building with pediment",
+    "D@0:06 square and classical building",
+    "B@0:00 5-story apartment block",
+    "I@0:00 three hits mentioned",
     "Carbon cross-check"
    ]
   }
@@ -372,147 +330,14 @@
    "t": 0.0,
    "type": "impact",
    "source": "E",
-   "clip_ts": 2.82,
-   "confidence": 0.98
+   "clip_ts": 2.8,
+   "confidence": 0.95
   },
   {
-   "t": 0.0,
+   "t": 0.02,
    "type": "boom_heard",
    "source": "E",
    "clip_ts": 2.82,
-   "confidence": 0.9
-  },
-  {
-   "t": 0.18,
-   "type": "fire",
-   "source": "E",
-   "clip_ts": 3.0,
-   "confidence": 0.9
-  },
-  {
-   "t": 30.0,
-   "type": "fire",
-   "source": "I",
-   "clip_ts": 0.0,
-   "confidence": 0.95
-  },
-  {
-   "t": 3133.0,
-   "type": "rescue",
-   "source": "B",
-   "clip_ts": 4.0,
-   "confidence": 0.6
-  },
-  {
-   "t": 4064.0,
-   "type": "rescue",
-   "source": "C",
-   "clip_ts": 0.0,
-   "confidence": 0.85
-  },
-  {
-   "t": 4068.0,
-   "type": "rescue",
-   "source": "C",
-   "clip_ts": 4.0,
-   "confidence": 0.95
-  },
-  {
-   "t": 5208.0,
-   "type": "rescue",
-   "source": "H",
-   "clip_ts": 0.0,
-   "confidence": 0.9
-  },
-  {
-   "t": 6349.0,
-   "type": "rescue",
-   "source": "K",
-   "clip_ts": 7.0,
-   "confidence": 0.6
-  },
-  {
-   "t": 16268.5,
-   "type": "rescue",
-   "source": "F",
-   "clip_ts": 0.5,
-   "confidence": 0.95
-  },
-  {
-   "t": 16274.5,
-   "type": "rescue",
-   "source": "F",
-   "clip_ts": 6.5,
-   "confidence": 0.98
-  },
-  {
-   "t": 16277.5,
-   "type": "siren",
-   "source": "F",
-   "clip_ts": 9.5,
-   "confidence": 0.95
-  },
-  {
-   "t": 16291.5,
-   "type": "siren",
-   "source": "F",
-   "clip_ts": 23.5,
-   "confidence": 0.95
-  },
-  {
-   "t": 16295.5,
-   "type": "rescue",
-   "source": "F",
-   "clip_ts": 27.5,
-   "confidence": 0.95
-  },
-  {
-   "t": 16303.0,
-   "type": "rescue",
-   "source": "F",
-   "clip_ts": 35.0,
-   "confidence": 0.95
-  },
-  {
-   "t": 16309.0,
-   "type": "fire",
-   "source": "F",
-   "clip_ts": 41.0,
-   "confidence": 0.85
-  },
-  {
-   "t": 16312.0,
-   "type": "rescue",
-   "source": "F",
-   "clip_ts": 44.0,
-   "confidence": 0.9
-  },
-  {
-   "t": 16316.0,
-   "type": "rescue",
-   "source": "F",
-   "clip_ts": 48.0,
-   "confidence": 0.95
-  },
-  {
-   "t": 16326.0,
-   "type": "rescue",
-   "source": "F",
-   "clip_ts": 58.0,
-   "confidence": 0.95
-  },
-  {
-   "t": 16354.0,
-   "type": "rescue",
-   "source": "F",
-   "clip_ts": 86.0,
-   "confidence": 0.95
-  },
-  {
-   "t": 60774.5,
-   "type": "fire",
-   "source": "G",
-   "clip_ts": 8.5,
    "confidence": 0.9
   }
  ],
@@ -530,7 +355,7 @@
    "duration_s": 2.67,
    "camera": null,
    "boom_distance_m": null,
-   "offset_s": 2354.0,
+   "offset_s": null,
    "aligned": false,
    "authenticity": "real",
    "reject_reason": null,
@@ -551,7 +376,7 @@
    "duration_s": 7.57,
    "camera": null,
    "boom_distance_m": null,
-   "offset_s": 3129.0,
+   "offset_s": null,
    "aligned": false,
    "authenticity": "real",
    "reject_reason": null,
@@ -560,8 +385,8 @@
    "findings": [
     {
      "clip_ts": 4.0,
-     "label": "Workers in yellow gear near damaged building",
-     "confidence": 0.6
+     "label": "Emergency workers and machinery near damaged building",
+     "confidence": 0.9
     }
    ]
   },
@@ -578,7 +403,7 @@
    "duration_s": 7.2,
    "camera": null,
    "boom_distance_m": null,
-   "offset_s": 4064.0,
+   "offset_s": null,
    "aligned": false,
    "authenticity": "real",
    "reject_reason": null,
@@ -587,12 +412,12 @@
    "findings": [
     {
      "clip_ts": 0.0,
-     "label": "Helmeted responder in vest documenting wrecked cars",
-     "confidence": 0.85
+     "label": "Helmeted responder with clipboard beside wrecked cars",
+     "confidence": 0.9
     },
     {
      "clip_ts": 4.0,
-     "label": "Fire truck with extended ladder near rubble",
+     "label": "Fire trucks with extended ladder at damaged building",
      "confidence": 0.95
     }
    ]
@@ -610,13 +435,19 @@
    "duration_s": 11.2,
    "camera": null,
    "boom_distance_m": null,
-   "offset_s": 6152.0,
+   "offset_s": null,
    "aligned": false,
    "authenticity": "real",
    "reject_reason": null,
    "graphic_level": 1,
    "license": "source: t.me/itsdonetsk",
-   "findings": []
+   "findings": [
+    {
+     "clip_ts": 6.5,
+     "label": "Crowd and yellow vehicle gathered outside",
+     "confidence": 0.55
+    }
+   ]
   },
   {
    "id": "E",
@@ -631,7 +462,7 @@
    "duration_s": 32.93,
    "camera": null,
    "boom_distance_m": null,
-   "offset_s": -2.82,
+   "offset_s": -2.8,
    "aligned": true,
    "authenticity": "real",
    "reject_reason": null,
@@ -639,18 +470,13 @@
    "license": "source: t.me/itsdonetsk",
    "findings": [
     {
-     "clip_ts": 2.9,
-     "label": "Bright orange explosion flash on left",
-     "confidence": 0.98
+     "clip_ts": 2.8,
+     "label": "Orange explosion flash erupts ahead of cars",
+     "confidence": 0.95
     },
     {
      "clip_ts": 3.0,
-     "label": "Flames visible near vehicle during impact",
-     "confidence": 0.9
-    },
-    {
-     "clip_ts": 3.0,
-     "label": "Shockwave knocks dashcam inside vehicle",
+     "label": "Shockwave shatters windshield and dislodges dashcam",
      "confidence": 0.95
     }
    ]
@@ -668,7 +494,7 @@
    "duration_s": 90.77,
    "camera": null,
    "boom_distance_m": null,
-   "offset_s": 16268.0,
+   "offset_s": null,
    "aligned": false,
    "authenticity": "real",
    "reject_reason": null,
@@ -676,33 +502,33 @@
    "license": "source: t.me/itsdonetsk",
    "findings": [
     {
-     "clip_ts": 0.5,
-     "label": "Firefighter walks past street debris and vehicles",
+     "clip_ts": 0.0,
+     "label": "Firefighter walks past debris and damaged vehicles",
      "confidence": 0.95
     },
     {
-     "clip_ts": 3.0,
-     "label": "Background speech near damaged white minibus",
-     "confidence": 0.85
-    },
-    {
      "clip_ts": 6.5,
-     "label": "Medics wheel injured person into ambulance",
+     "label": "Medics load patient on stretcher into ambulance",
      "confidence": 0.98
     },
     {
      "clip_ts": 9.5,
-     "label": "Ambulance drives away with siren sounding",
-     "confidence": 0.95
+     "label": "Ambulance drives away with siren wailing",
+     "confidence": 0.98
     },
     {
      "clip_ts": 14.5,
-     "label": "Person shouts in distance among street debris",
-     "confidence": 0.9
+     "label": "Man shouts on debris-covered street",
+     "confidence": 0.85
     },
     {
      "clip_ts": 23.5,
-     "label": "Second ambulance passes with siren active",
+     "label": "Second ambulance leaves with siren sounding",
+     "confidence": 0.98
+    },
+    {
+     "clip_ts": 28.0,
+     "label": "Fire ladder truck positions beside damaged building",
      "confidence": 0.95
     }
    ]
@@ -720,7 +546,7 @@
    "duration_s": 29.37,
    "camera": null,
    "boom_distance_m": null,
-   "offset_s": 60766.0,
+   "offset_s": null,
    "aligned": false,
    "authenticity": "real",
    "reject_reason": null,
@@ -729,13 +555,13 @@
    "findings": [
     {
      "clip_ts": 8.0,
-     "label": "Bright orange fireball erupts near street corner",
-     "confidence": 0.95
+     "label": "Large orange fireball erupts near street corner",
+     "confidence": 0.98
     },
     {
-     "clip_ts": 8.5,
-     "label": "Heavy smoke and dust cloud billows outward",
-     "confidence": 0.9
+     "clip_ts": 9.0,
+     "label": "Dense smoke and dust cloud fills intersection",
+     "confidence": 0.95
     }
    ]
   },
@@ -752,7 +578,7 @@
    "duration_s": 27.27,
    "camera": null,
    "boom_distance_m": null,
-   "offset_s": 5208.0,
+   "offset_s": null,
    "aligned": false,
    "authenticity": "real",
    "reject_reason": null,
@@ -766,8 +592,8 @@
     },
     {
      "clip_ts": 0.0,
-     "label": "Emergency and utility vehicles behind damaged building",
-     "confidence": 0.9
+     "label": "Emergency trucks and workers behind damaged building",
+     "confidence": 0.95
     }
    ]
   },
@@ -784,7 +610,7 @@
    "duration_s": 13.9,
    "camera": null,
    "boom_distance_m": null,
-   "offset_s": 30.0,
+   "offset_s": null,
    "aligned": false,
    "authenticity": "real",
    "reject_reason": null,
@@ -793,23 +619,18 @@
    "findings": [
     {
      "clip_ts": 0.0,
-     "label": "Large smoke plume rising across water",
+     "label": "Large smoke plume rising in distance",
      "confidence": 0.95
     },
     {
      "clip_ts": 0.0,
-     "label": "Man reacting in Russian to strikes",
-     "confidence": 0.98
+     "label": "Man speaks profanely about three hits",
+     "confidence": 0.95
     },
     {
      "clip_ts": 6.5,
-     "label": "Second man speaking in background",
+     "label": "Men discuss leaving and the shockwave",
      "confidence": 0.9
-    },
-    {
-     "clip_ts": 11.0,
-     "label": "Man repeating shock at the scene",
-     "confidence": 0.95
     }
    ]
   },
@@ -826,7 +647,7 @@
    "duration_s": 2.67,
    "camera": null,
    "boom_distance_m": null,
-   "offset_s": 3441.0,
+   "offset_s": null,
    "aligned": false,
    "authenticity": "real",
    "reject_reason": null,
@@ -847,7 +668,7 @@
    "duration_s": 11.22,
    "camera": null,
    "boom_distance_m": null,
-   "offset_s": 6342.0,
+   "offset_s": null,
    "aligned": false,
    "authenticity": "real",
    "reject_reason": null,
@@ -855,18 +676,18 @@
    "license": "source: t.me/XU_kraine",
    "findings": [
     {
-     "clip_ts": 7.0,
-     "label": "Yellow emergency truck and crowd outside",
-     "confidence": 0.6
+     "clip_ts": 6.0,
+     "label": "Yellow emergency vehicle and people gathered outside",
+     "confidence": 0.75
     }
    ]
   }
  ],
- "summary": "A daytime strike probably hit a five-story apartment block in a dense area of Kharkiv, with blast effects consistent with a ballistic missile or drone. Nine independent clips agree on the explosion and rescue work around the estimated afternoon strike time. However, the exact location relies on a single video that was screened out.",
+ "summary": "A daytime strike probably damaged a five-story apartment block in Kharkiv at an estimated afternoon time on June 22, 2024. The blast and aftermath are consistent with nine independent clips that agree on the event. However, the main caveat is that the exact location rests on a clip that was screened out.",
  "verification": {
-  "agree_place": true,
-  "agree_time": false,
-  "corroboration": "high",
+  "agree_place": false,
+  "agree_time": true,
+  "corroboration": "medium",
   "n_sources": 11,
   "n_rejected": 0
  },

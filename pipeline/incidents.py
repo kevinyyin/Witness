@@ -129,7 +129,8 @@ def assemble(hero):
     # 2. cameras from each clip's own location
     for s in live:
         loc = s["rec"]["location"]
-        if loc and loc["level"] in ("point", "district") and loc["radius_m"] <= 1500:
+        # a camera is drawn only where a landmark confirms the spot; a ±1 km model estimate is not a camera position
+        if loc and loc["method"] == "landmarks+osm":
             s["camera"] = {"lat": loc["lat"], "lon": loc["lon"], "heading_deg": 0, "fov_deg": 60, "radius_m": loc["radius_m"],
                            "confidence": round(min(0.9, max(0.1, 1 - loc["radius_m"] / 1000)), 2)}
 

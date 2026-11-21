@@ -428,45 +428,37 @@
  ],
  "review_notes": [
   {
-   "type": "time_conflict",
-   "label": "Clip D near impact shows fire; A, B, C unaligned",
+   "type": "single_source",
+   "label": "No clip shows the impact itself: t = 0 is the start of clip A, not a measured moment",
    "confidence": 0.9,
-   "t": 30.0,
+   "t": 0.0,
    "t_end": null,
    "anchor": {
-    "kind": "cameras",
-    "ref": [
-     "A",
-     "B",
-     "C",
-     "D"
-    ]
+    "kind": "impact"
    },
-   "source": "D",
+   "source": "A",
    "clip_ts": 0.0,
    "basis": [
-    "D@0:00 large flames and smoke",
-    "C@0:05.5 tall jet of flame",
-    "B@0:00 flames burning near building",
-    "A@0:08.5 tall orange flame",
-    "Carbon cross-check"
+    "no flash event in any clip"
    ]
   },
   {
-   "type": "location_conflict",
-   "label": "Clip D camera position is far from clip A",
-   "confidence": 0.85,
-   "t": 30.0,
+   "type": "time_conflict",
+   "label": "Clip A placed at impact already shows rescue and fire",
+   "confidence": 0.95,
+   "t": 0.0,
    "t_end": null,
    "anchor": {
     "kind": "camera",
-    "ref": "D"
+    "ref": "A"
    },
-   "source": "D",
+   "source": "A",
    "clip_ts": 0.0,
    "basis": [
-    "D@0:00 camera 50.05986, 36.19467",
-    "A@0:00 camera 50.00964, 36.31881",
+    "A@0:00 impact",
+    "A@0:00 person tending someone on pavement",
+    "A@0:07 firefighter with hose",
+    "A@0:08 tall jet of flame",
     "Carbon cross-check"
    ]
   }
@@ -476,95 +468,32 @@
    "t": 0.0,
    "type": "impact",
    "source": "A",
-   "clip_ts": -11414.0,
+   "clip_ts": -0.0,
    "confidence": 0.3
   },
   {
-   "t": 30.0,
-   "type": "fire",
-   "source": "D",
-   "clip_ts": 0.0,
-   "confidence": 0.98
-  },
-  {
-   "t": 3098.0,
-   "type": "rescue",
-   "source": "C",
-   "clip_ts": 0.0,
-   "confidence": 0.98
-  },
-  {
-   "t": 3098.0,
-   "type": "fire",
-   "source": "C",
-   "clip_ts": 0.0,
-   "confidence": 0.95
-  },
-  {
-   "t": 3103.5,
-   "type": "fire",
-   "source": "C",
-   "clip_ts": 5.5,
-   "confidence": 0.98
-  },
-  {
-   "t": 3114.0,
-   "type": "rescue",
-   "source": "C",
-   "clip_ts": 16.0,
-   "confidence": 0.92
-  },
-  {
-   "t": 3119.5,
-   "type": "rescue",
-   "source": "C",
-   "clip_ts": 21.5,
-   "confidence": 0.97
-  },
-  {
-   "t": 3124.5,
-   "type": "rescue",
-   "source": "C",
-   "clip_ts": 26.5,
-   "confidence": 0.95
-  },
-  {
-   "t": 4894.0,
-   "type": "fire",
-   "source": "B",
-   "clip_ts": 0.0,
-   "confidence": 0.95
-  },
-  {
-   "t": 4894.0,
-   "type": "rescue",
-   "source": "B",
-   "clip_ts": 0.0,
-   "confidence": 0.95
-  },
-  {
-   "t": 11414.0,
+   "t": 0.0,
    "type": "rescue",
    "source": "A",
    "clip_ts": 0.0,
-   "confidence": 0.85
+   "confidence": 0.9
   },
   {
-   "t": 11421.5,
+   "t": 7.5,
    "type": "rescue",
    "source": "A",
    "clip_ts": 7.5,
    "confidence": 0.95
   },
   {
-   "t": 11422.5,
+   "t": 8.7,
    "type": "fire",
    "source": "A",
-   "clip_ts": 8.5,
+   "clip_ts": 8.7,
    "confidence": 0.98
   },
   {
-   "t": 11428.0,
+   "t": 14.0,
    "type": "rescue",
    "source": "A",
    "clip_ts": 14.0,
@@ -592,31 +521,36 @@
     "confidence": 0.7
    },
    "boom_distance_m": null,
-   "offset_s": 11414.0,
+   "offset_s": 0.0,
    "aligned": false,
    "authenticity": "real",
    "reject_reason": null,
    "graphic_level": 1,
-   "license": "embed only",
+   "license": "source: t.me/bear007",
    "findings": [
     {
      "clip_ts": 0.0,
-     "label": "Person in vest tends to seated individual",
-     "confidence": 0.85
+     "label": "Person in vest tending someone on pavement",
+     "confidence": 0.9
+    },
+    {
+     "clip_ts": 2.8,
+     "label": "Distant shout heard",
+     "confidence": 0.7
     },
     {
      "clip_ts": 7.5,
-     "label": "Firefighter directs hose toward damaged area",
+     "label": "Firefighter kneeling with hose near damaged building",
      "confidence": 0.95
     },
     {
-     "clip_ts": 8.5,
-     "label": "Tall orange flame and smoke rise upward",
+     "clip_ts": 8.7,
+     "label": "Tall jet of flame and smoke rising",
      "confidence": 0.98
     },
     {
      "clip_ts": 14.0,
-     "label": "Multiple fire trucks and firefighters on scene",
+     "label": "Multiple fire trucks and firefighters on street",
      "confidence": 0.98
     }
    ]
@@ -634,26 +568,26 @@
    "duration_s": 46.17,
    "camera": null,
    "boom_distance_m": null,
-   "offset_s": 4894.0,
+   "offset_s": null,
    "aligned": false,
    "authenticity": "real",
    "reject_reason": null,
    "graphic_level": 1,
-   "license": "embed only",
+   "license": "source: t.me/prokuratura_kharkiv",
    "findings": [
     {
      "clip_ts": 0.0,
-     "label": "Flames burning near damaged building and car",
-     "confidence": 0.95
+     "label": "Flames burning beside damaged building and car",
+     "confidence": 0.98
     },
     {
      "clip_ts": 0.0,
-     "label": "Red fire truck parked near damaged building",
+     "label": "Red fire truck parked outside damaged building",
      "confidence": 0.95
     },
     {
      "clip_ts": 1.0,
-     "label": "Man in tactical vest speaks to camera",
+     "label": "Official speaks in Ukrainian about missile fragments",
      "confidence": 0.99
     }
    ]
@@ -671,41 +605,41 @@
    "duration_s": 29.68,
    "camera": null,
    "boom_distance_m": null,
-   "offset_s": 3098.0,
+   "offset_s": null,
    "aligned": false,
    "authenticity": "real",
    "reject_reason": null,
    "graphic_level": 1,
-   "license": "embed only",
+   "license": "source: t.me/suspilnenews",
    "findings": [
     {
      "clip_ts": 0.0,
-     "label": "Firefighter sprays water onto burned car",
-     "confidence": 0.98
+     "label": "Firefighter spraying water on burnt-out SUV",
+     "confidence": 0.95
     },
     {
      "clip_ts": 0.0,
-     "label": "Flames burn near damaged building",
+     "label": "Flames burning beside charred SUV",
      "confidence": 0.95
     },
     {
      "clip_ts": 5.5,
-     "label": "Tall jet of flame erupts by building",
-     "confidence": 0.98
+     "label": "Tall flame jetting beside damaged building",
+     "confidence": 0.95
     },
     {
-     "clip_ts": 16.0,
-     "label": "Medic assists shirtless man inside damaged vehicle",
-     "confidence": 0.92
+     "clip_ts": 5.5,
+     "label": "Firefighter and police standing near van",
+     "confidence": 0.9
+    },
+    {
+     "clip_ts": 16.5,
+     "label": "People assisting man out of damaged vehicle",
+     "confidence": 0.9
     },
     {
      "clip_ts": 21.5,
-     "label": "Fire truck and firefighters operate on street",
-     "confidence": 0.97
-    },
-    {
-     "clip_ts": 26.5,
-     "label": "Helmeted psychologist comforts man sitting on curb",
+     "label": "Fire truck and firefighters near tall flames",
      "confidence": 0.95
     }
    ]
@@ -721,21 +655,14 @@
    "uploader": "truexakharkiv",
    "posted_at": "2024-09-01T14:32:40+03:00",
    "duration_s": 16.57,
-   "camera": {
-    "lat": 50.05986,
-    "lon": 36.19467,
-    "heading_deg": 122,
-    "fov_deg": 60,
-    "radius_m": 300,
-    "confidence": 0.7
-   },
+   "camera": null,
    "boom_distance_m": null,
-   "offset_s": 30.0,
+   "offset_s": null,
    "aligned": false,
    "authenticity": "real",
    "reject_reason": null,
    "graphic_level": 1,
-   "license": "embed only",
+   "license": "source: t.me/truexakharkiv",
    "findings": [
     {
      "clip_ts": 0.0,
@@ -743,18 +670,18 @@
      "confidence": 0.98
     },
     {
-     "clip_ts": 2.0,
-     "label": "Cameraman speaks briefly while facing camera",
+     "clip_ts": 1.8,
+     "label": "Camera operator speaks while facing camera",
      "confidence": 0.95
     }
    ]
   }
  ],
- "summary": "A strike probably hit a commercial area near the Radmir office building on Akademika Pavlova Street in Kharkiv on September 1, 2024. Four independent clips show building damage, intense fire, and rescue work consistent with an estimated early afternoon strike. However, no clip captures the blast itself, leaving the exact timing uncertain.",
+ "summary": "A strike probably hit near the Radmir office building on Akademika Pavlova Street in Kharkiv at an estimated afternoon time on September 1, 2024. Four independent clips agree on fires, building damage, and rescue work consistent with a strike aftermath. However, no clip captures the actual impact, making the exact timing uncertain.",
  "verification": {
-  "agree_place": false,
+  "agree_place": true,
   "agree_time": false,
-  "corroboration": "medium",
+  "corroboration": "high",
   "n_sources": 4,
   "n_rejected": 0
  },

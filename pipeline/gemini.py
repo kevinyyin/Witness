@@ -198,6 +198,7 @@ posted about the same reported strike. Work only from the JSON below. Do not add
 2. summary: 2 or 3 short sentences, at most 60 words in total, on what probably happened.
    Use "probably", "estimated" and "consistent with". Give the place, how many independent clips agree, and the one main caveat.
    Plain words; no coordinates, no field names, no seconds.
+   Name a weapon only if its value in weapon.options is 0.5 or higher; otherwise do not mention the weapon type at all.
    Never say who is responsible. No legal terms. No casualty numbers."""
 
 
