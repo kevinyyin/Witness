@@ -135,7 +135,7 @@ export class WitnessScene {
     }
     const f0 = flashAt(t)
     sphere.scale.setScalar(1 + 0.15 * f0) // pulse at the first impact
-    ;(sphere.material as THREE.MeshBasicMaterial).opacity = 0.22 + 0.5 * f0
+    ;(sphere.material as THREE.MeshBasicMaterial).opacity = 0.14 + 0.4 * f0
     for (const [id, icon] of Object.entries(icons)) icon.scale.setScalar(blinkAt(this.inc, id, t) ? 60 : 18)
     for (const c of this.markers.cues) { // §7.1.5: siren pulse, buzz icon (3–4 s), fire/rescue markers stay
       const dt = t - c.t

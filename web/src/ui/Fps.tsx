@@ -4,7 +4,7 @@ import { frameStats } from '../scene/Scene'
 /** Big FPS readout (§7.1.8 #9: ≥ 30 fps on the demo laptop), readable from a metre away. */
 export function Fps({ points }: { points: number }) {
   const [fps, setFps] = useState(0)
-  const [hidden, setHidden] = useState(false)
+  const [hidden, setHidden] = useState(true) // hidden by default (cramped); F shows it for the 30 fps check
   useEffect(() => {
     const on = (e: KeyboardEvent) => { if (e.key === 'f' || e.key === 'F') setHidden((h) => !h) } // F: hide for video capture
     window.addEventListener('keydown', on)
