@@ -2,7 +2,27 @@
 import { useEffect, useRef, useState } from 'react'
 import type { Incident, Source } from '../types'
 import { useTime } from '../time/store'
-import { alsoCovering, fmtT, mmss, pickClip, slowmo } from '../time/derive'
+import { alsoCovering, fmtT, laneOf, mmss, pickClip, slowmo } from '../time/derive'
+
+/** Every clip in the reconstruction as a chip: playing one filled, clips covering the playhead bright, clips with no
+ *  place in time dashed. Click = play that clip. The incident is many clips; this keeps that visible. */
+function ClipStrip({ inc, current }: { inc: Incident; current: string | null }) {
+  const t = useTime((s) => Math.round(s.t))
+  const clips = inc.sources.filter((s) => s.authenticity !== 'fake')
+  return (
+    <div className="clip-strip">
+      <span className="muted">{clips.length} clips</span>
+      {clips.map((s) => {
+        const l = laneOf(s), live = !!l && t >= l.t0 && t <= l.t1
+        const when = l ? `placed at ${fmtT(l.t0)}${s.aligned ? '' : ' (approx., by post time)'}` : 'time unknown'
+        return (
+          <button key={s.id} className={`clip-chip ${s.id === current ? 'on' : ''} ${live ? 'live' : ''} ${l ? '' : 'nt'}`}
+            title={`${s.id} · ${s.platform} · ${when} · ${s.authenticity}`} onClick={() => useTime.getState().pin(s.id)}>{s.id}</button>
+        )
+      })}
+    </div>
+  )
+}
 import { embeddable, loadYouTube, videoAdapter, youtubeAdapter, youtubeId, type Adapter } from './players'
 
 /** Keeps a seekable player on the scene clock: re-seek on scrub/jump or drift > 0.5 s; rate follows playback. */
@@ -93,6 +113,7 @@ export function SourceVideo({ inc }: { inc: Incident }) {
         ▶ SOURCE VIDEO{src && <> · clip {src.id} · {src.platform} · {STATUS[src.authenticity]}</>}
         {' '}{pinned ? <button className="mini" onClick={() => useTime.getState().pin(null)}>pinned {pinned} · back to auto</button> : <span className="muted">(auto)</span>}
       </h4>
+      <ClipStrip inc={inc} current={src?.id ?? null} />
       <div className={`video-box ${blurred ? 'blurred' : ''}`}>
         {!src ? <div className="no-embed muted">No source clip covers this moment.</div>
           : kind === 'file' ? <FilePlayer key={src.id} src={src} />

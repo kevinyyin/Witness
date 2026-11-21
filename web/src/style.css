@@ -213,3 +213,12 @@ button.mini { padding: 1px 6px; font-size: 10px; margin: 2px 4px 2px 0; }
 .sidebar .unclear { font-family: var(--sans); font-weight: 700; letter-spacing: 0; }
 .sidebar button.mini { font-family: var(--mono); }
 .sidebar .footer { margin-top: 12px; padding-top: 10px; border-top: 1px solid var(--line); }
+/* clip strip (every clip of the reconstruction) + clip spans on the play bar */
+.clip-strip { display: flex; flex-wrap: wrap; gap: 4px; align-items: center; margin: 0 0 6px; }
+.clip-strip > .muted { font-family: var(--mono); font-size: 11px; margin-right: 4px; }
+.clip-chip { font-family: var(--mono); font-size: 12px; padding: 2px 8px; border: 1px solid var(--line); background: transparent; color: var(--dim); }
+.clip-chip.live { color: var(--text); border-color: var(--cyan); }
+.clip-chip.nt { border-style: dashed; }
+.clip-chip.on { background: var(--cyan); border-color: var(--cyan); color: #000; }
+.pb-span { position: absolute; top: 24px; height: 3px; border-radius: 2px; background: rgba(127, 227, 255, 0.55); pointer-events: none; }
+.pb-span.approx { background: repeating-linear-gradient(90deg, rgba(127, 227, 255, 0.55) 0 4px, transparent 4px 7px); }
