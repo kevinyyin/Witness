@@ -144,6 +144,8 @@ def check_incident(inc, sample):
     for e in inc["timeline"]:
         if e["type"] not in INCIDENT_EVENTS:
             problems.append(f"timeline type: {e['type']}")
+        if e["clip_ts"] is not None and not -0.01 <= e["clip_ts"] <= src[e["source"]]["duration_s"] + 1:
+            problems.append(f"timeline clip_ts outside its clip: {e}")
     impacts = [e for e in inc["timeline"] if e["type"] == "impact"]
     if not impacts or impacts[0]["t"] != 0:
         problems.append("timeline needs an impact event at t = 0")
