@@ -159,7 +159,8 @@ Written Sat Nov 21, 10:45 AM ET. Spec says "Teammate" for the pipeline owner: th
   Fields: `split`, `frozen_at`, `n_clips`, `rows[] {claim, metric, witness, baseline, unit, baseline_name, n}` (geolocation within 1 km / 5 km / median, with post text and video-only, vs. Gemini asked directly · inside-radius %, baseline `null` · fake precision / recall vs. single Hydrogen call · weapon top-1 vs. majority class · civilian-area flag vs. always residential · grouping vs. city + date), `ablation {metric, unit, full_video, frames_5, transcript, n}`, `worst_misses[3] {clip_id, thumb, expected, got, why}` (largest error among scored test items; `thumb` from Commons clips only, else `null`).
   Check: `python eval/run_eval.py --split dev && cmp eval/results.json web/public/eval/results.json && python -m pipeline.contract --results eval/results.json`; `! grep -rn rehearsal pipeline eval`.
   Cut: weapon and civilian-area rows first, then the video-only geolocation mode. Ablation and fake rows stay.
-- [ ] **3:30 AI FREEZE.** Commit, `git tag ai-freeze`, push. No prompt or rule changes after this.
+- [x] **3:30 AI FREEZE.** — 15:29: tag `ai-freeze` on `ad3f2ee`, pushed. Note: the visualizer-side session in this same folder started `eval/run_eval.py --split test` at 15:27 (an earlier attempt crashed on a non-ASCII file name and left 30 test clips cached). I did not start a second run. Uncommitted at tag time, from that session: an ASCII-file-name fix in `gemini.upload` and a live-only median of 3 link scores.
+- (original line) **3:30 AI FREEZE.** Commit, `git tag ai-freeze`, push. No prompt or rule changes after this.
 - [ ] **3:30–3:50 test run, once.** `python eval/run_eval.py --split test` (refuses if a `split: test` result already exists; sets `frozen_at`). Commit both files. → "pull now: test results".
 
 ### Tuning log (dev only, before the 3:30 freeze)
