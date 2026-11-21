@@ -7,7 +7,8 @@ import { OutputPass } from 'three/examples/jsm/postprocessing/OutputPass.js'
 import type { Incident, OsmFile } from '../types'
 import { groundGrid, sampleCity, wireCity } from './pointcloud'
 import { buildMarkers, type Markers } from './markers'
-import { flashAt, heatAt } from '../time/derive'
+import { blinkAt, flashAt, heatAt, waveRadiusM } from '../time/derive'
+import type { Mode } from '../time/store'
 
 /** Frame counter read by the FPS box. */
 export const frameStats = { frames: 0 }
@@ -56,7 +57,7 @@ export class WitnessScene {
     this.renderer.setClearColor(0x000000) // black void, no sky
     this.camera.position.set(-650, 420, 650)
     this.controls = new OrbitControls(this.camera, canvas)
-    Object.assign(this.controls, { enableDamping: true, maxPolarAngle: Math.PI * 0.49, minDistance: 30, maxDistance: 3000 })
+    Object.assign(this.controls, { enableDamping: true, maxPolarAngle: Math.PI * 0.49, minDistance: 30, maxDistance: 3000, autoRotateSpeed: 0.5 })
     this.controls.target.set(0, 20, 0)
     // Bloom only on light sources (§7.1.2): city colours stay below the threshold, markers are boosted above it.
     this.composer = new EffectComposer(this.renderer)
@@ -95,18 +96,33 @@ export class WitnessScene {
     this.points += g.length / 3
     this.markers = buildMarkers(inc)
     this.scene.add(this.markers.group)
+    this.inc = inc
   }
 
+  private inc: Incident | null = null
+
   /** Everything time-dependent is set from `t` here, every frame (D14). */
-  update(t: number) {
+  update(t: number, mode: Mode) {
+    this.controls.autoRotate = mode === 'walk' // V2 walkthrough-lite; V5 replaces with the director camera
     for (const m of this.mats) m.uniforms.uHeat.value = heatAt(t)
-    if (!this.markers) return
-    const f = flashAt(t), { flash, sphere } = this.markers
+    if (!this.markers || !this.inc) return
+    const f = flashAt(t), { flash, sphere, wave, waveMax, icons } = this.markers
     flash.visible = f > 0
     flash.scale.setScalar(60 + 220 * (1 - f))
     flash.material.opacity = f
     sphere.scale.setScalar(1 + 0.15 * f) // pulse at impact
     ;(sphere.material as THREE.MeshBasicMaterial).opacity = 0.22 + 0.5 * f
+    const r = waveRadiusM(t)
+    wave.visible = r > 0 && r < waveMax
+    wave.scale.setScalar(Math.max(r, 0.001))
+    ;(wave.material as THREE.PointsMaterial).opacity = 0.55 * (1 - r / waveMax)
+    for (const [id, icon] of Object.entries(icons)) icon.scale.setScalar(blinkAt(this.inc, id, t) ? 60 : 18)
+  }
+
+  /** Screen position (CSS px in the canvas) of a scene point. */
+  project(p: THREE.Vector3) {
+    const v = p.clone().project(this.camera)
+    return { x: ((v.x + 1) / 2) * this.canvas.clientWidth, y: ((1 - v.y) / 2) * this.canvas.clientHeight, visible: v.z > -1 && v.z < 1 }
   }
 
   showAnswerKey(on: boolean) { if (this.markers?.answerKey) this.markers.answerKey.visible = on }

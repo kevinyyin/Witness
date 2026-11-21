@@ -50,8 +50,21 @@ export type Markers = {
   group: THREE.Group
   flash: THREE.Sprite
   sphere: THREE.Mesh
+  wave: THREE.Points
+  waveMax: number // m: wave fades out once past the farthest camera
+  icons: Record<string, THREE.Sprite> // camera icons by source id (they blink)
   answerKey: THREE.Object3D | null
   unknownCameras: string[]
+}
+
+/** Upper hemisphere of points (unit radius) for the sound wave. */
+function hemisphere(n: number) {
+  const pos: number[] = []
+  for (let i = 0; i < n; i++) {
+    const y = i / n, r = Math.sqrt(1 - y * y), a = i * 2.39996 // golden angle
+    pos.push(Math.cos(a) * r, y, Math.sin(a) * r)
+  }
+  return new THREE.BufferGeometry().setAttribute('position', new THREE.Float32BufferAttribute(pos, 3))
 }
 
 export function buildMarkers(inc: Incident): Markers {
@@ -67,8 +80,15 @@ export function buildMarkers(inc: Incident): Markers {
     new THREE.SphereGeometry(o.radius_m, 24, 12),
     new THREE.MeshBasicMaterial({ color: AMBER, wireframe: true, transparent: true, opacity: 0.22, depthWrite: false }),
   )
-  group.add(dot, flash, sphere)
+  // Sound wave: translucent hemisphere of points, radius = 343 m/s × t (set per frame)
+  const wave = new THREE.Points(hemisphere(2500), new THREE.PointsMaterial({
+    color: CYAN, size: 2, sizeAttenuation: false, transparent: true, opacity: 0.5, depthWrite: false,
+  }))
+  wave.visible = false
+  group.add(dot, flash, sphere, wave)
 
+  const icons: Record<string, THREE.Sprite> = {}
+  let waveMax = 600
   const unknownCameras: string[] = []
   for (const s of inc.sources) {
     const cam = s.camera
@@ -77,6 +97,8 @@ export function buildMarkers(inc: Incident): Markers {
     const g = new THREE.Group()
     g.position.set(x, 2, z)
     const icon = sprite(glow(), CYAN, 18, 2.2)
+    icons[s.id] = icon
+    waveMax = Math.max(waveMax, Math.hypot(x, z) * 1.15)
     const label = sprite(letter(s.id), CYAN, 26, 1.6)
     label.position.y = 26
     g.add(icon, label)
@@ -106,5 +128,5 @@ export function buildMarkers(inc: Incident): Markers {
     answerKey.visible = false
     group.add(answerKey)
   }
-  return { group, flash, sphere, answerKey, unknownCameras }
+  return { group, flash, sphere, wave, waveMax, icons, answerKey, unknownCameras }
 }

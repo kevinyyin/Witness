@@ -1,12 +1,18 @@
-import { useEffect, useRef, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import type { Incident } from '../types'
 import { loadIncident, loadOsmFor, type OsmPick } from '../data/load'
 import { WitnessScene } from '../scene/Scene'
 import { useTime } from '../time/store'
+import { buildRuler } from '../time/ruler'
+import { markTimes } from '../time/derive'
+import { startLoop } from '../time/loop'
 import { SampleBanner } from './SampleBanner'
 import { Fps } from './Fps'
+import { Timeline } from './Timeline'
+import { Callouts } from './Callouts'
+import { Clock, LowerThird, NowPanel } from './HudText'
 
-/** §7.1 Reconstruction view. V1a: point-cloud city + free orbit + FPS. `?wire=1` or key W = wireframe fallback. */
+/** §7.1 Reconstruction view. Everything below reads scene time t from the store. `?wire=1` or key W = wireframe. */
 export function IncidentPage({ id }: { id: string }) {
   const [inc, setInc] = useState<Incident | null | undefined>(undefined)
   const [osm, setOsm] = useState<OsmPick | null | undefined>(undefined)
@@ -15,7 +21,8 @@ export function IncidentPage({ id }: { id: string }) {
   const [showKey, setShowKey] = useState(false)
   const canvas = useRef<HTMLCanvasElement>(null)
   const scene = useRef<WitnessScene | null>(null)
-  const { t, setT } = useTime()
+  const getScene = useCallback(() => scene.current, [])
+  const ruler = useMemo(() => (inc ? buildRuler(markTimes(inc)) : null), [inc])
 
   useEffect(() => {
     loadIncident(id).then((i) => {
@@ -24,6 +31,9 @@ export function IncidentPage({ id }: { id: string }) {
     })
   }, [id])
 
+  // Open on the establishing shot, paused (§7.1.8 #1).
+  useEffect(() => { if (ruler) useTime.setState({ t: ruler.start, playing: false, mode: 'walk', pinned: null }) }, [ruler])
+
   useEffect(() => {
     const on = (e: KeyboardEvent) => { if (e.key === 'w' || e.key === 'W') setWire((w) => !w) }
     window.addEventListener('keydown', on)
@@ -31,17 +41,17 @@ export function IncidentPage({ id }: { id: string }) {
   }, [])
 
   useEffect(() => {
-    if (!inc || !osm || !canvas.current) return
+    if (!inc || !osm || !ruler || !canvas.current) return
     const s = new WitnessScene(canvas.current)
     s.load(inc, osm.osm, wire)
     scene.current = s
-    if (import.meta.env.DEV) (window as any).__scene = s // dev-only: lets us time frames from the console
+    if (import.meta.env.DEV) Object.assign(window, { __scene: s, __time: useTime }) // dev-only: console checks
     setPoints(s.points)
-    let raf = 0
-    const tick = () => { s.update(useTime.getState().t); s.render(); raf = requestAnimationFrame(tick) }
-    tick()
-    return () => { cancelAnimationFrame(raf); s.dispose(); scene.current = null }
-  }, [inc, osm, wire])
+    const toFree = () => useTime.getState().setMode('free') // any drag or scroll → Free (§7.1.4)
+    s.controls.addEventListener('start', toFree)
+    const stop = startLoop(ruler, (t) => { s.update(t, useTime.getState().mode); s.render() })
+    return () => { stop(); s.controls.removeEventListener('start', toFree); s.dispose(); scene.current = null }
+  }, [inc, osm, wire, ruler])
 
   useEffect(() => { scene.current?.showAnswerKey(showKey) }, [showKey, points])
 
@@ -52,34 +62,37 @@ export function IncidentPage({ id }: { id: string }) {
     <div className="recon">
       <SampleBanner show={inc.is_sample} />
       <div className="stage">
-        <canvas ref={canvas} />
-        <div className="hud-title">
-          {inc.city.toUpperCase()} · INCIDENT #{inc.id} · {inc.sources.length} SOURCES
-          <div className="muted">{inc.title}</div>
-          {osm === null && <div className="warn">No OSM extract found (web/public/osm/index.json).</div>}
-          {osm && !osm.inside && <div className="warn">Impact is {Math.round(osm.distance_m)} m from the nearest OSM extract ({osm.entry.file}); buildings may be missing.</div>}
+        <div className="scene">
+          <canvas ref={canvas} />
+          <Callouts inc={inc} osm={osm?.osm ?? null} getScene={getScene} />
+          <div className="hud-title">
+            {inc.city.toUpperCase()} · INCIDENT #{inc.id} · {inc.sources.length} SOURCES
+            <div className="muted">{inc.title}</div>
+            {osm === null && <div className="warn">No OSM extract found (web/public/osm/index.json).</div>}
+            {osm && !osm.inside && <div className="warn">Impact is {Math.round(osm.distance_m)} m from the nearest OSM extract ({osm.entry.file}); buildings may be missing.</div>}
+          </div>
+          <Clock inc={inc} />
+          <LowerThird inc={inc} />
+          <div className="hud-tools">
+            {inc.answer_key && (
+              <button onClick={() => setShowKey((v) => !v)}>Investigators' location: {showKey ? 'shown' : 'reveal'}</button>
+            )}
+            {inc.sources.some((s) => !s.camera) && (
+              <div className="muted">Position unknown: {inc.sources.filter((s) => !s.camera).map((s) => s.id).join(', ')}</div>
+            )}
+          </div>
+          <Fps points={points} />
+          <div className="honesty">
+            Geometry: OpenStreetMap footprints, heights estimated. Not a scan.{wire && ' (wireframe)'}<br />
+            © OpenStreetMap contributors (ODbL)
+          </div>
         </div>
-        <Fps points={points} />
-        <div className="hud-tools">
-          {/* temp until the V2 timeline */}
-          <label>t = {t >= 0 ? '+' : ''}{t.toFixed(1)} s{' '}
-            <input type="range" min={-20} max={30} step={0.1} value={t} onChange={(e) => setT(Number(e.target.value))} />
-          </label>
-          {inc.answer_key && (
-            <button onClick={() => setShowKey((v) => !v)}>
-              Investigators' location: {showKey ? 'shown' : 'reveal'}
-            </button>
-          )}
-          {inc.sources.some((s) => !s.camera) && (
-            <div className="muted">Position unknown: {inc.sources.filter((s) => !s.camera).map((s) => s.id).join(', ')}</div>
-          )}
-        </div>
-        <div className="honesty">
-          Geometry: OpenStreetMap footprints, heights estimated. Not a scan.{wire && ' (wireframe)'}<br />
-          © OpenStreetMap contributors (ODbL)
-        </div>
+        {ruler && <Timeline inc={inc} ruler={ruler} />}
       </div>
-      <aside className="sidebar muted">Sidebar (V3)</aside>
+      <aside className="sidebar">
+        <div className="muted">Source video (V3)</div>
+        <NowPanel inc={inc} />
+      </aside>
     </div>
   )
 }

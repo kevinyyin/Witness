@@ -32,8 +32,52 @@ button:hover { border-color: var(--cyan); }
 
 /* §7.1.1 layout: ~70% scene, ~30% sidebar */
 .recon { display: grid; grid-template-columns: 7fr 3fr; height: 100vh; }
-.stage { position: relative; overflow: hidden; }
-.stage canvas { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
+.stage { display: flex; flex-direction: column; min-width: 0; }
+.scene { position: relative; overflow: hidden; flex: 1; }
+.scene canvas { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
+button.on { border-color: var(--cyan); color: var(--cyan); }
+
+/* callouts */
+.leaders { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; }
+.leaders path { stroke-width: 1; fill: none; }
+.leaders path.flag { stroke: var(--red); } .leaders path.note { stroke: var(--yellow); } .leaders path.boom { stroke: var(--cyan); }
+.callout { position: absolute; top: 0; left: 0; max-width: 280px; background: rgba(0,0,0,0.78); border-left: 3px solid; padding: 5px 8px; pointer-events: none; }
+.callout.flag { border-color: var(--red); } .callout.note { border-color: var(--yellow); } .callout.boom { border-color: var(--cyan); font-size: 11px; }
+.callout .basis { color: var(--dim); font-size: 10px; margin-top: 2px; }
+.clock-stack .callout { position: static; margin-top: 4px; }
+.pin { position: absolute; top: 0; left: 0; font-size: 12px; cursor: help; }
+.pin.flag { color: var(--red); } .pin.note { color: var(--yellow); } .pin.boom { display: none !important; }
+.clock { position: absolute; top: 34px; right: 14px; font-size: 18px; }
+.clock-stack { position: absolute; top: 62px; right: 14px; width: 280px; pointer-events: none; }
+.lower-third { position: absolute; bottom: 30px; left: 50%; transform: translateX(-50%); background: rgba(0,0,0,0.75); border-left: 3px solid var(--amber); padding: 4px 12px; white-space: nowrap; }
+
+/* timeline */
+.timeline { border-top: 1px solid var(--line); background: var(--panel); padding: 4px 8px 6px; user-select: none; }
+.tl-controls { display: flex; gap: 6px; align-items: center; margin-bottom: 4px; flex-wrap: wrap; }
+.tl-controls .seg { display: inline-flex; }
+.tl-controls .readout { margin-left: 8px; color: var(--cyan); }
+.tl-controls .checked { margin-left: auto; font-size: 11px; }
+.tl-body { display: flex; }
+.tl-labels { width: 48px; font-size: 10px; color: var(--dim); padding-top: 12px; }
+.tl-labels div { height: 16px; line-height: 16px; }
+.tl-track { position: relative; flex: 1; cursor: ew-resize; }
+.tick { position: absolute; top: -2px; font-size: 9px; color: var(--dim); transform: translateX(-50%); }
+.gap { position: absolute; top: 10px; bottom: 0; background: repeating-linear-gradient(135deg, #1a2029 0 4px, transparent 4px 8px); font-size: 10px; color: var(--dim); text-align: center; overflow: hidden; white-space: nowrap; }
+.mark { position: absolute; transform: translateX(-50%); font-size: 11px; cursor: pointer; white-space: nowrap; }
+.mark.flag { top: 10px; color: var(--red); } .mark.note { top: 10px; color: var(--yellow); }
+.mark.event { top: 24px; color: var(--text); font-size: 9px; }
+.lane-row { position: absolute; left: 0; right: 0; height: 12px; }
+.lane { position: absolute; height: 10px; top: 1px; background: #2e5a6b; font-size: 8px; line-height: 10px; color: var(--text); overflow: hidden; }
+.lane.guessed { border-right: 1px dashed var(--dim); }
+.lane.approx { background: repeating-linear-gradient(135deg, #2e5a6b 0 3px, transparent 3px 6px); }
+.lane-note { font-size: 9px; }
+.boom-tag { position: absolute; top: -1px; font-size: 8px; color: var(--cyan); white-space: nowrap; }
+.playhead { position: absolute; top: 0; bottom: 0; width: 2px; background: var(--cyan); transform: translateX(-1px); pointer-events: none; }
+.tl-track { min-height: calc(44px + 16px * 5); }
+
+/* sidebar */
+.sidebar h4 { margin: 12px 0 6px; font-size: 12px; letter-spacing: 0.08em; }
+.now-flag { color: var(--red); margin: 2px 0; } .now-note { color: var(--yellow); margin: 2px 0; }
 .hud-title { position: absolute; top: 10px; left: 14px; font-size: 14px; letter-spacing: 0.06em; pointer-events: none; }
 .fps { position: absolute; bottom: 8px; right: 14px; font-size: 20px; font-weight: 700; background: rgba(0,0,0,0.6); padding: 2px 8px; pointer-events: none; }
 .hud-tools { position: absolute; bottom: 44px; left: 14px; display: flex; flex-direction: column; gap: 6px; align-items: flex-start; }
