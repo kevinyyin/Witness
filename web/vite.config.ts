@@ -2,6 +2,7 @@ import { defineConfig, type Plugin } from 'vite'
 import react from '@vitejs/plugin-react'
 import fs from 'node:fs'
 import path from 'node:path'
+import { pipeline } from 'node:stream'
 import { fileURLToPath } from 'node:url'
 
 const here = path.dirname(fileURLToPath(import.meta.url))
@@ -21,11 +22,12 @@ function media(): Plugin {
       server.middlewares.use('/media', (req, res, next) => {
         const rel = decodeURIComponent((req.url ?? '/').split('?')[0])
         const file = path.resolve(DATA, '.' + rel)
-        if (!file.startsWith(DATA + path.sep)) return next()
+        // Only media types: the data folder also holds answer keys and rights-pending downloads.
+        const type = TYPES[path.extname(file).toLowerCase()]
+        if (!type || !file.startsWith(DATA + path.sep)) return next()
         let stat: fs.Stats
         try { stat = fs.statSync(file) } catch { return next() }
         if (!stat.isFile()) return next()
-        const type = TYPES[path.extname(file).toLowerCase()] ?? 'application/octet-stream'
         const m = /bytes=(\d*)-(\d*)/.exec(req.headers.range ?? '')
         if (m) {
           const start = m[1] ? Number(m[1]) : 0
@@ -34,10 +36,11 @@ function media(): Plugin {
             'Content-Range': `bytes ${start}-${end}/${stat.size}`, 'Accept-Ranges': 'bytes',
             'Content-Length': end - start + 1, 'Content-Type': type,
           })
-          fs.createReadStream(file, { start, end }).pipe(res)
+          // pipeline closes the file when the browser aborts (every seek) and swallows read errors.
+          pipeline(fs.createReadStream(file, { start, end }), res, () => {})
         } else {
           res.writeHead(200, { 'Content-Length': stat.size, 'Content-Type': type, 'Accept-Ranges': 'bytes' })
-          fs.createReadStream(file).pipe(res)
+          pipeline(fs.createReadStream(file), res, () => {})
         }
       })
     },

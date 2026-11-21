@@ -197,13 +197,6 @@
       "confidence": 0.9
     },
     {
-      "t": 2.6,
-      "type": "boom_heard",
-      "source": "E",
-      "clip_ts": 0.6,
-      "confidence": 0.6
-    },
-    {
       "t": 3.1,
       "type": "boom_heard",
       "source": "A",
@@ -214,7 +207,7 @@
       "t": 60,
       "type": "fire",
       "source": "B",
-      "clip_ts": 70.5,
+      "clip_ts": 72,
       "confidence": 0.7
     },
     {
@@ -355,7 +348,7 @@
         "fov_deg": 65,
         "radius_m": 350
       },
-      "boom_distance_m": 892,
+      "boom_distance_m": null,
       "offset_s": 38,
       "aligned": true,
       "authenticity": "unsure",
