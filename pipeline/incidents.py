@@ -51,6 +51,9 @@ def heroes():
         if not r["local_file"].strip() or not (DATA / r["local_file"]).is_file():
             continue  # listed but not downloaded (or not in this copy of the data folder): nothing to analyze
         h["clips"].append({"path": DATA / r["local_file"], "url": r["clip_url"],
+                           # screened out by a human (D12): read for location evidence only, never listed or played
+                           # (user decision, Nov 21 12:35)
+                           "hidden": r.get("screen", "").strip().lower() == "skip",
                            # Telegram post times are UTC
                            "posted_at": posted[r["clip_url"]] + "+00:00" if r["clip_url"] in posted else None})
     return list(out.values())
@@ -108,9 +111,13 @@ def assemble(hero):
 
     with ThreadPoolExecutor(4) as pool:
         recs = list(pool.map(run, hero["clips"]))
-    S, seen_sha = [], set()
+    S, seen_sha, hidden_locs = [], set(), []
     for clip, rec in zip(hero["clips"], recs):
         if rec is None or rec["sha256"] in seen_sha:  # failed, or the very same file posted twice
+            continue
+        if clip["hidden"]:
+            if rec["fake"]["verdict"] != "fake" and rec["location"]:
+                hidden_locs.append(rec["location"])
             continue
         seen_sha.add(rec["sha256"])
         raw = cached(rec["sha256"])["raw"]
@@ -135,8 +142,9 @@ def assemble(hero):
                 s["boom"] = round(SOUND_M_S * ph["delta_s"])
 
     # 4. impact: evidence rings -> the best-located clip (landmarks) -> claimed place
-    located = [s["rec"]["location"] for s in live if s["rec"]["location"]]
+    located = [s["rec"]["location"] for s in live if s["rec"]["location"]] + hidden_locs
     loc = min(located, key=lambda l: l["radius_m"]) if located else geo.locate({"landmarks": []}, hero["city"], "")
+    from_hidden = any(loc is h for h in hidden_locs)
     rings = [((s["camera"]["lat"], s["camera"]["lon"]), s["boom"]) for s in live if s["camera"] and s["boom"]]
     if len(rings) >= 2:
         lat, lon, rms = ring_fit(rings, (loc["lat"], loc["lon"]))
@@ -285,6 +293,9 @@ def assemble(hero):
             other = by_clip_id.get(dup.split()[3].rstrip(","))
             notes.append(_item("recycled_or_edited", f"Clip {s['id']} is the same video as {'clip ' + other['id'] if other else 'an earlier upload'}",
                                0.9, t0, anchor, s["id"], 0.0, ["pHash match"]))
+    if from_hidden and impact["method"] == "landmarks":
+        notes.append(_item("single_source", "The location rests on one clip that was screened out and is not shown", 0.9, 0.0,
+                           {"kind": "impact"}, None, None, [f"landmark: {', '.join(loc['evidence'][:2])}", "clip screened out by a human reviewer"]))
     if len([s for s in live if s["phys"]["delta_s"] is not None]) == 1 and with_flash:
         notes.append(_item("single_source", f"The impact is seen in one clip only ({star['id']})", 0.9, 0.0, {"kind": "impact"},
                            star["id"], star["phys"]["flash_ts"], [f"{star['id']}@{mmss(star['phys']['flash_ts'])} flash"]))

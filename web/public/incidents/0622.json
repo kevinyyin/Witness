@@ -55,19 +55,17 @@
  },
  "weapon": {
   "options": {
-   "shahed_drone": 0.07,
+   "shahed_drone": 0.06,
    "cruise_missile": 0.02,
-   "ballistic_missile": 0.25,
-   "glide_bomb": 0.09,
+   "ballistic_missile": 0.4,
+   "glide_bomb": 0.03,
    "rocket_cluster": 0.05,
-   "tube_artillery": 0.14,
-   "fpv_drone": 0.18,
-   "unknown": 0.19
+   "tube_artillery": 0.04,
+   "fpv_drone": 0.17,
+   "unknown": 0.24
   },
   "evidence": [
-   "E@0:03 Shockwave knocks dashcam inside vehicle",
-   "L@0:03 Loud explosion heard while facing sky",
-   "M@0:03 Loud explosion shakes and detaches dashcam"
+   "E@0:03 Shockwave knocks dashcam inside vehicle"
   ]
  },
  "flags": [
@@ -228,7 +226,7 @@
   },
   {
    "type": "recycled_or_edited",
-   "label": "Clip E is the same video as clip M",
+   "label": "Clip E is the same video as an earlier upload",
    "confidence": 0.9,
    "t": 0.0,
    "t_end": null,
@@ -275,44 +273,96 @@
    ]
   },
   {
+   "type": "single_source",
+   "label": "The location rests on one clip that was screened out and is not shown",
+   "confidence": 0.9,
+   "t": 0.0,
+   "t_end": null,
+   "anchor": {
+    "kind": "impact"
+   },
+   "source": null,
+   "clip_ts": null,
+   "basis": [
+    "landmark: АВТОВОКЗАЛ 0:21",
+    "clip screened out by a human reviewer"
+   ]
+  },
+  {
+   "type": "single_source",
+   "label": "The impact is seen in one clip only (E)",
+   "confidence": 0.9,
+   "t": 0.0,
+   "t_end": null,
+   "anchor": {
+    "kind": "impact"
+   },
+   "source": "E",
+   "clip_ts": 2.82,
+   "basis": [
+    "E@0:02 flash"
+   ]
+  },
+  {
    "type": "time_conflict",
-   "label": "Clip G places fireball hours after blast in E, L, M",
+   "label": "Clip G shows an explosion hours after impact in clip E",
    "confidence": 0.95,
    "t": 60774.0,
    "t_end": null,
    "anchor": {
     "kind": "cameras",
     "ref": [
-     "G",
      "E",
-     "L",
-     "M"
+     "G"
     ]
    },
    "source": "G",
    "clip_ts": 8.0,
    "basis": [
-    "G@0:08 Bright orange fireball erupts near street corner",
-    "E@0:03 Shockwave knocks dashcam inside vehicle",
-    "L@0:04 Loud explosion heard while facing sky",
-    "M@0:03 Loud explosion shakes and detaches dashcam",
+    "E@0:03 impact flash",
+    "G@0:08 fireball at t=60774.5s",
     "Carbon cross-check"
    ]
   },
   {
-   "type": "single_source",
-   "label": "Only clip L captures diving object and second and third blasts",
+   "type": "time_conflict",
+   "label": "Duplicate clips A and J are placed eighteen minutes apart",
    "confidence": 0.9,
-   "t": 7.76,
+   "t": 3441.0,
    "t_end": null,
    "anchor": {
-    "kind": "impact"
+    "kind": "cameras",
+    "ref": [
+     "A",
+     "J"
+    ]
    },
-   "source": "L",
-   "clip_ts": 11.5,
+   "source": "J",
+   "clip_ts": 0.0,
    "basis": [
-    "L@0:11 Second loud blast heard after object dives",
-    "L@0:17 Third loud explosion heard behind smoke",
+    "A@0:00 offset 2354s",
+    "J@0:00 pHash match offset 3441s",
+    "Carbon cross-check"
+   ]
+  },
+  {
+   "type": "time_conflict",
+   "label": "Duplicate clips D and K are placed three minutes apart",
+   "confidence": 0.9,
+   "t": 6349.0,
+   "t_end": null,
+   "anchor": {
+    "kind": "cameras",
+    "ref": [
+     "D",
+     "K"
+    ]
+   },
+   "source": "K",
+   "clip_ts": 7.0,
+   "basis": [
+    "D@0:00 offset 6152s",
+    "K@0:07 pHash match offset 6342s",
     "Carbon cross-check"
    ]
   }
@@ -333,46 +383,11 @@
    "confidence": 0.9
   },
   {
-   "t": 0.0,
-   "type": "boom_heard",
-   "source": "L",
-   "clip_ts": 3.74,
-   "confidence": 0.9
-  },
-  {
-   "t": 0.0,
-   "type": "boom_heard",
-   "source": "M",
-   "clip_ts": 2.82,
-   "confidence": 0.9
-  },
-  {
    "t": 0.18,
    "type": "fire",
    "source": "E",
    "clip_ts": 3.0,
    "confidence": 0.9
-  },
-  {
-   "t": 0.18,
-   "type": "fire",
-   "source": "M",
-   "clip_ts": 3.0,
-   "confidence": 0.9
-  },
-  {
-   "t": 2.26,
-   "type": "fire",
-   "source": "L",
-   "clip_ts": 6.0,
-   "confidence": 0.95
-  },
-  {
-   "t": 18.26,
-   "type": "siren",
-   "source": "L",
-   "clip_ts": 22.0,
-   "confidence": 0.8
   },
   {
    "t": 30.0,
@@ -494,34 +509,6 @@
    "confidence": 0.95
   },
   {
-   "t": 25082.0,
-   "type": "rescue",
-   "source": "N",
-   "clip_ts": 13.0,
-   "confidence": 0.9
-  },
-  {
-   "t": 25085.0,
-   "type": "rescue",
-   "source": "N",
-   "clip_ts": 16.0,
-   "confidence": 0.95
-  },
-  {
-   "t": 25107.0,
-   "type": "rescue",
-   "source": "N",
-   "clip_ts": 38.0,
-   "confidence": 0.9
-  },
-  {
-   "t": 25113.0,
-   "type": "rescue",
-   "source": "N",
-   "clip_ts": 44.0,
-   "confidence": 0.95
-  },
-  {
    "t": 60774.5,
    "type": "fire",
    "source": "G",
@@ -548,7 +535,7 @@
    "authenticity": "real",
    "reject_reason": null,
    "graphic_level": 2,
-   "license": "embed only",
+   "license": "source: t.me/itsdonetsk",
    "findings": []
   },
   {
@@ -569,7 +556,7 @@
    "authenticity": "real",
    "reject_reason": null,
    "graphic_level": 1,
-   "license": "embed only",
+   "license": "source: t.me/itsdonetsk",
    "findings": [
     {
      "clip_ts": 4.0,
@@ -596,7 +583,7 @@
    "authenticity": "real",
    "reject_reason": null,
    "graphic_level": 1,
-   "license": "embed only",
+   "license": "source: t.me/itsdonetsk",
    "findings": [
     {
      "clip_ts": 0.0,
@@ -628,7 +615,7 @@
    "authenticity": "real",
    "reject_reason": null,
    "graphic_level": 1,
-   "license": "embed only",
+   "license": "source: t.me/itsdonetsk",
    "findings": []
   },
   {
@@ -649,7 +636,7 @@
    "authenticity": "real",
    "reject_reason": null,
    "graphic_level": 1,
-   "license": "embed only",
+   "license": "source: t.me/itsdonetsk",
    "findings": [
     {
      "clip_ts": 2.9,
@@ -686,7 +673,7 @@
    "authenticity": "real",
    "reject_reason": null,
    "graphic_level": 2,
-   "license": "embed only",
+   "license": "source: t.me/itsdonetsk",
    "findings": [
     {
      "clip_ts": 0.5,
@@ -738,7 +725,7 @@
    "authenticity": "real",
    "reject_reason": null,
    "graphic_level": 1,
-   "license": "embed only",
+   "license": "source: t.me/itsdonetsk",
    "findings": [
     {
      "clip_ts": 8.0,
@@ -770,7 +757,7 @@
    "authenticity": "real",
    "reject_reason": null,
    "graphic_level": 1,
-   "license": "embed only",
+   "license": "source: t.me/kharkivlife",
    "findings": [
     {
      "clip_ts": 0.0,
@@ -802,7 +789,7 @@
    "authenticity": "real",
    "reject_reason": null,
    "graphic_level": 1,
-   "license": "embed only",
+   "license": "source: t.me/XU_kraine",
    "findings": [
     {
      "clip_ts": 0.0,
@@ -844,7 +831,7 @@
    "authenticity": "real",
    "reject_reason": null,
    "graphic_level": 2,
-   "license": "embed only",
+   "license": "source: t.me/XU_kraine",
    "findings": []
   },
   {
@@ -865,7 +852,7 @@
    "authenticity": "real",
    "reject_reason": null,
    "graphic_level": 1,
-   "license": "embed only",
+   "license": "source: t.me/XU_kraine",
    "findings": [
     {
      "clip_ts": 7.0,
@@ -873,157 +860,14 @@
      "confidence": 0.6
     }
    ]
-  },
-  {
-   "id": "L",
-   "clip_id": "c_0005",
-   "platform": "telegram",
-   "url": "https://t.me/XU_kraine/57699",
-   "embed_url": "https://t.me/XU_kraine/57699?embed=1",
-   "player": "file",
-   "media_url": "/api/media/telegram/XU_kraine/XU_kraine_57699.mp4",
-   "uploader": "XU_kraine",
-   "posted_at": "2024-06-22T17:48:01+03:00",
-   "duration_s": 26.27,
-   "camera": null,
-   "boom_distance_m": null,
-   "offset_s": -3.74,
-   "aligned": false,
-   "authenticity": "real",
-   "reject_reason": null,
-   "graphic_level": 1,
-   "license": "embed only",
-   "findings": [
-    {
-     "clip_ts": 3.5,
-     "label": "Loud explosion heard while facing sky",
-     "confidence": 0.95
-    },
-    {
-     "clip_ts": 6.0,
-     "label": "Dense grey-brown smoke plume rising above trees",
-     "confidence": 0.95
-    },
-    {
-     "clip_ts": 11.5,
-     "label": "Second loud blast heard after object dives",
-     "confidence": 0.95
-    },
-    {
-     "clip_ts": 17.5,
-     "label": "Third loud explosion heard behind smoke",
-     "confidence": 0.9
-    },
-    {
-     "clip_ts": 22.0,
-     "label": "Distant siren wailing in the background",
-     "confidence": 0.8
-    }
-   ]
-  },
-  {
-   "id": "M",
-   "clip_id": "c_0001",
-   "platform": "telegram",
-   "url": "https://t.me/XU_kraine/57707",
-   "embed_url": "https://t.me/XU_kraine/57707?embed=1",
-   "player": "file",
-   "media_url": "/api/media/telegram/XU_kraine/XU_kraine_57707.mp4",
-   "uploader": "XU_kraine",
-   "posted_at": "2024-06-22T18:50:54+03:00",
-   "duration_s": 32.93,
-   "camera": null,
-   "boom_distance_m": null,
-   "offset_s": -2.82,
-   "aligned": true,
-   "authenticity": "real",
-   "reject_reason": null,
-   "graphic_level": 1,
-   "license": "embed only",
-   "findings": [
-    {
-     "clip_ts": 2.9,
-     "label": "Bright orange flash and flames on left",
-     "confidence": 0.95
-    },
-    {
-     "clip_ts": 3.0,
-     "label": "Flames visible outside vehicle window",
-     "confidence": 0.9
-    },
-    {
-     "clip_ts": 3.0,
-     "label": "Loud explosion shakes and detaches dashcam",
-     "confidence": 0.98
-    },
-    {
-     "clip_ts": 15.0,
-     "label": "Distant shouting and crying heard outside",
-     "confidence": 0.8
-    },
-    {
-     "clip_ts": 26.5,
-     "label": "Screaming and distressed voices in background",
-     "confidence": 0.85
-    }
-   ]
-  },
-  {
-   "id": "N",
-   "clip_id": "c_0007",
-   "platform": "telegram",
-   "url": "https://t.me/XU_kraine/57716",
-   "embed_url": "https://t.me/XU_kraine/57716?embed=1",
-   "player": "file",
-   "media_url": "/api/media/telegram/XU_kraine/XU_kraine_57716.mp4",
-   "uploader": "XU_kraine",
-   "posted_at": "2024-06-22T22:44:55+03:00",
-   "duration_s": 78.93,
-   "camera": {
-    "lat": 49.97908,
-    "lon": 36.24601,
-    "heading_deg": 0,
-    "fov_deg": 60,
-    "radius_m": 300,
-    "confidence": 0.7
-   },
-   "boom_distance_m": null,
-   "offset_s": 25069.0,
-   "aligned": false,
-   "authenticity": "real",
-   "reject_reason": null,
-   "graphic_level": 1,
-   "license": "embed only",
-   "findings": [
-    {
-     "clip_ts": 13.0,
-     "label": "Excavator and responders near damaged apartment building",
-     "confidence": 0.9
-    },
-    {
-     "clip_ts": 16.0,
-     "label": "Fire trucks, ambulances, and emergency tent on street",
-     "confidence": 0.95
-    },
-    {
-     "clip_ts": 38.0,
-     "label": "Personnel in protective gear inspect building rubble",
-     "confidence": 0.9
-    },
-    {
-     "clip_ts": 44.0,
-     "label": "Fire engine and emergency crews at intersection",
-     "confidence": 0.95
-    }
-   ]
   }
  ],
- "summary": "A daytime strike probably hit a five-story apartment building in Kharkiv at an estimated afternoon hour. Eleven independent clips show explosions, smoke, and rescue work consistent with heavy blast damage. The main caveat is uncertain timing, as one security camera clip of a fireball is placed the next morning.",
+ "summary": "A daytime strike probably hit a five-story apartment block in a dense area of Kharkiv, with blast effects consistent with a ballistic missile or drone. Nine independent clips agree on the explosion and rescue work around the estimated afternoon strike time. However, the exact location relies on a single video that was screened out.",
  "verification": {
   "agree_place": true,
   "agree_time": false,
   "corroboration": "high",
-  "n_sources": 14,
+  "n_sources": 11,
   "n_rejected": 0
  },
  "answer_key": {

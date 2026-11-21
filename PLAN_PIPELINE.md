@@ -30,6 +30,7 @@ Written Sat Nov 21, 10:45 AM ET. Spec says "Teammate" for the pipeline owner: th
 - **Teammate (new, 11:26):** switch to Revision 2 of the spec: regenerate `web/public/sample_incident.json` and `sample_index.json` from §9.2/§9.3, show `authenticity: fake` as ✗, read the flat `index.json`, parse the §9.3 stream (`event:` lines, `summary`, 4 statuses, `verdict` stage); export the Sheet tabs to `data_meta/`; add `docs/*` + `!docs/VERIFIED.md` to `.gitignore` (§14).
 - **Teammate (original list):** repo pushed with `.gitignore`, `data_meta/{screen,heroes,break_it,rehearsal}.csv`, `web/public/sample_incident.json` with real `osm_file` + real clips, Vite proxy `/api` → `127.0.0.1:8000`, `web/` runnable by 11:50.
 - **Organizer answer received 12:07 (via the user): Q3 = yes**, downloaded Telegram clips may be used; hero clips are `player: file` under `/api/media/`. Q4 (temporary YouTube download) still open.
+- **User decision 12:35:** a hero clip marked `skip` in `heroes.csv` is read for location evidence only; it is never listed as a source or played. The incident gets a `single_source` note when its location rests on such a clip.
 - **Organizers (§13):** answers 1–4. Q3 decides Telegram/X analysis. Q4 decides the YouTube mode (§C.6).
 
 ## C. Design (mine; fixed parts of §9 are implemented as written)
