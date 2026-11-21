@@ -37,5 +37,7 @@ describe('director camera (§7.1.4)', () => {
     const blind = { ...inc, sources: inc.sources.map((s) => ({ ...s, camera: null })) }
     const d = makeDirector(blind)
     for (const t of [-15, -6, 0, 3, 60]) expect(finite(d(t))).toBe(true)
+    expect(d(-6).pos.distanceTo(d(-9).pos)).toBeGreaterThan(50) // still moving during the (empty) witness sweep
+    for (const b of [-10, -2]) expect(d(b - 0.001).pos.distanceTo(d(b + 0.001).pos)).toBeLessThan(2)
   })
 })

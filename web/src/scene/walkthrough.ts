@@ -47,7 +47,7 @@ export function makeDirector(inc: Incident): (t: number) => Pose {
     return { pos: V(w.x, 0, w.z).addScaledVector(out, 220).setY(90), look: V(w.x, 10, w.z).lerp(focus, 0.35) }
   }
   const sweep = (t: number): Pose => {
-    if (!ws.length) return establishing(-10)
+    if (!ws.length) return mix(establishing(-10), impact(), smooth((t + 10) / 8)) // no positioned witness: glide in instead of holding still
     const u = Math.min(ws.length - 1e-6, Math.max(0, ((t + 10) / 8) * ws.length))
     const i = Math.floor(u), f = u - i
     return i + 1 < ws.length ? mix(witnessPose(i), witnessPose(i + 1), smooth((f - 0.6) / 0.4)) : witnessPose(i)
