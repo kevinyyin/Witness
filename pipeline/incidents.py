@@ -129,7 +129,7 @@ def assemble(hero):
     # 2. cameras from each clip's own location
     for s in live:
         loc = s["rec"]["location"]
-        if loc and loc["level"] in ("point", "district") and loc["radius_m"] <= 1000:
+        if loc and loc["level"] in ("point", "district") and loc["radius_m"] <= 1500:
             s["camera"] = {"lat": loc["lat"], "lon": loc["lon"], "heading_deg": 0, "fov_deg": 60, "radius_m": loc["radius_m"],
                            "confidence": round(min(0.9, max(0.1, 1 - loc["radius_m"] / 1000)), 2)}
 
@@ -143,7 +143,7 @@ def assemble(hero):
 
     # 4. impact: evidence rings -> the best-located clip (landmarks) -> claimed place
     located = [s["rec"]["location"] for s in live if s["rec"]["location"]] + hidden_locs
-    loc = min(located, key=lambda l: l["radius_m"]) if located else geo.locate({"landmarks": []}, hero["city"], "")
+    loc = min(located, key=lambda l: l["radius_m"]) if located else geo.locate({"landmarks": [], "city_guess": hero["city"]}, hero["city"], "")
     from_hidden = any(loc is h for h in hidden_locs)
     rings = [((s["camera"]["lat"], s["camera"]["lon"]), s["boom"]) for s in live if s["camera"] and s["boom"]]
     if len(rings) >= 2:
@@ -151,7 +151,7 @@ def assemble(hero):
         cam_r = sum(s["camera"]["radius_m"] for s in live if s["camera"] and s["boom"]) / len(rings)
         impact = {"lat": round(lat, 5), "lon": round(lon, 5), "radius_m": int(max(40, rms + cam_r)), "method": "evidence_rings",
                   "confidence": round(max(0.3, 0.85 - rms / 1000), 2)}
-    elif loc["level"] in ("point", "district"):
+    elif loc["method"] == "landmarks+osm":  # only a landmark-confirmed location is precise enough to rebuild a scene around
         impact = {"lat": loc["lat"], "lon": loc["lon"], "radius_m": loc["radius_m"], "method": "landmarks",
                   "confidence": 0.6 if loc["radius_m"] <= 300 else 0.45 if loc["radius_m"] <= 1000 else 0.3}
     else:
@@ -161,7 +161,7 @@ def assemble(hero):
         if s["camera"]:
             s["camera"]["heading_deg"] = geo.bearing_deg((s["camera"]["lat"], s["camera"]["lon"]), ip)
 
-    # 5. remaining offsets: boom-only clips by sound travel, the rest by post time
+    # 5. remaining offsets: boom-only clips by sound travel
     posts = [datetime.fromisoformat(s["clip"]["posted_at"]) for s in live if s["clip"]["posted_at"]]
     first_post = min(posts) if posts else None
     for s in live:
@@ -173,8 +173,8 @@ def assemble(hero):
                 s["offset"], s["aligned"] = round(d / SOUND_M_S - s["phys"]["blast_times"][0], 2), True
             else:
                 s["offset"] = round(-s["phys"]["blast_times"][0], 2)  # approx: camera distance unknown
-        elif s["clip"]["posted_at"] and first_post:
-            s["offset"] = round(max(30.0, (datetime.fromisoformat(s["clip"]["posted_at"]) - first_post).total_seconds()), 2)
+        # A clip with no flash and no boom stays unplaced (offset_s: null). Its post time only says when it was
+        # uploaded, and spreading ten aftermath clips over 17 hours of post times made the timeline unreadable.
 
     # 6. the impact event comes from a seekable clip (§9.2)
     for s in S:
@@ -296,6 +296,9 @@ def assemble(hero):
     if from_hidden and impact["method"] == "landmarks":
         notes.append(_item("single_source", "The location rests on one clip that was screened out and is not shown", 0.9, 0.0,
                            {"kind": "impact"}, None, None, [f"landmark: {', '.join(loc['evidence'][:2])}", "clip screened out by a human reviewer"]))
+    if not with_flash:
+        notes.append(_item("single_source", f"No clip shows the impact itself: t = 0 is the start of clip {star['id']}, not a measured moment",
+                           0.9, 0.0, {"kind": "impact"}, star["id"], 0.0, ["no flash event in any clip"]))
     if len([s for s in live if s["phys"]["delta_s"] is not None]) == 1 and with_flash:
         notes.append(_item("single_source", f"The impact is seen in one clip only ({star['id']})", 0.9, 0.0, {"kind": "impact"},
                            star["id"], star["phys"]["flash_ts"], [f"{star['id']}@{mmss(star['phys']['flash_ts'])} flash"]))
@@ -395,7 +398,7 @@ def write_index():
 def write(incident, osm_path):
     """Key check, then the file. Refuses a raised military_object flag: the repo is public (§13)."""
     # a reconstruction needs a place: a city-level estimate gives the 3D scene nothing true to draw
-    assert incident["impact"]["method"] != "claimed_place", "city-level location only: no reconstruction written"
+    assert incident["impact"]["method"] != "claimed_place", "no landmark-confirmed location: no reconstruction written"
     contract.check_incident(incident, json.loads((PUBLIC / "sample_incident.json").read_text(encoding="utf-8")))
     (PUBLIC / "incidents").mkdir(exist_ok=True)
     (PUBLIC / "osm").mkdir(exist_ok=True)
@@ -421,7 +424,7 @@ if __name__ == "__main__":
             if want in ("all", h["id"]):
                 try:
                     inc, osm_file = assemble(h)
-                    assert inc["impact"]["method"] != "claimed_place", "city-level location only: no reconstruction written"
+                    assert inc["impact"]["method"] != "claimed_place", "no landmark-confirmed location: no reconstruction written"
                     if "--carbon" in sys.argv:
                         add_carbon(inc)
                     print(write(inc, osm_file), f"· impact {inc['impact']['method']} ±{inc['impact']['radius_m']} m ·",

@@ -8,7 +8,7 @@ from . import CACHE
 from .physics import SOUND_M_S
 
 NOT_REAL_FAIL = 0.6
-NOT_REAL_UNSURE = 0.35
+NOT_REAL_UNSURE = 0.45  # dev: fakes score 0.96+, real clips 0.10 (file) to 0.37 (a news report scored from text)
 REPEAT_FAIL = 0.95
 RECYCLED_GAP_S = 48 * 3600
 
@@ -106,7 +106,7 @@ if __name__ == "__main__":
     assert _run(0.95, delta=0.1, apparent=40) == ("real", "real_strike")  # a close blast is allowed to be instant
     assert _run(0.95, repeat=0.99, blasts=(1.0, 2.0)) == ("fake", "video_game")
     assert _run(0.2) == ("fake", "video_game")
-    assert _run(0.55) == ("unsure", None)
+    assert _run(0.5) == ("unsure", None)
     assert _run(0.95, match={"clip_id": "c_0001"}, older=30 * 86400) == ("fake", "recycled")
     assert _run(0.95, match={"clip_id": "c_0001"}, older=3600) == ("real", "real_strike")
     assert _run(0.95, delta=0.0, apparent=800, has_file=False) == ("fake", "video_game")

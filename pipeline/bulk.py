@@ -32,24 +32,40 @@ def manifest_clips():
     return out
 
 
+def _link(url):
+    return url.split("?")[0].strip().rstrip("/").lower()
+
+
 def telegram_clips():
-    """Downloaded Telegram clips that are not hero clips."""
+    """Downloaded Telegram clips that are not hero clips. claimed_place = the post's own caption."""
     hero = {r["local_file"] for r in csv.DictReader(open(ROOT / "data_meta" / "heroes.csv", encoding="utf-8-sig"))}
-    posted = {}
-    for line in open(DATA / "custody" / "manifest.jsonl", encoding="utf-8"):
-        d = json.loads(line)
-        posted[d.get("local_path")] = d.get("posted_at")
-    captions = {r["url"]: r["caption"] for r in csv.DictReader(open(DATA / "telegram_clips.csv", encoding="utf-8-sig"))}
+    captions = {_link(r["link"]): r["caption"] for r in csv.DictReader(open(DATA / "impact_videos_all.csv", encoding="utf-8-sig"))}
     out = []
     for p in sorted((DATA / "telegram").glob("*/*.mp4")):
-        rel = str(p.relative_to(DATA))
-        if rel in hero:
+        if str(p.relative_to(DATA)) in hero:
             continue
         channel, post = p.stem.rsplit("_", 1)
         url = f"https://t.me/{channel}/{post}"
-        out.append({"id": p.stem, "path": p, "url": url, "posted_at": posted[rel] + "+00:00" if posted.get(rel) else None,
-                    "claimed_place": (captions.get(url) or "")[:300] or None, "label": None, "date": (posted.get(rel) or "")[:10]})
+        out.append({"id": p.stem, "path": p, "url": url, "posted_at": None,
+                    "claimed_place": (captions.get(_link(url)) or "").strip()[:400] or None, "label": "real", "date": ""})
     return out
+
+
+def break_it_clips():
+    """YouTube links from data_meta/break_it.csv (label and split come with them). Analyzed by URL, no download."""
+    f = ROOT / "data_meta" / "break_it.csv"
+    if not f.exists():
+        return []
+    label = {"real_strike": "real", "fireworks_demolition": "fireworks"}
+    return [{"id": "yt_" + r["url"].split("v=")[-1][:11], "path": None, "url": r["url"], "posted_at": None, "claimed_place": None,
+             "label": label.get(r["label"], r["label"]), "date": "", "split": r["split"]}
+            for r in csv.DictReader(open(f, encoding="utf-8-sig"))]
+
+
+def skipped():
+    """Clip ids a human screened out (data_meta/screen.csv)."""
+    f = ROOT / "data_meta" / "screen.csv"
+    return {r["clip_id"] for r in csv.DictReader(open(f, encoding="utf-8-sig")) if r.get("screen", "").strip().lower() == "skip"} if f.exists() else set()
 
 
 def split_of():
@@ -57,11 +73,12 @@ def split_of():
     return {r["clip_id"]: r["split"] for r in csv.DictReader(open(f, encoding="utf-8"))} if f.exists() else {}
 
 
-def run(clips, workers=4):
+def run(clips, workers=8):
     """Analyze clips in parallel. Returns {clip id: record or None}."""
     def one(c):
         rec = None
-        for kind, data in analyze(path=c["path"], claimed_place=c["claimed_place"], posted_at=c["posted_at"], source_url=c["url"]):
+        src = {"path": c["path"], "source_url": c["url"]} if c["path"] else {"url": c["url"]}
+        for kind, data in analyze(claimed_place=c["claimed_place"], posted_at=c["posted_at"], **src):
             if kind == "error":
                 print(f"  ! {c['id']}: {data['stage']}: {data['message'][:120]}", file=sys.stderr)
             elif kind == "result":
@@ -75,18 +92,31 @@ def run(clips, workers=4):
 def group(items):
     """items: [{"id", "record", "city"}]. Returns groups (lists of ids) of non-rejected clips.
 
-    Strong link: locations overlap (both within GROUP_RADIUS_M) and posts within 6 h, or the same video (pHash).
-    Weak link: a clip without a usable location joins the group of the located clip from the same city that was
-    posted closest in time, within 6 h.
+    1. Coarse: same city, posted within 6 h of another clip in the group (or post time unknown).
+    2. Inside a coarse group, clips located to within GROUP_RADIUS_M cluster by overlapping radius;
+       the same video (pHash) always stays together.
+    3. If a coarse group holds two or more such clusters it is split, and each clip without a usable
+       location follows the located clip posted closest in time.
     """
     items = [i for i in items if i["record"] and i["record"]["fake"]["verdict"] != "fake"]
-    parent = {i["id"]: i["id"] for i in items}
 
-    def find(x):
-        while parent[x] != x:
-            parent[x] = parent[parent[x]]
-            x = parent[x]
-        return x
+    def unions(members, linked):
+        parent = {m["id"]: m["id"] for m in members}
+
+        def find(x):
+            while parent[x] != x:
+                parent[x] = parent[parent[x]]
+                x = parent[x]
+            return x
+
+        for a in members:
+            for b in members:
+                if a["id"] < b["id"] and linked(a, b):
+                    parent[find(a["id"])] = find(b["id"])
+        out = {}
+        for m in members:
+            out.setdefault(find(m["id"]), []).append(m)
+        return list(out.values())
 
     def when(i):
         try:
@@ -101,31 +131,33 @@ def group(items):
         loc = i["record"]["location"]
         return loc if loc and loc["radius_m"] <= GROUP_RADIUS_M else None
 
-    by_clip_id = {i["record"]["clip_id"]: i["id"] for i in items}
-    for a in items:
-        dup = a["record"]["fake"]["checks"][3]["detail"]
-        if dup.startswith("same video as") and dup.split()[3].rstrip(",") in by_clip_id:
-            parent[find(a["id"])] = find(by_clip_id[dup.split()[3].rstrip(",")])
-        for b in items:
-            la, lb = precise(a), precise(b)
-            if a["id"] < b["id"] and la and lb and (gap(a, b) is None or gap(a, b) <= GROUP_WINDOW_S):
-                if geo.dist_m((la["lat"], la["lon"]), (lb["lat"], lb["lon"])) <= la["radius_m"] + lb["radius_m"]:
-                    parent[find(a["id"])] = find(b["id"])
-    located = [i for i in items if precise(i)]
-    for a in items:
-        if not precise(a):
-            near = [(gap(a, b), b["id"]) for b in located if b["city"] == a["city"] and gap(a, b) is not None and gap(a, b) <= GROUP_WINDOW_S]
-            if near:
-                parent[find(a["id"])] = find(min(near)[1])
-    groups = {}
-    for i in items:
-        groups.setdefault(find(i["id"]), []).append(i["id"])
-    return sorted(groups.values(), key=len, reverse=True)
+    def same_video(a, b):
+        ids = {a["record"]["clip_id"], b["record"]["clip_id"]}
+        return any(x["record"]["fake"]["checks"][3]["detail"].startswith("same video as")
+                   and x["record"]["fake"]["checks"][3]["detail"].split()[3].rstrip(",") in ids for x in (a, b))
+
+    def overlap(a, b):
+        la, lb = precise(a), precise(b)
+        return bool(la and lb) and geo.dist_m((la["lat"], la["lon"]), (lb["lat"], lb["lon"])) <= la["radius_m"] + lb["radius_m"]
+
+    groups = []
+    coarse = unions(items, lambda a, b: same_video(a, b) or (a["city"] and a["city"] == b["city"] and (gap(a, b) is None or gap(a, b) <= GROUP_WINDOW_S)))
+    for members in coarse:
+        clusters = unions([m for m in members if precise(m)], lambda a, b: overlap(a, b) or same_video(a, b))
+        if len(clusters) < 2:
+            groups.append([m["id"] for m in members])
+            continue
+        for m in members:
+            if not precise(m):
+                best = min(clusters, key=lambda c: min((gap(m, x) if gap(m, x) is not None else float("inf")) for x in c))
+                best.append(m)
+        groups += [[m["id"] for m in c] for c in clusters]
+    return sorted(groups, key=len, reverse=True)
 
 
 if __name__ == "__main__":
     split = split_of()
-    todo = [c for c in manifest_clips() if split.get(c["id"]) == "dev"] + telegram_clips()
+    todo = [c for c in manifest_clips() + telegram_clips() if split.get(c["id"]) != "test" and c["id"] not in skipped()]
     if "--limit" in sys.argv:
         todo = todo[: int(sys.argv[sys.argv.index("--limit") + 1])]
     print(f"bulk: {len(todo)} clips")

@@ -120,6 +120,8 @@ def analyze(path=None, url=None, claimed_place=None, posted_at=None, source_url=
             f_watch = pool.submit(_timed, gemini.watch, block, claimed_place)
             # with a file, the Decisions API scores the video itself, in parallel with Hydrogen
             f_score = pool.submit(_timed, gemini.score, [{**block, "resolution": "low"}]) if prep else None
+            # three independent reads of the place, started now so the locate stage costs no extra wall-clock
+            f_reads = [pool.submit(gemini.where, block, claimed_place) for _ in range(3)]
             seen, ms["watch"] = f_watch.result()
             duration_s = prep["duration_s"] if prep else round(float(seen.get("duration_s") or 0), 2)
             timeline = clean_timeline(seen.get("timeline"), duration_s)
@@ -164,7 +166,7 @@ def analyze(path=None, url=None, claimed_place=None, posted_at=None, source_url=
         verdict_ms = int((time.time() - t0) * 1000)
 
         stage = "locate"
-        location, ms["locate"] = None, None
+        location, ms["locate"], reads = None, None, []
         if verdict == "fake":
             yield emit(_stage("locate", "skipped", None, "rejected clips are not located"))
         elif scores["military_object"] >= 0.5:  # §13: never locate military objects
@@ -172,7 +174,13 @@ def analyze(path=None, url=None, claimed_place=None, posted_at=None, source_url=
         else:
             yield emit(_stage("locate", "start"))
             decide_input = [{**block, "resolution": "low"}] if prep else seen.get("observations", "")
-            location, ms["locate"] = _timed(geo.locate, seen, claimed_place, decide_input)
+            reads = []
+            for f in f_reads:
+                try:
+                    reads.append(f.result())
+                except Exception:
+                    pass  # a failed read only widens the radius
+            location, ms["locate"] = _timed(geo.locate, seen, claimed_place, decide_input, reads)
             yield emit(_stage("locate", "done", ms["locate"],
                               f"{location['level']}: ±{location['radius_m']} m, {location['candidates']} candidates"))
 
@@ -213,7 +221,7 @@ def analyze(path=None, url=None, claimed_place=None, posted_at=None, source_url=
         if prep:
             with _LOCK:
                 fake.remember(prep["sha256"], prep["phash"], record["clip_id"], posted_at)
-        raw = {"seen": seen, "scores": scores, "phys": phys, "phash": prep["phash"] if prep else [],
+        raw = {"seen": seen, "scores": scores, "phys": phys, "reads": reads, "phash": prep["phash"] if prep else [],
                "path": str(path) if path else None}
         yield emit(("result", record))
         cache_file.write_text(json.dumps({"events": events, "record": record, "raw": raw}, ensure_ascii=False))

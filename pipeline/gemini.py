@@ -58,7 +58,7 @@ WATCH_SCHEMA = {
         "hud_start_s": {"type": "number"},
         "hud_end_s": {"type": "number"},
         "apparent_blast_distance_m": {"type": "number", "description": "Visual estimate of camera-to-explosion distance in metres. 0 if no explosion is visible."},
-        "city_guess": {"type": "string", "description": "City named on screen or in speech. Empty if none."},
+        "city_guess": {"type": "string", "description": "The city or town this was filmed in, according to the post text, on-screen text or speech. English name plus country, like 'Sumy, Ukraine'. Empty if none is named."},
         "observations": {"type": "string", "description": "4 to 6 plain sentences: what the footage shows and sounds like, and whether it looks like real camera footage, a video game, a film, fireworks or a demolition, and why."},
     },
     "required": ["duration_s", "timeline", "landmarks", "hud_present", "hud_start_s", "hud_end_s",
@@ -211,14 +211,32 @@ def crosscheck(document):
     return json.loads(out)
 
 
-def ask_directly(video_block, claimed_place=None):
-    """§11 baselines: one Hydrogen call asked for the answers outright. No funnel, no physics, no Decisions API."""
+def where(video_block, claimed_place=None):
+    """One independent Hydrogen read of where the clip was filmed: {"name", "lat", "lon"}. The funnel takes three."""
+    prompt = ("Where was this video filmed? Use everything visible and audible: buildings, signs, terrain, language. "
+              "name: the most specific place you can honestly give (street, district or town). "
+              "lat, lon: your best estimate in decimal degrees."
+              + (f' The post that carried it said: "{claimed_place}". Treat that as a claim, not a fact.' if claimed_place else ""))
+    out = _client.interactions.create(
+        model=HYDROGEN, input=[video_block, {"type": "text", "text": prompt}],
+        response_format={"type": "text", "mime_type": "application/json", "schema": {
+            "type": "object", "properties": {"name": {"type": "string"}, "lat": {"type": "number"}, "lon": {"type": "number"}},
+            "required": ["name", "lat", "lon"]}},
+    ).output_text
+    return json.loads(out)
+
+
+PREVIOUS = "gemini-3.8-flash"  # the newest pre-Gemini-4 model our key can call (3.1 Pro and 2.5 return 404); checked live Nov 21
+
+
+def ask_directly(video_block, claimed_place=None, model=HYDROGEN):
+    """§11 baselines: one model call asked for the answers outright. No funnel, no physics, no Decisions API."""
     prompt = ("Answer directly. real_strike: is this authentic footage of a real armed attack or its aftermath "
               "(not a video game, film, fireworks, demolition or unrelated footage)? "
               "lat, lon: your best estimate of where it was filmed, in decimal degrees."
               + (f' The post that carried it said: "{claimed_place}".' if claimed_place else ""))
     out = _client.interactions.create(
-        model=HYDROGEN, input=[video_block, {"type": "text", "text": prompt}],
+        model=model, input=[video_block, {"type": "text", "text": prompt}],
         response_format={"type": "text", "mime_type": "application/json", "schema": {
             "type": "object", "properties": {"real_strike": {"type": "boolean"}, "lat": {"type": "number"}, "lon": {"type": "number"}},
             "required": ["real_strike", "lat", "lon"]}},

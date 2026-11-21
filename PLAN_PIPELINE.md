@@ -162,6 +162,15 @@ Written Sat Nov 21, 10:45 AM ET. Spec says "Teammate" for the pipeline owner: th
 - [ ] **3:30 AI FREEZE.** Commit, `git tag ai-freeze`, push. No prompt or rule changes after this.
 - [ ] **3:30–3:50 test run, once.** `python eval/run_eval.py --split test` (refuses if a `split: test` result already exists; sets `frozen_at`). Commit both files. → "pull now: test results".
 
+### Tuning log (dev only, before the 3:30 freeze)
+- 12:40 Eval set grown: 62 Telegram clips with answer-key coords joined `eval/split.csv` by md5 of the clip id (19 dev, 43 test), plus 15 break-it links from `data_meta/break_it.csv` (5 dev, 10 test). `str_0001` is skipped (`screen.csv`).
+- 13:07–13:30 Geolocation funnel rebuilt: three independent Hydrogen reads per clip (`gemini.where`), middle read = estimate, radius = 2 × spread + 1000 m; a Decisions-backed OSM landmark that agrees with the reads narrows it to ±300 m; towns looked up by name (Nominatim, settlements only); agreeing reads beat a contradicting town lookup.
+- 13:20 Clips with no flash and no boom are no longer placed by post time (`offset_s: null`).
+- 13:35 `NOT_REAL_UNSURE` 0.35 → 0.45 (dev: fakes ≥ 0.96, real ≤ 0.37).
+- Baselines now: Hydrogen asked directly, `gemini-3.8-flash` asked directly (previous generation), Claude Opus 5.5 on 5 frames + caption (needs `ANTHROPIC_API_KEY` and `ANTHROPIC_WORKSPACE_ID` in `.env`).
+- 13:57 dev results (29 clips, 17 located, 28 hero clips): within 1 km 59% (Hydrogen direct 53, 3.8-flash 47, Claude 18); median 0.7 km (0.8 / 1.4 / 2.5); inside radius 76%; fakes 100/100 for every method; grouping 82% vs 79%; ablation 100 / 100 / 38.
+- User decisions: skip-marked hero clips are read for location only (12:35); Claude baseline stays at 5 frames (13:36); ChatGPT skipped.
+
 ### After the freeze
 - [ ] **P6 (3:50 → 4:30)** Crash fixes from rehearsal and latency only. Send the teammate the pipeline's README lines (how to run, sources, licenses, safety rules).
 - [ ] **P7 (4:30 → 5:00)** Submit: final pull, server restart test on the demo machine, `curl /api/health`.

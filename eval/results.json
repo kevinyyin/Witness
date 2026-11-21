@@ -1,7 +1,7 @@
 {
  "split": "dev",
  "frozen_at": null,
- "n_clips": 6,
+ "n_clips": 29,
  "rows": [
   {
    "claim": "Fakes caught",
@@ -10,7 +10,16 @@
    "baseline": 100,
    "unit": "%",
    "baseline_name": "Single Hydrogen call, no physics or audio checks",
-   "n": 6
+   "n": 29
+  },
+  {
+   "claim": "Fakes caught",
+   "metric": "precision",
+   "witness": 100,
+   "baseline": 100,
+   "unit": "%",
+   "baseline_name": "gemini-3.8-flash asked directly (previous generation)",
+   "n": 29
   },
   {
    "claim": "Fakes caught",
@@ -19,52 +28,133 @@
    "baseline": 100,
    "unit": "%",
    "baseline_name": "Single Hydrogen call, no physics or audio checks",
-   "n": 6
+   "n": 29
+  },
+  {
+   "claim": "Fakes caught",
+   "metric": "recall",
+   "witness": 100,
+   "baseline": 100,
+   "unit": "%",
+   "baseline_name": "gemini-3.8-flash asked directly (previous generation)",
+   "n": 29
+  },
+  {
+   "claim": "Fakes caught",
+   "metric": "precision (file clips only)",
+   "witness": 100,
+   "baseline": 100,
+   "unit": "%",
+   "baseline_name": "Claude Opus 5.5 on 5 frames + caption (no video, no sound)",
+   "n": 24
+  },
+  {
+   "claim": "Fakes caught",
+   "metric": "recall (file clips only)",
+   "witness": 100,
+   "baseline": 100,
+   "unit": "%",
+   "baseline_name": "Claude Opus 5.5 on 5 frames + caption (no video, no sound)",
+   "n": 24
   },
   {
    "claim": "Geolocation works",
    "metric": "within 1 km",
-   "witness": 0,
-   "baseline": 0,
+   "witness": 59,
+   "baseline": 53,
    "unit": "%",
    "baseline_name": "Gemini asked directly",
-   "n": 1
+   "n": 17
   },
   {
    "claim": "Geolocation works",
    "metric": "within 5 km",
-   "witness": 100,
-   "baseline": 100,
+   "witness": 94,
+   "baseline": 88,
    "unit": "%",
    "baseline_name": "Gemini asked directly",
-   "n": 1
+   "n": 17
   },
   {
    "claim": "Geolocation works",
    "metric": "median error",
-   "witness": 4.6,
-   "baseline": 1.5,
+   "witness": 0.7,
+   "baseline": 0.8,
    "unit": "km",
    "baseline_name": "Gemini asked directly",
-   "n": 1
+   "n": 17
   },
   {
    "claim": "Uncertainty is honest",
    "metric": "true location inside the radius",
-   "witness": 100,
+   "witness": 76,
    "baseline": null,
    "unit": "%",
    "baseline_name": "none (target ≥ 70%)",
-   "n": 1
+   "n": 17
+  },
+  {
+   "claim": "Geolocation works",
+   "metric": "within 1 km",
+   "witness": 59,
+   "baseline": 47,
+   "unit": "%",
+   "baseline_name": "gemini-3.8-flash asked directly (previous generation)",
+   "n": 17
+  },
+  {
+   "claim": "Geolocation works",
+   "metric": "within 5 km",
+   "witness": 94,
+   "baseline": 94,
+   "unit": "%",
+   "baseline_name": "gemini-3.8-flash asked directly (previous generation)",
+   "n": 17
+  },
+  {
+   "claim": "Geolocation works",
+   "metric": "median error",
+   "witness": 0.7,
+   "baseline": 1.4,
+   "unit": "km",
+   "baseline_name": "gemini-3.8-flash asked directly (previous generation)",
+   "n": 17
+  },
+  {
+   "claim": "Geolocation works",
+   "metric": "within 1 km",
+   "witness": 59,
+   "baseline": 18,
+   "unit": "%",
+   "baseline_name": "Claude Opus 5.5 on 5 frames + caption (no video, no sound)",
+   "n": 17
+  },
+  {
+   "claim": "Geolocation works",
+   "metric": "within 5 km",
+   "witness": 94,
+   "baseline": 94,
+   "unit": "%",
+   "baseline_name": "Claude Opus 5.5 on 5 frames + caption (no video, no sound)",
+   "n": 17
+  },
+  {
+   "claim": "Geolocation works",
+   "metric": "median error",
+   "witness": 0.7,
+   "baseline": 2.5,
+   "unit": "km",
+   "baseline_name": "Claude Opus 5.5 on 5 frames + caption (no video, no sound)",
+   "n": 17
   },
   {
    "claim": "Grouping",
    "metric": "hero clips grouped correctly",
-   "witness": 52,
-   "baseline": 81,
+   "witness": 82,
+   "baseline": 79,
    "unit": "%",
    "baseline_name": "Group by claimed city + date",
-   "n": 27
+   "n": 28
   }
  ],
  "ablation": {
@@ -72,8 +162,30 @@
   "unit": "%",
   "full_video": 100,
   "frames_5": 100,
-  "transcript": 33,
-  "n": 6
+  "transcript": 38,
+  "n": 24
  },
- "worst_misses": []
+ "worst_misses": [
+  {
+   "clip_id": "itsdonetsk_239921",
+   "thumb": "eval/miss_1.jpg",
+   "expected": "real strike, 3 Hydrogen reads within 0 m of each other: Odes",
+   "got": "9.4 km from the published location (radius ±1000 m)",
+   "why": "model reads: 3 Hydrogen reads within 0 m of each other: Odesa, Ukraine; 3 map candidates"
+  },
+  {
+   "clip_id": "huyovy_kharkiv_150130",
+   "thumb": "eval/miss_2.jpg",
+   "expected": "real strike, 3 Hydrogen reads within 297 m of each other: Ba",
+   "got": "4.0 km from the published location (radius ±1593 m)",
+   "why": "model reads: 3 Hydrogen reads within 297 m of each other: Balakliya, Kharkiv Oblast, Ukraine; 3 map candidates"
+  },
+  {
+   "clip_id": "uniannet_96605",
+   "thumb": "eval/miss_3.jpg",
+   "expected": "real strike, 3 Hydrogen reads within 301 m of each other: Um",
+   "got": "2.1 km from the published location (radius ±1602 m)",
+   "why": "model reads: 3 Hydrogen reads within 301 m of each other: Uman, Cherkasy Oblast, Ukraine; 3 map candidates"
+  }
+ ]
 }
