@@ -281,6 +281,8 @@ function ClipPlayer({ yt, file, graphic, adapter }: { yt: string | null; file: F
 /** The map is the centre of a located verdict: OpenStreetMap's own embed, a red marker on the best guess and a red
  *  circle for the uncertainty radius. The embed fits its box at a whole zoom level, so the circle is sized from
  *  that same zoom (Web Mercator: metres per pixel = 156543.03 · cos(lat) / 2^zoom). */
+const BLEED = 60 // px: the map frame overhangs its box by this much, which hides the embed's own zoom buttons
+
 function LocMap({ lat, lon, radius_m, title, sub }: { lat: number; lon: number; radius_m: number; title: string; sub: string }) {
   const box = useRef<HTMLDivElement>(null)
   const [size, setSize] = useState<[number, number] | null>(null)
@@ -296,8 +298,9 @@ function LocMap({ lat, lon, radius_m, title, sub }: { lat: number; lon: number; 
   const mercY = (d: number) => (1 - Math.log(Math.tan(d * rad) + 1 / Math.cos(d * rad)) / Math.PI) / 2
   let ring = 0
   if (size) {
+    // the frame is BLEED px larger than the box on every side (see CSS), and the embed fits the view to the frame
     const zoom = Math.min(19, Math.floor(Math.log2(Math.min(
-      size[0] / (256 * ((2 * dLon) / 360)), size[1] / (256 * (mercY(lat - dLat) - mercY(lat + dLat)))))))
+      (size[0] + 2 * BLEED) / (256 * ((2 * dLon) / 360)), (size[1] + 2 * BLEED) / (256 * (mercY(lat - dLat) - mercY(lat + dLat)))))))
     ring = (2 * radius_m) / ((156543.03392 * Math.cos(lat * rad)) / 2 ** zoom)
   }
   return (
@@ -306,6 +309,7 @@ function LocMap({ lat, lon, radius_m, title, sub }: { lat: number; lon: number; 
         src={`https://www.openstreetmap.org/export/embed.html?bbox=${bbox}&layer=mapnik`} />
       {ring > 0 && <i className="ring" style={{ width: ring, height: ring }} />}
       <i className="pin" />
+      <small className="osm">© OpenStreetMap contributors</small>
       <div className="where"><b>{title}</b>{sub && <span>{sub}</span>}</div>
     </div>
   )
