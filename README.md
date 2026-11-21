@@ -14,7 +14,17 @@ data_meta/  CSV exports of the shared decision sheet (screening, heroes, break-i
 ```
 
 ## How to run
-_TODO (filled in during the day)._
+**Web (reconstruction view, break-it panel, overview, proof slide):**
+```
+cd web
+npm install
+npm run dev          # http://localhost:5173
+```
+- `#/` overview · `#/incident/<id>` reconstruction · `#/break` break-it panel · `#/proof` proof slide.
+- The Vite dev server proxies `/api` to the pipeline server on `127.0.0.1:8000` (see `pipeline/` and `PLAN_PIPELINE.md`). Without it, the break-it panel replays the recorded runs in `web/public/fixtures/` under a SAMPLE DATA banner.
+- Incident data is static: `web/public/incidents/*.json` (pipeline output). `web/public/sample_incident.json` is a hand-made contract fixture and always shows a **SAMPLE DATA** banner; it never goes on stage.
+- Keys in the reconstruction view: Space play/pause · ←/→ previous/next marker · J/K/L 0.25x/pause/4x · W wireframe · F hide the FPS box. Drag = free camera, [Resume walkthrough] returns to the director camera; double-click focuses a spot.
+- `npm test` runs the unit tests; `npm run make-sample` rebuilds the sample from `data/osm/` (needs the `data` link).
 
 ## Data (`data/`, not in git)
 `data/` is a link to the prep folder produced by `prep_data.py` (videos, OSM extracts, answer keys).
