@@ -30,11 +30,11 @@ Witness never says who did it, never says "war crime", and never names a weapon 
 
 ## Built before vs during the event
 **Before** (no product code):
-- **The plan.** `WITNESS_SPEC.md`, a planning document. Its current revision is dated Nov 20.
-- **The data download script.** `prep_data.py` downloaded openly licensed videos, OpenStreetMap extracts and published answer keys.
+- **The plan.** `WITNESS_SPEC.md`, a planning document (not in the public repo). Its current revision is dated Nov 20.
+- **The data download script.** `prep_data.py` (not in the public repo) downloaded openly licensed videos, OpenStreetMap extracts and published answer keys.
 - **The data folder** that script filled. It is not in git (see [Data](#data-sources-and-licenses)).
 - **Human screening lists**, in `data_meta/*.csv`: which clips are fit to show, which incidents to use as hero examples, and the YouTube links for testing. This started the night before and the screening of hero clips continued during the event.
-- **Camera poses**, in `data_meta/camera_poses.csv`: where each camera stood and which way it faced, from matching the skyline in a frame against OpenStreetMap buildings. The pipeline reads these positions; it does not compute them.
+- **Camera poses**, in `data_meta/camera_poses.csv`: where each camera stood and which way it faced, from matching the skyline in a frame against OpenStreetMap buildings with a separate script (`skyline.py`, not in the public repo). The pipeline reads these positions; it does not compute them.
 
 **During**: every line in `pipeline/`, `web/` and `eval/`. The first commit in this repository is from 10:46 AM on Nov 21, 2026.
 
@@ -122,6 +122,8 @@ Found by pushing on it during the event. The fixes we made are listed on the pro
 ## How to run
 Needs Python 3.11 or newer, Node, and ffmpeg.
 
+**A fresh clone without the data folder and a Gemini key gets the 3D scenes, the static data (incidents, map extracts, eval results) and two recorded Break-it runs only.** The web app (step 2) and the checks (step 4) run without either. Live analysis, the local source videos in the reconstruction, rebuilding incidents and the eval need the data folder and the key.
+
 **1. The pipeline server**
 ```
 python3.11 -m venv .venv
@@ -182,9 +184,10 @@ eval/            run_eval.py, split.csv, results.json
 data_meta/       CSV exports of the human decisions (screening, heroes, test links)
 custody.py       chain-of-custody log: a hash-chained record of every file and processing step; the incident builder reads its manifest
 docs/VERIFIED.md facts about the Gemini API checked against the official docs on the day
-WITNESS_SPEC.md  the planning document; PLAN_*.md are the working plans
+PLAN_*.md        the working plans
 data/            link to the data folder (not in git)
 ```
+Not in the public repo: `WITNESS_SPEC.md` (the planning document), `prep_data.py` (the data download script) and `skyline.py` (the skyline-matching script that produced `data_meta/camera_poses.csv`). Comments that cite a section number (§) refer to the planning document.
 
 ## Data, sources and licenses
 `data/` is a link to a folder outside the repository (videos, OpenStreetMap extracts, answer keys). Code reads its path from `WITNESS_DATA`.

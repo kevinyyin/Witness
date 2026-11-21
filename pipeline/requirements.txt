@@ -6,3 +6,4 @@ numpy
 scipy
 imagehash
 pillow
+anthropic>=2.12  # eval/run_eval.py only: the Claude baseline
