@@ -62,5 +62,12 @@ Fetched 2026-11-21 from `aistudio.google.com/docs/*.md` (where `ai.google.dev/ge
 4. Hydrogen's timing is 1 FPS. Flash and boom times are refined in code (audio onsets, frame brightness) when we hold the file; in model-timed mode a second Hydrogen pass re-reads ±5 s around the blast at `fps: 10`.
 5. Ablation arms: full = default layers; transcript = `content_layers: ["transcript"]`; 5 frames = five image blocks.
 
+## Live checks (Nov 21, 10:54, our key)
+- `client.decisions.create` with a `noul` and a `choice` question on text: answered in 1.3 s; `.noul`, `.choice`, `.probabilities` (a dict) are as documented.
+- `client.interactions.create` on `gemini-4-hydrogen`: 2.7 s for a one-word reply. On `gemini-4-carbon`: 18.3 s for the same reply, so Carbon stays out of the 60 s break-it path.
+- Hydrogen with the docs' sample YouTube URL: answered in 4.4 s.
+- The SDK also has `client.aio.decisions` and `client.aio.interactions` (attributes exist; not called).
+- Not yet run: any video file, any strike footage (K1), the Files API.
+
 ## Not read yet
 Managed Agents pages (only needed for the optional last step). Rate limits for our own key (dashboard).

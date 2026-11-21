@@ -87,7 +87,7 @@ Written Sat Nov 21, 10:45 AM ET. Spec says "Teammate" for the pipeline owner: th
   Files: `docs/*.md` (saved pages, ignored), `docs/VERIFIED.md` (committed).
   Check: `grep -c 'Source:' docs/VERIFIED.md` ≥ 10 and each identifier in the prompt's CRITICAL paragraph has a line marked VERIFIED (with file + quote) or NOT FOUND.
   Fallback: an identifier NOT FOUND → tell the user before any call uses it.
-- [ ] **S2 Repo + env** (5 min, as soon as the URL, data and key exist)
+- [ ] **S2 Repo + env** (5 min, as soon as the URL, data and key exist) — PARTIAL 10:54: remote `https://github.com/kevinyyin/Witness.git` is empty (no `.gitignore`, `data_meta/`, `web/`); local `main` has one commit, **not pushed** until the teammate's root commit exists (then `git pull --rebase origin main`, push). `.venv` ready (google-genai 3.6.1), key works. Private files are in `.git/info/exclude`. Still missing: `~/witness-data`, `data` symlink, `data_meta/*.csv` headers.
   Goal: `git init`, remote, pull; spec + `PROMPT_*.md` in `.git/info/exclude`; `.venv` (Python 3.11) with `pipeline/requirements.txt`; `data` symlink → `~/witness-data`; commit this plan.
   Check: `git check-ignore -q .env data docs/x.md && git status --short | grep -v '^??' | wc -l` = 0; `ls data/manifest.csv data_meta/heroes.csv web/public/sample_incident.json`; `head -1 data_meta/*.csv`.
   Fallback: no repo yet → work locally, commit when it exists.
