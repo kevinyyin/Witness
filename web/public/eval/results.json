@@ -168,21 +168,21 @@
  "worst_misses": [
   {
    "clip_id": "itsdonetsk_239921",
-   "thumb": "eval/miss_1.jpg",
+   "thumb": null,
    "expected": "real strike, 3 Hydrogen reads within 0 m of each other: Odes",
    "got": "9.4 km from the published location (radius ±1000 m)",
    "why": "model reads: 3 Hydrogen reads within 0 m of each other: Odesa, Ukraine; 3 map candidates"
   },
   {
    "clip_id": "huyovy_kharkiv_150130",
-   "thumb": "eval/miss_2.jpg",
+   "thumb": null,
    "expected": "real strike, 3 Hydrogen reads within 297 m of each other: Ba",
    "got": "4.0 km from the published location (radius ±1593 m)",
    "why": "model reads: 3 Hydrogen reads within 297 m of each other: Balakliya, Kharkiv Oblast, Ukraine; 3 map candidates"
   },
   {
    "clip_id": "uniannet_96605",
-   "thumb": "eval/miss_3.jpg",
+   "thumb": null,
    "expected": "real strike, 3 Hydrogen reads within 301 m of each other: Um",
    "got": "2.1 km from the published location (radius ±1602 m)",
    "why": "model reads: 3 Hydrogen reads within 301 m of each other: Uman, Cherkasy Oblast, Ukraine; 3 map candidates"

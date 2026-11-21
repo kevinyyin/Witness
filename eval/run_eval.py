@@ -270,9 +270,12 @@ def main(split):
     # --- worst misses: largest errors first; thumbnails from Commons clips only ---------------------------------------
     worst = []
     (PUBLIC / "eval").mkdir(exist_ok=True)
+    for old in (PUBLIC / "eval").glob("miss_*.jpg"):
+        old.unlink()  # never leave a thumbnail from an earlier run behind
     for n, (_, c, expected, got, why) in enumerate(sorted(misses, key=lambda m: -m[0])[:3], 1):
         thumb = None
-        if c["path"] and recs[c["id"]]["triage"]["graphic_level"] < 2:
+        # §9.3: thumbnails come from Commons clips only (CC BY), never from social clips
+        if c["path"] and "commons.wikimedia.org" in (c["url"] or "") and recs[c["id"]]["triage"]["graphic_level"] < 2:
             shutil.copy(ingest.prepare(c["path"])["frames"][2], PUBLIC / "eval" / f"miss_{n}.jpg")
             thumb = f"eval/miss_{n}.jpg"
         worst.append({"clip_id": c["id"], "thumb": thumb, "expected": expected, "got": got, "why": why[:200]})
