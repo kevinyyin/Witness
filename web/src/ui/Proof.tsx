@@ -19,14 +19,17 @@ export function Proof() {
       <table>
         <thead><tr><th>Claim</th><th>Metric</th><th>Witness</th><th>Baseline</th><th>n</th></tr></thead>
         <tbody>
-          {r.rows.map((x, i) => (
-            <tr key={i}>
-              <td>{x.claim}</td><td className="muted">{x.metric}</td>
+          {r.rows.map((x, i) => {
+            const same = i > 0 && r.rows[i - 1].claim === x.claim && r.rows[i - 1].metric === x.metric // one row per baseline: name the metric once
+            return (
+            <tr key={i} className={same ? 'cont' : ''}>
+              <td>{same ? '' : x.claim}</td><td className="muted">{same ? '' : x.metric}</td>
               <td className="num">{fmt(x.witness, x.unit)}</td>
               <td className="num">{fmt(x.baseline, x.unit)}{x.baseline_name && <div className="muted small">{x.baseline_name}</div>}</td>
               <td className="muted">{x.n}</td>
             </tr>
-          ))}
+            )
+          })}
         </tbody>
       </table>
       <h3>Needs Gemini's ears <span className="muted">· {a.metric} · n = {a.n}</span></h3>

@@ -107,7 +107,8 @@ button.mini { padding: 1px 6px; font-size: 10px; margin: 2px 4px 2px 0; }
 .proof { max-width: 1200px; margin: 0 auto; font-size: 15px; }
 .proof table { width: 100%; border-collapse: collapse; margin: 12px 0 20px; }
 .proof th, .proof td { text-align: left; padding: 7px 10px; border-bottom: 1px solid var(--line); vertical-align: top; }
-.proof td.num { font-size: 20px; color: var(--cyan); } .proof .small { font-size: 11px; }
+.proof td.num { font-size: 20px; color: var(--cyan); }
+.proof tr.cont td { border-top: 0; padding-top: 2px; } .proof .small { font-size: 11px; }
 .bar-row.wide { grid-template-columns: 120px 1fr 70px; max-width: 700px; }
 .misses { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
 .miss img, .no-thumb { width: 100%; aspect-ratio: 16 / 9; object-fit: cover; background: var(--panel); display: flex; align-items: center; justify-content: center; }
