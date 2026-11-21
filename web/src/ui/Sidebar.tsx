@@ -15,14 +15,29 @@ export function Sec({ title, open = true, children }: { title: ReactNode; open?:
 // §7.1.9: never "war crime", "illegal", "guilty". Carbon's free text is checked before it is shown.
 const VERDICT = /\b(war crimes?|illegal|guilty)\b/i
 
+// Carbon's notes carry this basis tag (add_carbon in pipeline/incidents.py); the contract has no other marker for them.
+const CARBON_TAG = 'Carbon cross-check'
+
 export function Summary({ inc }: { inc: Incident }) {
-  if (!inc.summary) return null
+  if (!inc.summary) return null // no summary = Carbon has not run on this incident
+  const found = inc.review_notes.filter((n) => n.basis.includes(CARBON_TAG))
   return (
-    <Sec title={<>WHAT PROBABLY HAPPENED <span className="muted">(written by Gemini 4 Carbon)</span></>}>
-      {VERDICT.test(inc.summary)
-        ? <div className="warn">Summary withheld: its wording breaks the no-verdict rule (§7.1.9).</div>
-        : <div>{inc.summary}</div>}
-    </Sec>
+    <>
+      <Sec title="Cross-check summary: gemini-4-carbon">
+        {VERDICT.test(inc.summary)
+          ? <div className="warn">Summary withheld: its wording breaks the no-verdict rule (§7.1.9).</div>
+          : <div>{inc.summary}</div>}
+      </Sec>
+      <Sec title={<>Contradictions found by gemini-4-carbon <span className="muted">({found.length})</span></>}>
+        {found.length === 0 && <div className="muted">Checked, none found</div>}
+        {found.map((n, i) => (
+          <div key={i} className="flag-row now-note" onClick={() => n.t != null && useTime.getState().jump(n.t - 2, n.source)}>
+            <span className="muted">{n.t == null ? '—' : fmtT(n.t)}</span> ● {n.label}{' '}
+            <span className="muted">{conf(n.confidence)} · {n.basis.filter((b) => b !== CARBON_TAG).join(' · ')}</span>
+          </div>
+        ))}
+      </Sec>
+    </>
   )
 }
 
@@ -118,6 +133,7 @@ export function Footer({ inc, showKey, toggleKey }: { inc: Incident; showKey: bo
     <section className="footer">
       Evidence record: {report ? <a href={url} target="_blank" rel="noreferrer">evidence report ↗</a> : <span className="muted">no report exported yet</span>}
       {inc.answer_key && <> · Investigators' location <button className="mini" onClick={toggleKey}>{showKey ? 'hide' : 'reveal'}</button></>}
+      <div className="muted" style={{ display: 'block', marginTop: 6 }}>gemini-4-hydrogen: watch, listen, locate. gemini-decision-1: calibrated scores. gemini-4-carbon: per-incident cross-check.</div>
     </section>
   )
 }
