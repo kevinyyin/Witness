@@ -112,7 +112,13 @@ export class WitnessScene {
       this.camera.position.copy(p.pos)
       this.controls.target.copy(p.look)
     }
-    for (const m of this.mats) m.uniforms.uHeat.value = heatAt(t)
+    // The depth fog follows the camera: with fixed distances the whole city faded to black when zoomed out.
+    const dist = this.camera.position.distanceTo(this.controls.target)
+    for (const m of this.mats) {
+      m.uniforms.uHeat.value = heatAt(t)
+      m.uniforms.uFogNear.value = Math.max(500, dist * 0.5)
+      m.uniforms.uFogFar.value = Math.max(1900, dist * 1.9)
+    }
     if (!this.markers || !this.inc) return
     const { blasts, sphere, icons, cones } = this.markers
     const w = witnessAt(this.inc, t)

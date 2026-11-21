@@ -148,5 +148,26 @@ button.mini { padding: 1px 6px; font-size: 10px; margin: 2px 4px 2px 0; }
 /* confidence (and "anchor not in scene") sits under the label, so a long note never squeezes the label */
 .sidebar .flag-row > span:last-child { grid-column: 2; font-size: 10px; }
 .sidebar .source-row { margin: 8px 0; }
+/* --- less clutter --- */
+.sidebar section { border-bottom: 0; padding-bottom: 6px; }
+.sidebar h4 { margin: 16px 0 6px; padding-top: 10px; border-top: 1px solid var(--line); font-size: 11px; }
+.sidebar section:first-child h4 { border-top: 0; padding-top: 0; margin-top: 0; }
+/* findings under the video: quiet text links, the first four only */
+.sidebar .findings button.mini { display: block; border: 0; background: none; padding: 1px 0; margin: 0; color: var(--dim); text-align: left; font-size: 11px; }
+.sidebar .findings button.mini:hover:not(:disabled) { color: var(--cyan); }
+.sidebar .findings button.mini:nth-child(n+5) { display: none; }
+/* weapon bars back on one line each now that the sidebar has a minimum width */
+.sidebar .bar-row { grid-template-columns: minmax(0, 175px) 1fr 30px; row-gap: 0; margin: 2px 0; }
+.sidebar .bar-row > .bar { grid-column: 2; grid-row: 1; height: 4px; }
+.sidebar .bar-row > span:last-child { grid-column: 3; text-align: right; }
+.sidebar .bar-row > span:first-child { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.sidebar .unclear { font-size: 18px; margin: 0 0 4px; }
+/* "checked, none" flags run together as one quiet paragraph instead of a line each */
+.sidebar section > div[class="muted"] { display: inline; font-size: 10px; }
+.sidebar section > div[class="muted"] + div[class="muted"]::before { content: "  ·  "; }
+/* the source list keeps every clip but scrolls inside its own box */
+.sidebar section:has(> .source-row) { max-height: 210px; overflow: auto; }
+.sidebar .source-row { margin: 5px 0; }
+.sidebar .source-row .muted { font-size: 10px; }
 .muted { color: var(--dim); }
 .warn { color: var(--amber); }
