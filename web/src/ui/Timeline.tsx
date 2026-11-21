@@ -4,7 +4,7 @@ import { useEffect, useMemo, useRef, useState } from 'react'
 import type { Incident } from '../types'
 import type { Ruler } from '../time/ruler'
 import { useTime } from '../time/store'
-import { clockAt, fmtT, mmss } from '../time/derive'
+import { clockAt, fmtT, laneOf, mmss } from '../time/derive'
 
 // `src` = the clip a click should show (§9.2: flags/notes carry `source`, events carry `source`).
 type Mark = { t: number; kind: 'flag' | 'note' | 'impact'; sym: string; label: string; detail: string; src: string | null }
@@ -83,6 +83,12 @@ export function Timeline({ inc, ruler }: { inc: Incident; ruler: Ruler }) {
         onPointerLeave={() => setHover(null)}>
         <div className="pb-track" />
         {ruler.gaps.map((g, i) => <div key={i} className="pb-gap" style={{ left: x(g.t0), width: `${(ruler.tToX(g.t1) - ruler.tToX(g.t0)) * 100}%` }} />)}
+        {/* where each clip placed in time sits (like chapters); approx. = placed by post time */}
+        {inc.sources.flatMap((s, i) => {
+          const l = laneOf(s)
+          if (!l || s.authenticity === 'fake') return []
+          return [<div key={'c' + i} className={`pb-span ${s.aligned ? '' : 'approx'}`} style={{ left: x(l.t0), width: `${Math.max(0.3, (ruler.tToX(l.t1) - ruler.tToX(l.t0)) * 100)}%` }} />]
+        })}
         <Progress ruler={ruler} />
         {groups.map((g, i) => (
           <div key={i} className={`pb-mark ${g[0].kind}`} style={{ left: x(g[0].t) }}
