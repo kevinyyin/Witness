@@ -82,7 +82,7 @@ export function buildMarkers(inc: Incident): Markers {
   dot.position.set(0, 2, 0)
   // Uncertainty sphere: radius = impact.radius_m (§7.1.3)
   const sphere = new THREE.Mesh(
-    new THREE.SphereGeometry(o.radius_m, 24, 12),
+    new THREE.SphereGeometry(o.radius_m, 24, 6, 0, Math.PI * 2, 0, Math.PI / 2), // upper half only: a dome on the ground
     new THREE.MeshBasicMaterial({ color: AMBER, wireframe: true, transparent: true, opacity: 0.22, depthWrite: false }),
   )
   group.add(dot, sphere)

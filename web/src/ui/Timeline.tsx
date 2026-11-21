@@ -1,68 +1,52 @@
-// §7.1.6 timeline: the reviewer's main control. Rows: flags, events, one lane per clip. Drives t.
-import { useEffect, useMemo, useRef } from 'react'
+// Timeline as a single play bar (YouTube-style) with flag, note and impact markers on it. Drives t.
+// Hover details go in a reserved line above the bar, so they never cover the scene or the bar.
+import { useEffect, useMemo, useRef, useState } from 'react'
 import type { Incident } from '../types'
 import type { Ruler } from '../time/ruler'
 import { useTime } from '../time/store'
-import { fmtT, laneOf, mmss } from '../time/derive'
+import { clockAt, fmtT, mmss } from '../time/derive'
 
 // `src` = the clip a click should show (§9.2: flags/notes carry `source`, events carry `source`).
-type Mark = { t: number; row: 'flag' | 'note' | 'event'; text: string; tip: string; src: string | null }
+type Mark = { t: number; kind: 'flag' | 'note' | 'impact'; sym: string; label: string; detail: string; src: string | null }
 
 function marksOf(inc: Incident): Mark[] {
-  const c = (x: number | null | undefined) => (x == null ? '—' : x.toFixed(2))
-  const all: Mark[] = [
-    ...inc.flags.filter((f) => f.t != null).map((f) => ({ t: f.t!, row: 'flag' as const, text: '▲', src: f.source, tip: `${f.label}\n${f.basis.join(' · ')}\nconf ${c(f.confidence)}` })),
-    ...inc.review_notes.filter((f) => f.t != null).map((f) => ({ t: f.t!, row: 'note' as const, text: '●', src: f.source, tip: `${f.label}\n${f.basis.join(' · ')}\nconf ${c(f.confidence)}` })),
-    ...inc.timeline.map((e) => ({
-      t: e.t, row: 'event' as const, src: e.source,
-      text: e.type === 'impact' ? '✦' : e.type === 'boom_heard' ? `boom@${e.source}` : e.type.replace(/_/g, ' '),
-      tip: `${e.type} ${fmtT(e.t)}\n${e.source ?? ''}${e.clip_ts != null ? `@${mmss(e.clip_ts)}` : ''}\nconf ${c(e.confidence)}`,
-    })),
+  const c = (x: number | null | undefined) => `conf ${x == null ? '—' : x.toFixed(2)}`
+  return [
+    ...inc.flags.filter((f) => f.t != null).map((f) => ({ t: f.t!, kind: 'flag' as const, sym: '▲', label: f.label, detail: [...f.basis, c(f.confidence)].join(' · '), src: f.source })),
+    ...inc.review_notes.filter((f) => f.t != null).map((f) => ({ t: f.t!, kind: 'note' as const, sym: '●', label: f.label, detail: [...f.basis, c(f.confidence)].join(' · '), src: f.source })),
+    ...inc.timeline.filter((e) => e.type === 'impact').map((e) => ({ t: e.t, kind: 'impact' as const, sym: '✦', label: 'Impact', detail: [`${e.source}@${mmss(e.clip_ts)}`, c(e.confidence)].join(' · '), src: e.source })),
   ].sort((a, b) => a.t - b.t)
-  // Events less than a second apart share one label; drawn separately they print on top of each other.
-  const out: Mark[] = []
-  for (const m of all) {
-    const last = out[out.length - 1]
-    if (m.row === 'event' && last?.row === 'event' && m.t - last.t < 1) {
-      last.text += ` · ${m.text}`
-      last.tip += `\n\n${m.tip}`
-    } else out.push({ ...m })
-  }
-  return out
 }
 
-function niceStep(span: number) {
-  return [1, 2, 5, 10, 30, 60, 120, 300, 600].find((s) => span / s <= 12) ?? 1200
-}
-
-function Playhead({ ruler }: { ruler: Ruler }) {
+function Progress({ ruler }: { ruler: Ruler }) {
   const t = useTime((s) => s.t)
-  return <div className="playhead" style={{ left: `${ruler.tToX(t) * 100}%` }} />
+  const x = `${ruler.tToX(t) * 100}%`
+  return <><div className="pb-played" style={{ width: x }} /><div className="pb-knob" style={{ left: x }} /></>
 }
 
-function Readout() {
+function Readout({ end }: { end: number }) {
   const t = useTime((s) => Math.round(s.t * 10) / 10)
-  return <span className="readout">t = {fmtT(t)}</span>
+  return <span className="readout">{fmtT(t)} <span className="muted">/ {fmtT(end)}</span></span>
 }
 
 export function Timeline({ inc, ruler }: { inc: Incident; ruler: Ruler }) {
   const playing = useTime((s) => s.playing), speed = useTime((s) => s.speed), mode = useTime((s) => s.mode)
   const { toggle, setSpeed, setMode, setT, jump } = useTime.getState()
-  const track = useRef<HTMLDivElement>(null)
+  const bar = useRef<HTMLDivElement>(null)
   const dragging = useRef(false)
+  const [hover, setHover] = useState<{ x: number; text: React.ReactNode } | null>(null)
   const marks = useMemo(() => marksOf(inc), [inc])
+  // Markers closer than ~0.6% of the bar (e.g. every flag at t = 0) become one marker with a count.
+  const groups = useMemo(() => {
+    const rank = { flag: 0, impact: 1, note: 2 }, out: Mark[][] = []
+    for (const m of marks) {
+      const g = out[out.length - 1]
+      if (g && ruler.tToX(m.t) - ruler.tToX(g[0].t) < 0.006) g.push(m); else out.push([m])
+    }
+    return out.map((g) => g.sort((a, b) => rank[a.kind] - rank[b.kind]))
+  }, [marks, ruler])
   const x = (t: number) => `${ruler.tToX(t) * 100}%`
-  const scrub = (clientX: number) => {
-    const r = track.current!.getBoundingClientRect()
-    setT(ruler.xToT((clientX - r.left) / r.width))
-  }
-  const ticks = useMemo(() => {
-    const linear = ruler.end - ruler.start - ruler.gaps.reduce((s, g) => s + g.t1 - g.t0, 0)
-    const step = niceStep(linear), out: number[] = []
-    for (let t = Math.ceil(ruler.start / step) * step; t <= ruler.end; t += step)
-      if (!ruler.gaps.some((g) => t > g.t0 && t < g.t1)) out.push(t)
-    return out
-  }, [ruler])
+  const ratio = (clientX: number) => { const r = bar.current!.getBoundingClientRect(); return Math.min(1, Math.max(0, (clientX - r.left) / r.width)) }
 
   useEffect(() => {
     const times = [...new Set(marks.map((m) => m.t))]
@@ -80,63 +64,46 @@ export function Timeline({ inc, ruler }: { inc: Incident; ruler: Ruler }) {
     return () => window.removeEventListener('keydown', on)
   }, [marks])
 
-  const checkedNone = inc.flags.filter((f) => f.t == null && f.status === 'checked_none')
-  // A clip without a place in time gets no row: ten "not placed" rows buried the few clips that are timed.
-  const placed = inc.sources.filter((s) => laneOf(s)), unplaced = inc.sources.filter((s) => !laneOf(s))
+  // Hovering the bar itself previews the time under the pointer (like YouTube's time tooltip).
+  const previewAt = (clientX: number) => {
+    const r = ratio(clientX), t = ruler.xToT(r)
+    const gap = ruler.gaps.find((g) => t > g.t0 && t < g.t1)
+    setHover({ x: r, text: gap ? <>⋯ {Math.round((gap.t1 - gap.t0) / 60)} min with no events (skipped)</> : <>{fmtT(t)} · {clockAt(inc, t)}</> })
+  }
+
   return (
     <div className="timeline">
+      <div className="pb-info">
+        {hover && <span className="pb-tip" style={{ left: `clamp(0px, calc(${hover.x * 100}% - 20%), 40%)` }}>{hover.text}</span>}
+      </div>
+      <div className="pb" ref={bar}
+        onPointerDown={(e) => { dragging.current = true; e.currentTarget.setPointerCapture(e.pointerId); setT(ruler.xToT(ratio(e.clientX))) }}
+        onPointerMove={(e) => { if (dragging.current) setT(ruler.xToT(ratio(e.clientX))); previewAt(e.clientX) }}
+        onPointerUp={() => { dragging.current = false }}
+        onPointerLeave={() => setHover(null)}>
+        <div className="pb-track" />
+        {ruler.gaps.map((g, i) => <div key={i} className="pb-gap" style={{ left: x(g.t0), width: `${(ruler.tToX(g.t1) - ruler.tToX(g.t0)) * 100}%` }} />)}
+        <Progress ruler={ruler} />
+        {groups.map((g, i) => (
+          <div key={i} className={`pb-mark ${g[0].kind}`} style={{ left: x(g[0].t) }}
+            onPointerDown={(e) => e.stopPropagation()}
+            onPointerMove={(e) => {
+              e.stopPropagation()
+              setHover({ x: ruler.tToX(g[0].t), text: <>{g.length === 1 ? null : <span className="muted">{fmtT(g[0].t)} · {g.length} items: </span>}
+                {g.map((m, j) => <span key={j}>{j > 0 && <span className="muted"> | </span>}<b className={m.kind}>{m.sym} {m.label}</b>{g.length === 1 && <span className="muted"> {fmtT(m.t)} · {m.detail}</span>}</span>)}</> })
+            }}
+            onClick={() => jump(g[0].t - 2, g[0].src)}>{g[0].sym}{g.length > 1 && <sup>{g.length}</sup>}</div>
+        ))}
+      </div>
       <div className="tl-controls">
-        <button onClick={toggle}>{playing ? '❚❚' : '▶'}</button>
+        <button onClick={toggle} aria-label={playing ? 'Pause' : 'Play'}>{playing ? '❚❚' : '▶'}</button>
+        <Readout end={ruler.end} />
+        <span className="spacer" />
         {[0.25, 1, 4].map((s) => <button key={s} className={speed === s ? 'on' : ''} onClick={() => setSpeed(s)}>{s}x</button>)}
         <span className="seg">
-          <button className={mode === 'walk' ? 'on' : ''} onClick={() => setMode('walk')}>Walkthrough{mode === 'walk' ? ' ●' : ''}</button>
+          <button className={mode === 'walk' ? 'on' : ''} onClick={() => setMode('walk')}>Walkthrough</button>
           <button className={mode === 'free' ? 'on' : ''} onClick={() => setMode('free')}>Free</button>
         </span>
-        {mode === 'free' && <button onClick={() => setMode('walk')}>Resume walkthrough</button>}
-        <Readout />
-        {checkedNone.length > 0 && <span className="muted checked">○ checked, none: {checkedNone.map((f) => f.label).join(' · ')}</span>}
-      </div>
-      <div className="tl-body">
-        <div className="tl-labels">
-          <div>flags</div><div>events</div>
-          {placed.map((s) => <div key={s.id}>{s.id}</div>)}
-        </div>
-        <div className="tl-track" ref={track} style={{ minHeight: 44 + 16 * placed.length + (unplaced.length ? 18 : 0) }}
-          onPointerDown={(e) => { dragging.current = true; (e.target as HTMLElement).setPointerCapture(e.pointerId); scrub(e.clientX) }}
-          onPointerMove={(e) => dragging.current && scrub(e.clientX)}
-          onPointerUp={() => { dragging.current = false }}>
-          {ticks.map((t) => <div key={t} className="tick" style={{ left: x(t) }}>{t > 0 ? '+' : ''}{t}s</div>)}
-          {ruler.gaps.map((g, i) => (
-            <div key={i} className="gap" style={{ left: x(g.t0), width: `${(ruler.tToX(g.t1) - ruler.tToX(g.t0)) * 100}%` }}>
-              ⋯ {Math.round((g.t1 - g.t0) / 60)} min ⋯
-            </div>
-          ))}
-          {marks.map((m, i) => (
-            <div key={i} className={`mark ${m.row}`} style={{ left: x(m.t) }} title={m.tip}
-              onPointerDown={(e) => e.stopPropagation()} onClick={() => jump(m.t - 2, m.src)}>{m.text}</div>
-          ))}
-          {placed.map((s, i) => {
-            const l = laneOf(s)
-            const boom = inc.timeline.find((e) => e.type === 'boom_heard' && e.source === s.id)
-            return (
-              <div key={s.id} className="lane-row" style={{ top: 40 + i * 16 }}>
-                {l ? (
-                  <div className={`lane ${s.aligned === false ? 'approx' : ''}`}
-                    style={{ left: x(l.t0), width: `${(ruler.tToX(l.t1) - ruler.tToX(l.t0)) * 100}%` }}>
-                    {s.aligned === false && 'approx.'}
-                  </div>
-                ) : <span className="muted lane-note">{s.authenticity === 'fake' ? 'rejected' : 'not placed in time'}</span>}
-                {boom && <span className="boom-tag" style={{ left: x(boom.t) }}>boom heard {fmtT(boom.t)}</span>}
-              </div>
-            )
-          })}
-          {unplaced.length > 0 && (
-            <div className="lane-row muted lane-note" style={{ top: 42 + placed.length * 16 }}>
-              not placed in time: {unplaced.map((s) => (s.authenticity === 'fake' ? `${s.id} (rejected)` : s.id)).join(' · ')} · open them from Sources
-            </div>
-          )}
-          <Playhead ruler={ruler} />
-        </div>
       </div>
     </div>
   )

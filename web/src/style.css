@@ -59,28 +59,27 @@ button.on { border-color: var(--cyan); color: var(--cyan); }
 .lower-third { position: absolute; bottom: 30px; left: 50%; transform: translateX(-50%); background: rgba(0,0,0,0.75); border-left: 3px solid var(--amber); padding: 4px 12px; white-space: nowrap; }
 
 /* timeline */
-.timeline { border-top: 1px solid var(--line); background: var(--panel); padding: 4px 8px 6px; user-select: none; }
-.tl-controls { display: flex; gap: 6px; align-items: center; margin-bottom: 4px; flex-wrap: wrap; }
+.timeline { border-top: 1px solid var(--line); background: var(--panel); padding: 2px 14px 8px; user-select: none; }
+/* reserved line for hover details: nothing ever overlaps the scene or the bar */
+.pb-info { position: relative; height: 20px; font-size: 12px; overflow: hidden; }
+.pb-info .pb-tip { position: absolute; top: 2px; max-width: 100%; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.pb-mark sup { font-size: 8px; color: var(--text); margin-left: 1px; }
+.pb-info b.flag { color: var(--red); } .pb-info b.note { color: var(--yellow); } .pb-info b.impact { color: var(--amber); }
+/* the play bar: thin, thickens on hover, played part filled, round knob */
+.pb { position: relative; height: 18px; cursor: pointer; }
+.pb-track, .pb-played, .pb-gap { position: absolute; top: 7px; height: 4px; transition: top 0.1s, height 0.1s; }
+.pb-track { left: 0; right: 0; background: #2a323d; }
+.pb-played { left: 0; background: var(--red); }
+.pb-gap { background: repeating-linear-gradient(90deg, #0b0e12 0 3px, #3a4450 3px 6px); }
+.pb:hover .pb-track, .pb:hover .pb-played, .pb:hover .pb-gap { top: 5px; height: 8px; }
+.pb-knob { position: absolute; top: 9px; width: 12px; height: 12px; border-radius: 50%; background: var(--red); transform: translate(-50%, -50%); pointer-events: none; }
+.pb-mark { position: absolute; top: -6px; transform: translateX(-50%); font-size: 11px; line-height: 1; cursor: pointer; padding: 0 2px; }
+.pb-mark.flag { color: var(--red); } .pb-mark.note { color: var(--yellow); } .pb-mark.impact { color: var(--amber); top: -7px; font-size: 13px; }
+.pb-mark:hover { transform: translateX(-50%) scale(1.4); }
+.tl-controls { display: flex; gap: 6px; align-items: center; margin-top: 4px; }
 .tl-controls .seg { display: inline-flex; }
-.tl-controls .readout { margin-left: 8px; color: var(--cyan); }
-.tl-controls .checked { margin-left: auto; font-size: 11px; }
-.tl-body { display: flex; }
-.tl-labels { width: 48px; font-size: 10px; color: var(--dim); padding-top: 12px; }
-.tl-labels div { height: 16px; line-height: 16px; }
-.tl-track { position: relative; flex: 1; cursor: ew-resize; }
-.tick { position: absolute; top: -2px; font-size: 9px; color: var(--dim); transform: translateX(-50%); }
-.gap { position: absolute; top: 10px; bottom: 0; background: repeating-linear-gradient(135deg, #1a2029 0 4px, transparent 4px 8px); font-size: 10px; color: var(--dim); text-align: center; overflow: hidden; white-space: nowrap; }
-.mark { position: absolute; transform: translateX(-50%); font-size: 11px; cursor: pointer; white-space: nowrap; }
-.mark.flag { top: 10px; color: var(--red); } .mark.note { top: 10px; color: var(--yellow); }
-.mark.event { top: 24px; color: var(--text); font-size: 9px; }
-.lane-row { position: absolute; left: 0; right: 0; height: 12px; }
-.lane { position: absolute; height: 10px; top: 1px; background: #2e5a6b; font-size: 8px; line-height: 10px; color: var(--text); overflow: hidden; }
-.lane.approx { background: repeating-linear-gradient(135deg, #2e5a6b 0 3px, transparent 3px 6px); }
-.lane-note { font-size: 9px; }
-.boom-tag { position: absolute; top: -1px; font-size: 8px; color: var(--cyan); white-space: nowrap; }
-.playhead { position: absolute; top: 0; bottom: 0; width: 2px; background: var(--cyan); transform: translateX(-1px); pointer-events: none; }
-.tl-track { min-height: 76px; }
-.lane-note { font-size: 10px; white-space: nowrap; }
+.tl-controls .readout { margin-left: 6px; color: var(--text); font-variant-numeric: tabular-nums; }
+.tl-controls .spacer { flex: 1; }
 
 /* sidebar */
 .sidebar { font-size: 12px; }
