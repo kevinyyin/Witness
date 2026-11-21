@@ -7,12 +7,6 @@
    "evidence": "commit 9da10f4, pipeline/geo.py · the 1:50 PM run was overwritten before it was committed"
   },
   {
-   "saw": "Hero incidents drew a camera for every clip with a model estimate, and spread aftermath clips along the timeline by upload time.",
-   "changed": "A camera is drawn only where a landmark confirms the spot. A clip with no flash and no boom stays off the timeline.",
-   "now": "0901 keeps one camera and 0622 none. Clips that cannot be timed are listed as sources, not placed on the timeline.",
-   "evidence": "commit 9b2b103, pipeline/incidents.py"
-  },
-  {
    "saw": "In 0622 only one clip was placed at the impact. A silent CCTV clip that shows the flash was dropped because it has no boom.",
    "changed": "A clip with a confident flash and no sound is aligned by the flash alone, to about a second.",
    "now": "0622 plays two cameras at the impact.",

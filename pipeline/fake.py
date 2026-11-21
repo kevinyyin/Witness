@@ -8,6 +8,10 @@ from . import CACHE
 from .physics import SOUND_M_S
 
 NOT_REAL_FAIL = 0.6
+# A link is scored from Hydrogen's written description, not the footage, and that score moves between runs: one real
+# dev clip scored 0.05, 0.14, 0.15, 0.35 and 0.64 on five runs. Link fakes score 0.96+, so a link is rejected only
+# from 0.8; between "unsure" and that, a human decides.
+NOT_REAL_FAIL_TEXT = 0.8
 NOT_REAL_UNSURE = 0.45  # dev: fakes score 0.96+, real clips 0.10 (file) to 0.37 (a news report scored from text)
 REPEAT_FAIL = 0.95
 RECYCLED_GAP_S = 48 * 3600
@@ -62,8 +66,10 @@ def run_checks(seen, scores, phys, has_file, match, older_by_s):
     kind = max(scores["fake_kind"], key=scores["fake_kind"].get).replace("_", " ")
     hud = f", on-screen interface {mmss(seen['hud_start_s'])}–{mmss(seen['hud_end_s'])}" if seen.get("hud_present") else ", no HUD"
     hud_ts = float(seen["hud_start_s"]) if seen.get("hud_present") else None
-    if not_real >= NOT_REAL_FAIL:
+    if not_real >= (NOT_REAL_FAIL if has_file else NOT_REAL_FAIL_TEXT):
         c3 = ("fail", f"looks like {kind} (not-real score {not_real:.2f}){hud}", hud_ts)
+    elif not_real >= NOT_REAL_UNSURE:
+        c3 = ("n/a", f"inconclusive (not-real score {not_real:.2f}){hud}", hud_ts)
     else:
         c3 = ("pass", f"looks like real camera footage (not-real score {not_real:.2f}){hud}", hud_ts)
 
@@ -110,4 +116,7 @@ if __name__ == "__main__":
     assert _run(0.95, match={"clip_id": "c_0001"}, older=30 * 86400) == ("fake", "recycled")
     assert _run(0.95, match={"clip_id": "c_0001"}, older=3600) == ("real", "real_strike")
     assert _run(0.95, delta=0.0, apparent=800, has_file=False) == ("fake", "video_game")
+    assert _run(0.36, has_file=False) == ("unsure", None)  # the real dev link on its worst run: a human decides
+    assert _run(0.36) == ("fake", "video_game")  # the same score from the footage itself still rejects
+    assert _run(0.04, has_file=False) == ("fake", "video_game")  # link fakes score 0.96+
     print("fake selftest OK")
