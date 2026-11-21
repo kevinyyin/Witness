@@ -55,6 +55,9 @@ export function Callouts({ inc, osm, getScene }: { inc: Incident; osm: OsmFile |
   useEffect(() => {
     const draw = (t: number) => {
       const s = getScene()
+      // cards already laid out this frame (x, y, w, h); the clock + its screen-level stack (top right) is reserved
+      const cw = s?.renderer.domElement.clientWidth ?? 800, stack = document.querySelector<HTMLElement>('.clock-stack')
+      const placed: [number, number, number, number][] = [[cw - 310, 0, 310, 66 + (stack?.offsetHeight ?? 0)]]
       items.forEach((it, i) => {
         const card = cards.current[i], pin = pins.current[i], path = leaders.current[i]
         if (!card || !pin || !path) return
@@ -76,8 +79,16 @@ export function Callouts({ inc, osm, getScene }: { inc: Incident; osm: OsmFile |
           if (hover.current !== i) return // hovering a pin re-opens its callout (§7.1.5)
         }
         const op = st.state === 'pin' ? 1 : st.opacity
-        const x = Math.max(8, Math.min(p.x + 50, W - 300)), y = Math.max(40, Math.min(p.y - 110, H - 140))
+        const x = Math.max(8, Math.min(p.x + 50, W - 300))
+        let y = Math.max(40, Math.min(p.y - 110, H - 140))
         card.style.display = ''
+        // several callouts at once (e.g. every impact flag at t = 0): push down until it overlaps no earlier card
+        const w = card.offsetWidth || 280, h = card.offsetHeight || 40
+        for (let k = 0; k < placed.length; k++) {
+          const [px, py, pw, ph] = placed[k]
+          if (x < px + pw && x + w > px && y < py + ph + 6 && y + h + 6 > py) { y = py + ph + 6; k = -1 }
+        }
+        placed.push([x, y, w, h])
         card.style.opacity = String(op)
         card.style.transform = `translate(${x}px, ${y}px)`
         if (st.state !== 'pin') pin.style.display = 'none'
