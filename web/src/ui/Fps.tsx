@@ -4,6 +4,12 @@ import { frameStats } from '../scene/Scene'
 /** Big FPS readout (§7.1.8 #9: ≥ 30 fps on the demo laptop), readable from a metre away. */
 export function Fps({ points }: { points: number }) {
   const [fps, setFps] = useState(0)
+  const [hidden, setHidden] = useState(false)
+  useEffect(() => {
+    const on = (e: KeyboardEvent) => { if (e.key === 'f' || e.key === 'F') setHidden((h) => !h) } // F: hide for video capture
+    window.addEventListener('keydown', on)
+    return () => window.removeEventListener('keydown', on)
+  }, [])
   useEffect(() => {
     let frames = frameStats.frames, t = performance.now()
     const id = setInterval(() => {
@@ -14,6 +20,7 @@ export function Fps({ points }: { points: number }) {
     }, 500)
     return () => clearInterval(id)
   }, [])
+  if (hidden) return null
   return (
     <div className="fps" style={{ color: fps >= 30 ? 'var(--green)' : 'var(--red)' }}>
       FPS {fps} · {Math.round(points / 1000)}k pts
