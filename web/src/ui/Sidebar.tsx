@@ -18,7 +18,7 @@ const VERDICT = /\b(war crimes?|illegal|guilty)\b/i
 export function Summary({ inc }: { inc: Incident }) {
   if (!inc.summary) return null
   return (
-    <Sec title="WHAT PROBABLY HAPPENED">
+    <Sec title={<>WHAT PROBABLY HAPPENED <span className="muted">(written by Gemini 4 Carbon)</span></>}>
       {VERDICT.test(inc.summary)
         ? <div className="warn">Summary withheld: its wording breaks the no-verdict rule (§7.1.9).</div>
         : <div>{inc.summary}</div>}

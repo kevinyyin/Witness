@@ -12,6 +12,9 @@ const rank = (claim: string) => (CLAIMS.indexOf(claim) + 1) || CLAIMS.length + 1
 export function Proof() {
   const [r, setR] = useState<Results | null | undefined>(undefined)
   useEffect(() => { getJSON<Results>('eval/results.json').then(setR) }, [])
+  // eval/changes.json: failures seen on the dev set and what was changed for each. Optional: no file, no section.
+  const [changes, setChanges] = useState<{ items: { saw: string; changed: string; now: string; evidence: string }[] } | null>(null)
+  useEffect(() => { getJSON<typeof changes>('eval/changes.json').then(setChanges) }, [])
   if (r === undefined) return <div className="page muted">Loading eval/results.json…</div>
   if (r === null) return <div className="page warn">No web/public/eval/results.json yet (the pipeline commits dev-set numbers by 3:00, test-set by 3:50).</div>
   const a = r.ablation, best = Math.max(a.full_video, a.frames_5, a.transcript, 1)
@@ -39,6 +42,19 @@ export function Proof() {
           })}
         </tbody>
       </table>
+      {changes && changes.items.length > 0 && (
+        <>
+          <h3>What we changed after seeing failures</h3>
+          <table className="changes">
+            <thead><tr><th>What we saw</th><th>What we changed</th><th>Result</th></tr></thead>
+            <tbody>
+              {changes.items.map((c, i) => (
+                <tr key={i}><td>{c.saw}</td><td>{c.changed}</td><td>{c.now}<div className="muted small">{c.evidence}</div></td></tr>
+              ))}
+            </tbody>
+          </table>
+        </>
+      )}
       <h3>Footage, not a description of it <span className="muted">· {a.metric} · n = {a.n}</span></h3>
       {([['full video', a.full_video], ['5 frames', a.frames_5], ['transcript', a.transcript]] as const).map(([k, v]) => (
         <div key={k} className="bar-row wide"><span>{k}</span><span className="bar"><span style={{ width: `${(v / best) * 100}%` }} /></span><span>{fmt(v, a.unit)}</span></div>

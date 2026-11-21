@@ -31,7 +31,9 @@ export function BreakIt() {
   const [elapsed, setElapsed] = useState(0)
   const [board, setBoard] = useState<Scoreboard | null>(null)
   const [judged, setJudged] = useState(false)
-  const [ran, setRan] = useState<File | null>(null) // the file behind the current result, so the card can play it
+  // what this run was given: its video shows the moment Analyze is pressed, so nobody waits on a list of stage names
+  const [sent, setSent] = useState<{ n: number; yt: string | null; file: File | null } | null>(null)
+  const adapter = useRef<Adapter | null>(null)
   const started = useRef(0)
   const ended = useRef(false) // a result or an error arrived: anything else is a dropped stream
 
@@ -65,12 +67,16 @@ export function BreakIt() {
     }
     finally { setBusy(false); setElapsed((performance.now() - started.current) / 1000) } // a hidden tab throttles the ticker: set the total here
   }
-  const submit = () => { setRan(file); return run(() => analyze(file ? { file, claimed_place: place || null } : { url: url.trim(), claimed_place: place || null }, onEvent)) }
-  const replay = (f: Fixture) => { setRan(null); return run(() => replayFixture(f, onEvent)) }
+  const submit = () => { setSent({ n: (sent?.n ?? 0) + 1, yt: file ? null : youtubeId(url), file }); return run(() => analyze(file ? { file, claimed_place: place || null } : { url: url.trim(), claimed_place: place || null }, onEvent)) }
+  const replay = (f: Fixture) => { setSent(null); return run(() => replayFixture(f, onEvent)) }
   const tell = async (truth: Truth) => {
     if (!result) return
     try { setBoard(await judge(result.clip_id, truth)); setJudged(true) } catch (err) { setError(String((err as Error).message)) }
   }
+
+  const yt = sent && !sent.file ? (youtubeId(result?.embed_url ?? '') ?? sent.yt) : null
+  const playable = !!sent && (!!yt || !!sent.file)
+  const go = (ts: number) => { adapter.current?.seek(Math.max(0, ts - 1.5)); adapter.current?.play() } // start just before the moment
 
   return (
     <div className="page breakit">
@@ -113,7 +119,11 @@ export function BreakIt() {
           })}
           {error && <div className="warn">✗ {error}</div>}
         </section>
-        {result && <Verdict key={result.clip_id} r={result} file={ran} />}
+        <div className="bk-right">
+          {playable && <ClipPlayer key={sent!.n} yt={yt} file={sent!.file} graphic={result?.triage.graphic_level ?? 0} adapter={adapter} />}
+          {playable && busy && !result && <div className="muted">Play it while Witness works. The verdict lands here.</div>}
+          {result && <Verdict key={result.clip_id} r={result} playable={playable} go={go} />}
+        </div>
       </div>
 
       {result && (
@@ -135,11 +145,15 @@ export function BreakIt() {
   )
 }
 
-/** The analyzed clip, playable on the card: every timed line below seeks it, so a claim can be checked in one click. */
+/** The clip being analyzed. Every timed line on the verdict card seeks it, so a claim can be checked in one click. */
 function ClipPlayer({ yt, file, graphic, adapter }: { yt: string | null; file: File | null; graphic: number; adapter: { current: Adapter | null } }) {
   const box = useRef<HTMLDivElement>(null), vid = useRef<HTMLVideoElement>(null)
   const [src, setSrc] = useState<string | null>(null)
-  const [shown, setShown] = useState(graphic < 2) // same rule as the reconstruction sidebar: graphic >= 2 starts blurred
+  // same rule as the reconstruction sidebar: graphic >= 2 is blurred. The level is only known once scoring is done,
+  // so a clip that turns out graphic is paused and covered at that moment.
+  const [override, setOverride] = useState(false)
+  const shown = graphic < 2 || override
+  useEffect(() => { if (!shown) adapter.current?.pause() }, [shown, adapter])
   useEffect(() => {
     if (yt || !file) return
     const u = URL.createObjectURL(file)
@@ -158,7 +172,7 @@ function ClipPlayer({ yt, file, graphic, adapter }: { yt: string | null; file: F
   return (
     <div className={`video-box ${shown ? '' : 'blurred'}`}>
       {yt ? <div><div ref={box} /></div> : <video ref={vid} src={src ?? undefined} playsInline controls preload="auto" />}
-      {!shown && <div className="blur-cover">Graphic content (level {graphic}) · blurred<button onClick={() => setShown(true)}>Show anyway</button></div>}
+      {!shown && <div className="blur-cover">Graphic content (level {graphic}) · blurred<button onClick={() => setOverride(true)}>Show anyway</button></div>}
     </div>
   )
 }
@@ -171,19 +185,14 @@ function LocMap({ lat, lon, radius_m }: { lat: number; lon: number; radius_m: nu
     src={`https://www.openstreetmap.org/export/embed.html?bbox=${bbox}&layer=mapnik&marker=${lat.toFixed(5)},${lon.toFixed(5)}`} />
 }
 
-function Verdict({ r, file }: { r: ClipRecord; file: File | null }) {
+function Verdict({ r, playable, go }: { r: ClipRecord; playable: boolean; go: (ts: number) => void }) {
   const f = r.fake
-  const adapter = useRef<Adapter | null>(null)
-  const yt = youtubeId(r.embed_url ?? r.source_url ?? '')
-  const playable = !!yt || !!file
-  const go = (ts: number) => { adapter.current?.seek(Math.max(0, ts - 1.5)); adapter.current?.play() } // start just before the moment
   const rejected = f.verdict === 'fake'
   const title = rejected ? `Rejected · ${LABEL[f.label ?? ''] ?? f.label ?? 'not real'}` : f.verdict === 'real' ? 'Real strike footage' : 'Unsure · needs a human reviewer'
   const loc = r.location
   return (
     <section className={`verdict ${f.verdict}`}>
       <h3>{title} <span className="muted">conf {f.confidence.toFixed(2)}</span></h3>
-      {playable && <ClipPlayer yt={yt} file={file} graphic={r.triage.graphic_level} adapter={adapter} />}
       {r.timeline.length > 0 && (
         <div className="bk-events">
           <span className="muted">What Hydrogen saw and heard{playable ? ' (click to check)' : ''}: </span>

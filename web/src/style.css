@@ -133,7 +133,8 @@ button.mini { padding: 1px 6px; font-size: 10px; margin: 2px 4px 2px 0; }
 .verdict h3 { margin: 4px 0 10px; font-size: 22px; }
 .check { margin: 3px 0; } .check.fail { color: var(--red); }
 .bk-loc { margin: 10px 0 4px; }
-.verdict .video-box { max-width: 560px; margin-bottom: 8px; }
+.proof table.changes td { vertical-align: top; width: 33%; padding-right: 18px; line-height: 1.45; }
+.bk-right .video-box { max-width: 560px; margin-bottom: 8px; }
 .bk-events { margin: 6px 0 10px; max-width: 720px; } .bk-events button.mini { font-size: 12px; padding: 2px 7px; }
 .check button.mini { font-size: 12px; }
 .bk-map { display: block; width: 100%; max-width: 560px; height: 220px; border: 1px solid var(--line); margin-top: 6px; filter: invert(1) hue-rotate(180deg) brightness(0.9) contrast(0.9); }
