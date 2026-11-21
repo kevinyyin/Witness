@@ -94,9 +94,31 @@ export function BreakIt() {
 
   const ready = !busy && (!!file || !!url.trim())
 
+  const located = result && result.fake.verdict !== 'fake' ? result.location : null
   return (
-    <div className={`page breakit${dragging ? ' dragging' : ''}`}>
+    <div className={`page breakit bk-split${dragging ? ' dragging' : ''}`}>
       <SampleBanner show={offline} />
+      {/* the stage: like the reconstruction, the place is the main thing. A fake never reaches the map. */}
+      <div className="bk-stage">
+        {located ? (
+          <LocMap key={result!.clip_id} lat={located.lat} lon={located.lon} radius_m={located.radius_m}
+            title={result!.fake.verdict === 'real' ? 'Real strike footage' : 'Unsure · needs a human reviewer'}
+            sub={`${located.level === 'city' ? 'City only' : located.level === 'unknown' ? 'Location unknown' : located.level} · ± ${located.radius_m >= 1000 ? `${(located.radius_m / 1000).toFixed(1)} km` : `${located.radius_m} m`}${located.evidence[0] ? ` · ${located.evidence[0]}` : ''}`} />
+        ) : (
+          <div className={`bk-empty${result?.fake.verdict === 'fake' ? ' fake' : ''}`}>
+            <b>{result
+              ? result.fake.verdict === 'fake' ? `Rejected · ${LABEL[result.fake.label ?? ''] ?? result.fake.label?.replace(/_/g, ' ') ?? 'not real'}`
+                : result.triage.military_object >= 0.5 ? 'Location withheld' : 'Location unknown'
+              : busy ? 'Watching the clip' : 'Nothing on the map yet'}</b>
+            <span>{result
+              ? result.fake.verdict === 'fake' ? 'Rejected clips are not located and never reach the map.'
+                : result.triage.military_object >= 0.5 ? 'A military object is visible, so Witness does not place this clip.' : 'Witness could not narrow this clip to a place.'
+              : busy ? 'If it shows a real strike, it lands here with its margin of error. A fake never does.'
+                : 'Paste a link or drop a video on the right. A real strike is placed here with its margin of error.'}</span>
+          </div>
+        )}
+      </div>
+      <aside className="bk-side">
       <header className="bk-head">
         <div>
           <h1>Try to fool Witness<i>.</i></h1>
@@ -219,6 +241,7 @@ export function BreakIt() {
           </table>
         </section>
       )}
+      </aside>
     </div>
   )
 }
@@ -302,9 +325,7 @@ function Verdict({ r, playable, go }: { r: ClipRecord; playable: boolean; go: (t
       {rejected && <p className="note">Rejected clips are not located and never reach the map.</p>}
       {!rejected && (loc ? (
         <div className="bk-loc">
-          <LocMap lat={loc.lat} lon={loc.lon} radius_m={loc.radius_m}
-            title={`${loc.level === 'city' ? 'City only' : loc.level === 'unknown' ? 'Location unknown' : loc.level} · ± ${loc.radius_m >= 1000 ? `${(loc.radius_m / 1000).toFixed(1)} km` : `${loc.radius_m} m`}`}
-            sub={loc.evidence[0] ?? ''} />
+          {loc.evidence.length > 0 && <p className="muted">{loc.evidence.join(' · ')}</p>}
           <p className="coords">
             {loc.lat.toFixed(4)}, {loc.lon.toFixed(4)} · {loc.method} · {loc.candidates} candidate{loc.candidates === 1 ? '' : 's'}
             {' · '}{f.checks.filter((c) => c.result === 'pass').length} of {f.checks.filter((c) => c.result !== 'n/a').length} checks passed
