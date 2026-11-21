@@ -169,6 +169,7 @@ Written Sat Nov 21, 10:45 AM ET. Spec says "Teammate" for the pipeline owner: th
 - 13:35 `NOT_REAL_UNSURE` 0.35 → 0.45 (dev: fakes ≥ 0.96, real ≤ 0.37).
 - Baselines now: Hydrogen asked directly, `gemini-3.8-flash` asked directly (previous generation), Claude Opus 5.5 on 5 frames + caption (needs `ANTHROPIC_API_KEY` and `ANTHROPIC_WORKSPACE_ID` in `.env`).
 - 13:57 dev results (29 clips, 17 located, 28 hero clips): within 1 km 59% (Hydrogen direct 53, 3.8-flash 47, Claude 18); median 0.7 km (0.8 / 1.4 / 2.5); inside radius 76%; fakes 100/100 for every method; grouping 82% vs 79%; ablation 100 / 100 / 38.
+- 14:06 **Mistake:** I sent test clip `neg_0007` through the live server once while checking the restart (verdict was correct: fake, demolition). It is now `excluded` in `eval/split.csv`, so it counts in neither dev nor test. Nothing was tuned after seeing it. Server checks from now on use dev clips only: `neg_0006`, `str_0008`.
 - User decisions: skip-marked hero clips are read for location only (12:35); Claude baseline stays at 5 frames (13:36); ChatGPT skipped.
 
 ### After the freeze
