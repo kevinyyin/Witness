@@ -164,6 +164,51 @@ def retime(video_block, around_s):
     return (float(out["flash_ts"]), float(out["blast_ts"])) if ok else None
 
 
+CROSSCHECK_SCHEMA = {
+    "type": "object",
+    "properties": {
+        "notes": {"type": "array", "items": {
+            "type": "object",
+            "properties": {
+                "type": {"type": "string", "enum": ["time_conflict", "location_conflict", "single_source"]},
+                "label": {"type": "string", "description": "At most 12 words, naming the clips by letter."},
+                "confidence": {"type": "number"},
+                "sources": {"type": "array", "items": {"type": "string"}, "description": "Letters of the clips involved."},
+                "source": {"type": "string", "description": "Letter of the one clip a reviewer should open."},
+                "clip_ts": {"type": "number", "description": "Seconds into that clip where the problem shows."},
+                "basis": {"type": "array", "items": {"type": "string"}, "description": "Evidence like 'C@0:12 impact'."},
+            },
+            "required": ["type", "label", "confidence", "sources", "source", "clip_ts", "basis"]}},
+        "summary": {"type": "string"},
+    },
+    "required": ["notes", "summary"],
+}
+
+CROSSCHECK_PROMPT = """You are the second reader of an incident file. Code assembled it from several video clips that were
+posted about the same reported strike. Work only from the JSON below. Do not add outside knowledge.
+
+1. notes: contradictions a human reviewer must check before trusting the reconstruction.
+   - time_conflict: two clips disagree about when something happened by more than 30 s, or a clip placed at the
+     impact already shows damage, smoke or rescue work.
+   - location_conflict: a clip seems to show a different place from the others.
+   - single_source: an important event that only one independent clip shows. Reposts of the same video are not independent.
+   Report only what the JSON supports. An empty list is a valid answer.
+2. summary: 2 or 3 short sentences, at most 60 words in total, on what probably happened.
+   Use "probably", "estimated" and "consistent with". Give the place, how many independent clips agree, and the one main caveat.
+   Plain words; no coordinates, no field names, no seconds.
+   Never say who is responsible. No legal terms. No casualty numbers."""
+
+
+def crosscheck(document):
+    """Carbon: cross-check an incident for contradictions and write the summary. Returns {"notes": [...], "summary": str}."""
+    out = _client.interactions.create(
+        model=CARBON,
+        input=[{"type": "text", "text": CROSSCHECK_PROMPT + "\n\n" + json.dumps(document, ensure_ascii=False)}],
+        response_format={"type": "text", "mime_type": "application/json", "schema": CROSSCHECK_SCHEMA},
+    ).output_text
+    return json.loads(out)
+
+
 def score(input_blocks):
     """One Decisions call with every question. Returns plain dicts keyed like QUESTIONS."""
     answers = _decisions.decisions.create(model=DECISION, input=input_blocks, questions=QUESTIONS).answers

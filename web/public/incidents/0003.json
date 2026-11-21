@@ -1,0 +1,768 @@
+{
+ "id": "0003",
+ "city": "Kharkiv",
+ "title": "Strike in Kharkiv, 2024-09-01",
+ "osm_file": "osm/Kharkiv_buildings_2024-09-01_mall.json",
+ "time": {
+  "impact_local": "2024-09-01T14:32:40+03:00",
+  "plus_minus_s": 3600,
+  "basis": "earliest post time; the impact is earlier by an unknown amount"
+ },
+ "impact": {
+  "lat": 50.00964,
+  "lon": 36.31881,
+  "radius_m": 300,
+  "method": "landmarks",
+  "confidence": 0.6
+ },
+ "target": {
+  "osm_id": "way/1499318141",
+  "footprint": [
+   [
+    36.3172233,
+    50.0101191
+   ],
+   [
+    36.3183002,
+    50.0100917
+   ],
+   [
+    36.3183032,
+    50.0101499
+   ],
+   [
+    36.3184842,
+    50.010144
+   ],
+   [
+    36.3185117,
+    50.0104874
+   ],
+   [
+    36.3185906,
+    50.0104848
+   ],
+   [
+    36.3188024,
+    50.0104778
+   ],
+   [
+    36.3188543,
+    50.0104761
+   ],
+   [
+    36.3188178,
+    50.0100186
+   ],
+   [
+    36.318827,
+    50.0100183
+   ],
+   [
+    36.3188345,
+    50.0100158
+   ],
+   [
+    36.3188403,
+    50.0100119
+   ],
+   [
+    36.3188439,
+    50.010007
+   ],
+   [
+    36.3188448,
+    50.0100016
+   ],
+   [
+    36.318843,
+    50.0099964
+   ],
+   [
+    36.3188387,
+    50.0099917
+   ],
+   [
+    36.3188324,
+    50.0099882
+   ],
+   [
+    36.3188246,
+    50.0099862
+   ],
+   [
+    36.3186978,
+    50.0099905
+   ],
+   [
+    36.3186907,
+    50.0099028
+   ],
+   [
+    36.3186805,
+    50.0098927
+   ],
+   [
+    36.3186674,
+    50.0098851
+   ],
+   [
+    36.3186518,
+    50.0098805
+   ],
+   [
+    36.3185338,
+    50.0098844
+   ],
+   [
+    36.3185303,
+    50.009826
+   ],
+   [
+    36.3183696,
+    50.0098319
+   ],
+   [
+    36.3183169,
+    50.0098339
+   ],
+   [
+    36.3183162,
+    50.0098244
+   ],
+   [
+    36.3183145,
+    50.0098181
+   ],
+   [
+    36.3183092,
+    50.009813
+   ],
+   [
+    36.3183015,
+    50.0098094
+   ],
+   [
+    36.3182923,
+    50.0098077
+   ],
+   [
+    36.3182829,
+    50.009808
+   ],
+   [
+    36.3182742,
+    50.0098105
+   ],
+   [
+    36.3182672,
+    50.0098147
+   ],
+   [
+    36.3182629,
+    50.0098202
+   ],
+   [
+    36.3182617,
+    50.0098262
+   ],
+   [
+    36.3182264,
+    50.0098273
+   ],
+   [
+    36.3182232,
+    50.0097714
+   ],
+   [
+    36.31822,
+    50.0097155
+   ],
+   [
+    36.3182294,
+    50.0097114
+   ],
+   [
+    36.3182364,
+    50.0097057
+   ],
+   [
+    36.3182404,
+    50.0096989
+   ],
+   [
+    36.318241,
+    50.0096917
+   ],
+   [
+    36.3182382,
+    50.0096846
+   ],
+   [
+    36.3182321,
+    50.0096785
+   ],
+   [
+    36.3182224,
+    50.0096734
+   ],
+   [
+    36.3182105,
+    50.0096707
+   ],
+   [
+    36.318198,
+    50.0096707
+   ],
+   [
+    36.3181862,
+    50.0096735
+   ],
+   [
+    36.3181765,
+    50.0096786
+   ],
+   [
+    36.31817,
+    50.0096855
+   ],
+   [
+    36.3176811,
+    50.0097031
+   ],
+   [
+    36.3174223,
+    50.0097128
+   ],
+   [
+    36.317422,
+    50.0097104
+   ],
+   [
+    36.3174161,
+    50.0097047
+   ],
+   [
+    36.3174075,
+    50.0097005
+   ],
+   [
+    36.3173974,
+    50.0096984
+   ],
+   [
+    36.3173867,
+    50.0096984
+   ],
+   [
+    36.3173764,
+    50.0097008
+   ],
+   [
+    36.317368,
+    50.0097051
+   ],
+   [
+    36.3173622,
+    50.009711
+   ],
+   [
+    36.3173598,
+    50.0097178
+   ],
+   [
+    36.3173606,
+    50.009724
+   ],
+   [
+    36.3173054,
+    50.0097283
+   ],
+   [
+    36.3172619,
+    50.0097392
+   ],
+   [
+    36.3172197,
+    50.0097641
+   ],
+   [
+    36.3172005,
+    50.0098024
+   ],
+   [
+    36.3172033,
+    50.0098476
+   ],
+   [
+    36.3172233,
+    50.0101191
+   ]
+  ],
+  "levels": 3,
+  "osm_tags": {
+   "addr:housenumber": "271",
+   "addr:street": "вулиця Академіка Павлова",
+   "building": "office",
+   "building:levels": "3",
+   "name": "Радмір",
+   "name:ru": "Радмир",
+   "name:uk": "Радмір"
+  },
+  "visual_basis": []
+ },
+ "weapon": {
+  "options": {
+   "shahed_drone": 0.03,
+   "cruise_missile": 0.06,
+   "ballistic_missile": 0.42,
+   "glide_bomb": 0.03,
+   "rocket_cluster": 0.05,
+   "tube_artillery": 0.03,
+   "fpv_drone": 0.01,
+   "unknown": 0.39
+  },
+  "evidence": []
+ },
+ "flags": [
+  {
+   "type": "residential",
+   "label": "Residential building",
+   "status": "checked_none",
+   "confidence": null,
+   "t": null,
+   "t_end": null,
+   "anchor": null,
+   "source": null,
+   "clip_ts": null,
+   "basis": []
+  },
+  {
+   "type": "protected_site",
+   "label": "Hospital / school / worship / shelter nearby",
+   "status": "checked_none",
+   "confidence": null,
+   "t": null,
+   "t_end": null,
+   "anchor": null,
+   "source": null,
+   "clip_ts": null,
+   "basis": []
+  },
+  {
+   "type": "dense_population",
+   "label": "Densely populated · 118 buildings within 300 m",
+   "status": "raised",
+   "confidence": 0.85,
+   "t": 0.0,
+   "t_end": null,
+   "anchor": {
+    "kind": "impact"
+   },
+   "source": null,
+   "clip_ts": null,
+   "basis": [
+    "osm: 118 buildings within 300 m"
+   ]
+  },
+  {
+   "type": "night_strike",
+   "label": "Night strike",
+   "status": "checked_none",
+   "confidence": null,
+   "t": null,
+   "t_end": null,
+   "anchor": null,
+   "source": null,
+   "clip_ts": null,
+   "basis": []
+  },
+  {
+   "type": "indiscriminate_weapon",
+   "label": "Indiscriminate-weapon indicator",
+   "status": "checked_none",
+   "confidence": null,
+   "t": null,
+   "t_end": null,
+   "anchor": null,
+   "source": null,
+   "clip_ts": null,
+   "basis": []
+  },
+  {
+   "type": "second_strike",
+   "label": "Second strike on responders",
+   "status": "checked_none",
+   "confidence": null,
+   "t": null,
+   "t_end": null,
+   "anchor": null,
+   "source": null,
+   "clip_ts": null,
+   "basis": []
+  },
+  {
+   "type": "uxo",
+   "label": "Unexploded ordnance visible",
+   "status": "checked_none",
+   "confidence": null,
+   "t": null,
+   "t_end": null,
+   "anchor": null,
+   "source": null,
+   "clip_ts": null,
+   "basis": []
+  },
+  {
+   "type": "military_object",
+   "label": "Military object visible",
+   "status": "checked_none",
+   "confidence": null,
+   "t": null,
+   "t_end": null,
+   "anchor": null,
+   "source": null,
+   "clip_ts": null,
+   "basis": []
+  }
+ ],
+ "review_notes": [
+  {
+   "type": "location_conflict",
+   "label": "Clip D camera location is kilometers away from clip A",
+   "confidence": 0.9,
+   "t": 30.0,
+   "t_end": null,
+   "anchor": {
+    "kind": "camera",
+    "ref": "D"
+   },
+   "source": "D",
+   "clip_ts": 0.0,
+   "basis": [
+    "D@0:00 camera 50.05986, 36.19467",
+    "A@0:00 camera 50.00964, 36.31881",
+    "Carbon cross-check"
+   ]
+  },
+  {
+   "type": "time_conflict",
+   "label": "Clip D near impact shows fire; A, B, C unaligned",
+   "confidence": 0.88,
+   "t": 30.0,
+   "t_end": null,
+   "anchor": {
+    "kind": "cameras",
+    "ref": [
+     "A",
+     "B",
+     "C",
+     "D"
+    ]
+   },
+   "source": "D",
+   "clip_ts": 0.0,
+   "basis": [
+    "D@0:00 fire at t=30s",
+    "C@0:00 rescue at t=3098s",
+    "B@0:00 fire at t=4894s",
+    "A@0:00 rescue at t=11414s",
+    "Carbon cross-check"
+   ]
+  }
+ ],
+ "timeline": [
+  {
+   "t": 0.0,
+   "type": "impact",
+   "source": "A",
+   "clip_ts": -11414.0,
+   "confidence": 0.3
+  },
+  {
+   "t": 30.0,
+   "type": "fire",
+   "source": "D",
+   "clip_ts": 0.0,
+   "confidence": 0.98
+  },
+  {
+   "t": 3098.0,
+   "type": "rescue",
+   "source": "C",
+   "clip_ts": 0.0,
+   "confidence": 0.98
+  },
+  {
+   "t": 3098.0,
+   "type": "fire",
+   "source": "C",
+   "clip_ts": 0.0,
+   "confidence": 0.95
+  },
+  {
+   "t": 3103.5,
+   "type": "fire",
+   "source": "C",
+   "clip_ts": 5.5,
+   "confidence": 0.98
+  },
+  {
+   "t": 3114.0,
+   "type": "rescue",
+   "source": "C",
+   "clip_ts": 16.0,
+   "confidence": 0.92
+  },
+  {
+   "t": 3119.5,
+   "type": "rescue",
+   "source": "C",
+   "clip_ts": 21.5,
+   "confidence": 0.97
+  },
+  {
+   "t": 3124.5,
+   "type": "rescue",
+   "source": "C",
+   "clip_ts": 26.5,
+   "confidence": 0.95
+  },
+  {
+   "t": 4894.0,
+   "type": "fire",
+   "source": "B",
+   "clip_ts": 0.0,
+   "confidence": 0.95
+  },
+  {
+   "t": 4894.0,
+   "type": "rescue",
+   "source": "B",
+   "clip_ts": 0.0,
+   "confidence": 0.95
+  },
+  {
+   "t": 11414.0,
+   "type": "rescue",
+   "source": "A",
+   "clip_ts": 0.0,
+   "confidence": 0.85
+  },
+  {
+   "t": 11421.5,
+   "type": "rescue",
+   "source": "A",
+   "clip_ts": 7.5,
+   "confidence": 0.95
+  },
+  {
+   "t": 11422.5,
+   "type": "fire",
+   "source": "A",
+   "clip_ts": 8.5,
+   "confidence": 0.98
+  },
+  {
+   "t": 11428.0,
+   "type": "rescue",
+   "source": "A",
+   "clip_ts": 14.0,
+   "confidence": 0.98
+  }
+ ],
+ "sources": [
+  {
+   "id": "A",
+   "clip_id": "c_0020",
+   "platform": "telegram",
+   "url": "https://t.me/bear007/55132",
+   "embed_url": "https://t.me/bear007/55132?embed=1",
+   "player": "file",
+   "media_url": "/api/media/telegram/bear007/bear007_55132.mp4",
+   "uploader": "bear007",
+   "posted_at": "2024-09-01T17:42:54+03:00",
+   "duration_s": 22.6,
+   "camera": {
+    "lat": 50.00964,
+    "lon": 36.31881,
+    "heading_deg": 0,
+    "fov_deg": 60,
+    "radius_m": 300,
+    "confidence": 0.7
+   },
+   "boom_distance_m": null,
+   "offset_s": 11414.0,
+   "aligned": false,
+   "authenticity": "real",
+   "reject_reason": null,
+   "graphic_level": 1,
+   "license": "embed only",
+   "findings": [
+    {
+     "clip_ts": 0.0,
+     "label": "Person in vest tends to seated individual",
+     "confidence": 0.85
+    },
+    {
+     "clip_ts": 7.5,
+     "label": "Firefighter directs hose toward damaged area",
+     "confidence": 0.95
+    },
+    {
+     "clip_ts": 8.5,
+     "label": "Tall orange flame and smoke rise upward",
+     "confidence": 0.98
+    },
+    {
+     "clip_ts": 14.0,
+     "label": "Multiple fire trucks and firefighters on scene",
+     "confidence": 0.98
+    }
+   ]
+  },
+  {
+   "id": "B",
+   "clip_id": "c_0021",
+   "platform": "telegram",
+   "url": "https://t.me/prokuratura_kharkiv/18453",
+   "embed_url": "https://t.me/prokuratura_kharkiv/18453?embed=1",
+   "player": "file",
+   "media_url": "/api/media/telegram/prokuratura_kharkiv/prokuratura_kharkiv_18453.mp4",
+   "uploader": "prokuratura_kharkiv",
+   "posted_at": "2024-09-01T15:54:14+03:00",
+   "duration_s": 46.17,
+   "camera": null,
+   "boom_distance_m": null,
+   "offset_s": 4894.0,
+   "aligned": false,
+   "authenticity": "real",
+   "reject_reason": null,
+   "graphic_level": 1,
+   "license": "embed only",
+   "findings": [
+    {
+     "clip_ts": 0.0,
+     "label": "Flames burning near damaged building and car",
+     "confidence": 0.95
+    },
+    {
+     "clip_ts": 0.0,
+     "label": "Red fire truck parked near damaged building",
+     "confidence": 0.95
+    },
+    {
+     "clip_ts": 1.0,
+     "label": "Man in tactical vest speaks to camera",
+     "confidence": 0.99
+    }
+   ]
+  },
+  {
+   "id": "C",
+   "clip_id": "c_0022",
+   "platform": "telegram",
+   "url": "https://t.me/suspilnenews/37711",
+   "embed_url": "https://t.me/suspilnenews/37711?embed=1",
+   "player": "file",
+   "media_url": "/api/media/telegram/suspilnenews/suspilnenews_37711.mp4",
+   "uploader": "suspilnenews",
+   "posted_at": "2024-09-01T15:24:18+03:00",
+   "duration_s": 29.68,
+   "camera": null,
+   "boom_distance_m": null,
+   "offset_s": 3098.0,
+   "aligned": false,
+   "authenticity": "real",
+   "reject_reason": null,
+   "graphic_level": 1,
+   "license": "embed only",
+   "findings": [
+    {
+     "clip_ts": 0.0,
+     "label": "Firefighter sprays water onto burned car",
+     "confidence": 0.98
+    },
+    {
+     "clip_ts": 0.0,
+     "label": "Flames burn near damaged building",
+     "confidence": 0.95
+    },
+    {
+     "clip_ts": 5.5,
+     "label": "Tall jet of flame erupts by building",
+     "confidence": 0.98
+    },
+    {
+     "clip_ts": 16.0,
+     "label": "Medic assists shirtless man inside damaged vehicle",
+     "confidence": 0.92
+    },
+    {
+     "clip_ts": 21.5,
+     "label": "Fire truck and firefighters operate on street",
+     "confidence": 0.97
+    },
+    {
+     "clip_ts": 26.5,
+     "label": "Helmeted psychologist comforts man sitting on curb",
+     "confidence": 0.95
+    }
+   ]
+  },
+  {
+   "id": "D",
+   "clip_id": "c_0019",
+   "platform": "telegram",
+   "url": "https://t.me/truexakharkiv/48992",
+   "embed_url": "https://t.me/truexakharkiv/48992?embed=1",
+   "player": "file",
+   "media_url": "/api/media/telegram/truexakharkiv/truexakharkiv_48992.mp4",
+   "uploader": "truexakharkiv",
+   "posted_at": "2024-09-01T14:32:40+03:00",
+   "duration_s": 16.57,
+   "camera": {
+    "lat": 50.05986,
+    "lon": 36.19467,
+    "heading_deg": 122,
+    "fov_deg": 60,
+    "radius_m": 300,
+    "confidence": 0.7
+   },
+   "boom_distance_m": null,
+   "offset_s": 30.0,
+   "aligned": false,
+   "authenticity": "real",
+   "reject_reason": null,
+   "graphic_level": 1,
+   "license": "embed only",
+   "findings": [
+    {
+     "clip_ts": 0.0,
+     "label": "Large flames and smoke from damaged building",
+     "confidence": 0.98
+    },
+    {
+     "clip_ts": 2.0,
+     "label": "Cameraman speaks briefly while facing camera",
+     "confidence": 0.95
+    }
+   ]
+  }
+ ],
+ "summary": "A strike probably hit a commercial area near the Radmir building on Akademika Pavlova Street in Kharkiv on September 1, 2024. Four independent clips show fire and damaged buildings consistent with this aftermath around an estimated early afternoon time. However, one clip maps to a different part of the city, so location agreement remains uncertain.",
+ "verification": {
+  "agree_place": false,
+  "agree_time": false,
+  "corroboration": "medium",
+  "n_sources": 4,
+  "n_rejected": 0
+ },
+ "answer_key": {
+  "source": "Bellingcat",
+  "lat": 50.00906,
+  "lon": 36.319206,
+  "url": "https://ukraine.bellingcat.com"
+ },
+ "is_sample": false
+}

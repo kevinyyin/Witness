@@ -171,6 +171,17 @@ def check_incident(inc, sample):
     assert not problems, "\n".join(problems)
 
 
+def check_index(index):
+    """§9.3 incidents/index.json."""
+    want = {"is_sample": None, "city": None, "n_clips": None, "n_rejected": None, "incidents": {
+        k: None for k in ("id", "title", "lat", "lon", "radius_m", "n_sources", "corroboration", "impact_local")}}
+    problems = key_diff(shape(index), want)
+    if index.get("is_sample") is not False:
+        problems.append("is_sample must be false")
+    problems += [f"incident {i.get('id')}: id must be a string" for i in index.get("incidents", []) if not isinstance(i.get("id"), str)]
+    assert not problems, "\n".join(problems)
+
+
 def check_stream(text):
     """A raw /api/analyze response body (§9.3): stage events in order, then exactly one result or error."""
     blocks = [b for b in text.strip().split("\n\n") if b.strip()]
@@ -217,6 +228,9 @@ if __name__ == "__main__":
         for f in sys.argv[sys.argv.index("--stream") + 1:]:
             ev = check_stream(open(f, encoding="utf-8").read())
             print(f"{f}: OK, {len(ev)} events, verdict {ev[-1][1].get('fake', {}).get('verdict', ev[-1][0])}")
+    elif "--index" in sys.argv:
+        check_index(json.load(open(sys.argv[sys.argv.index("--index") + 1], encoding="utf-8")))
+        print("index OK")
     elif "--clip" not in sys.argv and len(sys.argv) > 1:
         from . import PUBLIC
         sample = json.loads((PUBLIC / "sample_incident.json").read_text(encoding="utf-8"))

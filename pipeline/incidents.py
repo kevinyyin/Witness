@@ -329,8 +329,64 @@ def assemble(hero):
     }, osm_path
 
 
+def add_carbon(incident):
+    """The Carbon cross-check (never cut): its review notes and the summary. Carbon never sees the answer key."""
+    from . import gemini
+    by_id = {s["id"]: s for s in incident["sources"]}
+    doc = {k: v for k, v in incident.items() if k not in ("answer_key", "summary")}
+    doc["clip_descriptions"] = {s["id"]: cached_observations(s["clip_id"]) for s in incident["sources"]}
+    out = gemini.crosscheck(doc)
+    have = {(n["type"], n["source"]) for n in incident["review_notes"]}
+    for n in (out.get("notes") or [])[:5]:  # model output is untrusted: keep only well-formed notes
+        src = by_id.get(n.get("source"))
+        letters = [x for x in n.get("sources") or [] if x in by_id]
+        text = json.dumps(n, ensure_ascii=False).lower()
+        if (src is None or n.get("type") not in ("time_conflict", "location_conflict", "single_source") or (n["type"], n["source"]) in have
+                or any(w in text for w in contract.VERDICT_WORDS)):
+            continue
+        ts = min(max(float(n.get("clip_ts") or 0), 0.0), src["duration_s"])
+        anchor = ({"kind": "cameras", "ref": letters} if n["type"] == "time_conflict" and len(letters) >= 2
+                  else {"kind": "camera", "ref": src["id"]} if n["type"] != "single_source" else {"kind": "impact"})
+        incident["review_notes"].append(_item(
+            n["type"], str(n.get("label", ""))[:120], round(min(max(float(n.get("confidence") or 0.5), 0.0), 1.0), 2),
+            None if src["offset_s"] is None else round(ts + src["offset_s"], 2), anchor, src["id"], round(ts, 2),
+            [str(b)[:80] for b in (n.get("basis") or [])[:4]] + ["Carbon cross-check"]))
+    summary = str(out.get("summary") or "").strip()
+    incident["summary"] = summary if summary and not any(w in summary.lower() for w in contract.VERDICT_WORDS) else None
+    types = {n["type"] for n in incident["review_notes"]}
+    incident["verification"]["agree_time"] = "time_conflict" not in types
+    incident["verification"]["agree_place"] = "location_conflict" not in types
+    if not incident["verification"]["agree_place"] and incident["verification"]["corroboration"] == "high":
+        incident["verification"]["corroboration"] = "medium"
+    return incident
+
+
+def cached_observations(clip_id):
+    from .clip import cached_by_clip_id
+    entry = cached_by_clip_id(clip_id)
+    return entry["raw"]["seen"].get("observations", "") if entry else ""
+
+
+def write_index():
+    """web/public/incidents/index.json (§9.3) from the incident files on disk and the clips analyzed so far."""
+    incs = [json.loads(f.read_text(encoding="utf-8")) for f in sorted((PUBLIC / "incidents").glob("[0-9]*.json"))]
+    recs = [json.loads(f.read_text(encoding="utf-8"))["record"] for f in (CACHE / "clips").glob("*.json")]
+    cities = [i["city"] for i in incs]
+    index = {"is_sample": False, "city": max(set(cities), key=cities.count), "n_clips": len(recs),
+             "n_rejected": sum(r["fake"]["verdict"] == "fake" for r in recs),
+             "incidents": [{"id": i["id"], "title": i["title"], "lat": i["impact"]["lat"], "lon": i["impact"]["lon"],
+                            "radius_m": i["impact"]["radius_m"], "n_sources": i["verification"]["n_sources"],
+                            "corroboration": i["verification"]["corroboration"], "impact_local": i["time"]["impact_local"]}
+                           for i in incs]}
+    contract.check_index(index)
+    (PUBLIC / "incidents" / "index.json").write_text(json.dumps(index, ensure_ascii=False, indent=1), encoding="utf-8")
+    return index
+
+
 def write(incident, osm_path):
     """Key check, then the file. Refuses a raised military_object flag: the repo is public (§13)."""
+    # a reconstruction needs a place: a city-level estimate gives the 3D scene nothing true to draw
+    assert incident["impact"]["method"] != "claimed_place", "city-level location only: no reconstruction written"
     contract.check_incident(incident, json.loads((PUBLIC / "sample_incident.json").read_text(encoding="utf-8")))
     (PUBLIC / "incidents").mkdir(exist_ok=True)
     (PUBLIC / "osm").mkdir(exist_ok=True)
@@ -356,8 +412,13 @@ if __name__ == "__main__":
             if want in ("all", h["id"]):
                 try:
                     inc, osm_file = assemble(h)
+                    assert inc["impact"]["method"] != "claimed_place", "city-level location only: no reconstruction written"
+                    if "--carbon" in sys.argv:
+                        add_carbon(inc)
                     print(write(inc, osm_file), f"· impact {inc['impact']['method']} ±{inc['impact']['radius_m']} m ·",
                           f"{inc['verification']['n_sources']} sources · error vs answer key",
                           f"{geo.dist_m((inc['impact']['lat'], inc['impact']['lon']), (h['answer_key']['lat'], h['answer_key']['lon'])):.0f} m")
                 except AssertionError as e:
                     print(f"{h['id']}: NOT WRITTEN\n{e}", file=sys.stderr)
+        idx = write_index()
+        print(f"index.json: {len(idx['incidents'])} incidents, {idx['n_clips']} clips, {idx['n_rejected']} rejected")

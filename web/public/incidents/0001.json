@@ -273,6 +273,64 @@
    "basis": [
     "pHash match"
    ]
+  },
+  {
+   "type": "time_conflict",
+   "label": "Clip A shows explosion hours after impact in D, E, F",
+   "confidence": 0.95,
+   "t": 60774.0,
+   "t_end": null,
+   "anchor": {
+    "kind": "cameras",
+    "ref": [
+     "A",
+     "D",
+     "E",
+     "F"
+    ]
+   },
+   "source": "A",
+   "clip_ts": 8.0,
+   "basis": [
+    "A@0:08 fireball",
+    "E@0:03 impact",
+    "D@0:03 explosion",
+    "Carbon cross-check"
+   ]
+  },
+  {
+   "type": "single_source",
+   "label": "Clips D and E are reposts showing the aligned impact",
+   "confidence": 0.9,
+   "t": 0.0,
+   "t_end": null,
+   "anchor": {
+    "kind": "impact"
+   },
+   "source": "E",
+   "clip_ts": 2.82,
+   "basis": [
+    "E@0:03 impact",
+    "D@0:03 pHash match with E",
+    "Carbon cross-check"
+   ]
+  },
+  {
+   "type": "single_source",
+   "label": "Only clip F captures diving object and follow-up blasts",
+   "confidence": 0.9,
+   "t": 7.76,
+   "t_end": null,
+   "anchor": {
+    "kind": "impact"
+   },
+   "source": "F",
+   "clip_ts": 11.5,
+   "basis": [
+    "F@0:11 second blast after object dives",
+    "F@0:17 third explosion",
+    "Carbon cross-check"
+   ]
   }
  ],
  "timeline": [
@@ -976,10 +1034,10 @@
    ]
   }
  ],
- "summary": null,
+ "summary": "An explosion probably struck a five-story apartment building in Kharkiv on the afternoon of June 22, 2024, estimated from the earliest post. Eleven independent clips agree on the scene, showing structural damage and rescue work consistent with an explosive strike. However, reliance on post times leaves the true strike time uncertain and misplaces one blast video.",
  "verification": {
   "agree_place": true,
-  "agree_time": true,
+  "agree_time": false,
   "corroboration": "high",
   "n_sources": 14,
   "n_rejected": 0
