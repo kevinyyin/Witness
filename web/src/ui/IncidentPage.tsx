@@ -10,7 +10,7 @@ import { SampleBanner } from './SampleBanner'
 import { Fps } from './Fps'
 import { Timeline } from './Timeline'
 import { Callouts } from './Callouts'
-import { Clock, GapCard, LowerThird, NowPanel, TitleCard } from './HudText'
+import { Clock, GapCard, Legend, LowerThird, NowPanel, TitleCard } from './HudText'
 import { SourceVideo } from './SourceVideo'
 import { FlagsList, Footer, Sources, Summary, WeaponSection } from './Sidebar'
 
@@ -103,6 +103,7 @@ export function IncidentPage({ id }: { id: string }) {
             </div>
           )}
           <div className="hud-tools">
+            <Legend inc={inc} />
             <button className="mini" onClick={() => setShowRings((v) => !v)}>Evidence rings: {showRings ? 'on' : 'off'}</button>
           </div>
           <Fps points={points} />

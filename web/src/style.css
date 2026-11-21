@@ -47,8 +47,14 @@ button.on { border-color: var(--cyan); color: var(--cyan); }
 .callout { position: absolute; top: 0; left: 0; max-width: 280px; background: rgba(0,0,0,0.78); border-left: 3px solid; padding: 5px 8px; pointer-events: none; }
 .callout.flag { border-color: var(--red); } .callout.note { border-color: var(--yellow); } .callout.boom, .callout.witness { border-color: var(--cyan); font-size: 11px; }
 .leaders path.witness { stroke: var(--cyan); } .pin.witness { display: none !important; }
-.title-card { position: absolute; top: 38%; left: 50%; transform: translate(-50%, -50%); text-align: center; pointer-events: none; letter-spacing: 0.08em; }
-.title-card .big { font-size: 26px; margin-top: 6px; }
+.title-card { position: absolute; top: 64px; left: 14px; text-align: left; pointer-events: none; letter-spacing: 0.08em; color: var(--red); max-width: 46%; }
+.title-card .muted { color: var(--red); opacity: 0.75; }
+.title-card .big { font-size: 26px; margin-top: 6px; color: var(--red); }
+.legend { position: absolute; bottom: 40px; left: 14px; display: flex; flex-direction: column; gap: 2px; font-size: 11px; color: var(--dim); pointer-events: none; }
+.hud-tools .legend { position: static; }
+.legend { background: rgba(0, 0, 0, 0.7); padding: 4px 8px; }
+.legend i { font-style: normal; display: inline-block; width: 14px; }
+.lg-impact { color: var(--amber); } .lg-target { color: var(--red); } .lg-cam { color: var(--cyan); }
 .gap-card { position: absolute; top: 45%; left: 50%; transform: translate(-50%, -50%); font-size: 28px; background: rgba(0,0,0,0.85); padding: 10px 24px; border: 1px solid var(--line); pointer-events: none; }
 .callout .basis { color: var(--dim); font-size: 10px; margin-top: 2px; }
 .clock-stack .callout { position: static; margin-top: 4px; }
