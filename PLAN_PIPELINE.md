@@ -102,7 +102,7 @@ Written Sat Nov 21, 10:45 AM ET. Spec says "Teammate" for the pipeline owner: th
 - [x] **G2 K6 latency** — PASS 11:25: 25.3 s for one 6.8 MB hero clip (ffmpeg 0.4, upload 3.9, Hydrogen 21.0 ‖ Decisions 1.3). — `pipeline/killtests/k6_latency.py`
   One `dev` clip: ffmpeg + Hydrogen + Decisions, wall-clock per stage.
   Check: prints total seconds. Pass: ≤ 60 s. Fail → 180 s cap, parallel calls, lower fps.
-- [ ] **G3 K3-mini geolocation** — `pipeline/killtests/k3_geo.py`
+- [x] **G3 K3-mini geolocation** — PASS 11:36: 3/5 hero clips within 5 km (0.07, 0.74, 1.20 km); 2 clips had no readable landmark. Landmarks file fetched by me from Overpass (2,193 named places). — `pipeline/killtests/k3_geo.py`
   5 `dev` clips with known locations: Hydrogen landmarks → OSM landmark search → distance to the key.
   Check: prints 5 distances. Pass: ≥ 2 within 5 km. Fail → pitch "narrows to district + candidates".
 - [x] **GATE: go / fog.** — **GO** from the user at 11:30 on K1 + K6 (K3-mini still pending: Overpass busy). I give K1, K6, K3-mini results; the user decides. **No product code before "go". On "fog": stop and re-plan (D13).**
@@ -117,7 +117,7 @@ Written Sat Nov 21, 10:45 AM ET. Spec says "Teammate" for the pipeline owner: th
 - [x] **11:50 fps check.** — 11:30: user read **FPS 122 · 495k pts** in a full-size browser on this Mac → point cloud stays. (11:27: web runs here; in-app pane showed "FPS 34 · 495k pts" at 800×600 — the user must read it in a full-size browser.) Pull, `cd web && npm i && npm run dev`, ask the user to read the fps number → teammate (12:00 point-cloud decision).
 
 ### P2 Fake checks + break-it API (12:30 → 1:15) — deadline 1:30
-- [ ] **P2**
+- [x] **P2** — done 11:41: live server on 127.0.0.1:8000 (routes at `/api/x` and `/x`). `analyze_fake.txt` = Commons fireworks file → `fake: fireworks 0.95`; `analyze_real.txt` = Commons Kharkiv aftermath file → `real 0.91`, city-level location. A YouTube link runs end to end (URL mode). `contract --stream` passes on all three; judge POST/GET, 422/404, media 200/206 and path traversal 404 checked; `fake`, `physics`, `geo` self-tests pass. Blast timing uses a numpy loudness-jump detector (librosa's onset strength missed the boom), so `librosa` → `scipy` in requirements. Not done: yt-dlp download mode (waits on organizer Q4); no game link tested (no `break_it.csv`).
   Goal: full §9.1 record over a streamed endpoint; scoreboard; health.
   Files: `pipeline/physics.py` (onsets, flash→boom, repeated sample), `pipeline/fake.py` (§C.2–3), `pipeline/geo.py` (§C.5), `pipeline/app.py` (FastAPI on `127.0.0.1:8000`: `/api/health`, `/api/analyze`, `/api/judge` GET+POST with `data/cache/scoreboard.json`, `/api/media/<file>`).
   Fields: `fake {verdict, label, confidence, checks[4] {name, result, detail, clip_ts}}`, `location {lat, lon, radius_m, level, method, evidence, candidates}` (or `null`), `incident_id`, `stages_ms {fetch, watch, physics, score, locate, verdict}`; stream events `stage {stage, status, ms, summary}`, `result`, `error {stage, message}`; health `{ok, youtube_url_input}`; scoreboard `{tries, right, history[] {clip_id, verdict, label, truth, right}}`.

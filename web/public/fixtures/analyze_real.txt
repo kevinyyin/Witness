@@ -1,0 +1,39 @@
+event: stage
+data: {"stage": "fetch", "status": "start", "ms": null, "summary": null}
+
+event: stage
+data: {"stage": "fetch", "status": "done", "ms": 10275, "summary": "117 s clip"}
+
+event: stage
+data: {"stage": "watch", "status": "start", "ms": null, "summary": null}
+
+event: stage
+data: {"stage": "watch", "status": "done", "ms": 17261, "summary": "9 events: fire, speech, rescue"}
+
+event: stage
+data: {"stage": "physics", "status": "start", "ms": null, "summary": null}
+
+event: stage
+data: {"stage": "physics", "status": "done", "ms": 55, "summary": "no flash + blast pair"}
+
+event: stage
+data: {"stage": "score", "status": "start", "ms": null, "summary": null}
+
+event: stage
+data: {"stage": "score", "status": "done", "ms": 4398, "summary": "war-related 0.86 · real strike 0.91"}
+
+event: stage
+data: {"stage": "locate", "status": "start", "ms": null, "summary": null}
+
+event: stage
+data: {"stage": "locate", "status": "done", "ms": 0, "summary": "city: ±12000 m, 0 candidates"}
+
+event: stage
+data: {"stage": "verdict", "status": "start", "ms": null, "summary": null}
+
+event: stage
+data: {"stage": "verdict", "status": "done", "ms": 0, "summary": "real: real_strike (0.91)"}
+
+event: result
+data: {"clip_id": "c_0002", "source_url": null, "platform": "upload", "embed_url": null, "sha256": "55ea691f0446985af8fdc4bd5f21862b8398936cc411b7f8b6a8cb5f2ecd8057", "duration_s": 117.05, "posted_at": null, "claimed_place": "Kharkiv", "timeline": [{"clip_ts": 0.0, "type": "fire", "label": "Large flames engulfing dark structures", "confidence": 0.98}, {"clip_ts": 0.5, "type": "speech", "label": "Emergency radio dispatch chatter heard", "confidence": 0.9}, {"clip_ts": 7.0, "type": "fire", "label": "Burning vehicle showering bright sparks", "confidence": 0.95}, {"clip_ts": 14.5, "type": "rescue", "label": "Firefighters approaching burning cars with hoses", "confidence": 0.95}, {"clip_ts": 32.0, "type": "rescue", "label": "Medics assisting evacuees near ambulance", "confidence": 0.96}, {"clip_ts": 41.0, "type": "rescue", "label": "Firefighters spraying water onto burning vehicles", "confidence": 0.97}, {"clip_ts": 48.5, "type": "rescue", "label": "Firefighters hosing down burning brick structures", "confidence": 0.96}, {"clip_ts": 110.0, "type": "rescue", "label": "Firefighters unloading ladder from fire truck", "confidence": 0.95}, {"clip_ts": 117.0, "type": "rescue", "label": "Firefighter climbing ladder to apartment balcony", "confidence": 0.97}], "triage": {"war_related": 0.86, "event_type": {"strike": 0.0, "aftermath": 1.0, "other": 0.0}, "graphic_level": 1, "civilian_objects": 0.86, "uxo": 0.19, "military_object": 0.19}, "fake": {"verdict": "real", "label": "real_strike", "confidence": 0.91, "checks": [{"name": "flash_to_boom", "result": "n/a", "detail": "no flash + blast pair in the clip", "clip_ts": null}, {"name": "repeated_sample", "result": "n/a", "detail": "needs the file and at least two blasts", "clip_ts": null}, {"name": "render_hud", "result": "pass", "detail": "looks like real camera footage (not-real score 0.09), no HUD", "clip_ts": null}, {"name": "seen_before", "result": "pass", "detail": "no pHash match", "clip_ts": null}]}, "location": {"lat": 49.9935, "lon": 36.2304, "radius_m": 12000, "level": "city", "method": "claimed_place", "evidence": ["claimed_place: Kharkiv"], "candidates": 0}, "weapon": {"options": {"shahed_drone": 0.37, "cruise_missile": 0.03, "ballistic_missile": 0.08, "glide_bomb": 0.02, "rocket_cluster": 0.27, "tube_artillery": 0.02, "fpv_drone": 0.01, "unknown": 0.21}, "evidence": []}, "incident_id": null, "stages_ms": {"fetch": 10275, "watch": 17261, "physics": 55, "score": 4398, "locate": 0, "verdict": 0}}
+

@@ -9,7 +9,9 @@ import sys
 import time
 from concurrent.futures import ThreadPoolExecutor
 
-from . import CACHE, gemini, ingest
+from datetime import datetime
+
+from . import CACHE, fake, gemini, geo, ingest, physics
 
 STAGES = ["fetch", "watch", "physics", "score", "locate", "verdict"]
 
@@ -62,6 +64,20 @@ def clean_timeline(raw, duration_s):
     return sorted(out, key=lambda e: e["clip_ts"])
 
 
+def _older_by_s(posted_at, other_posted_at):
+    """Seconds by which the other clip's post is older, or None when either time is unknown."""
+    try:
+        return (datetime.fromisoformat(posted_at) - datetime.fromisoformat(other_posted_at)).total_seconds()
+    except (TypeError, ValueError):
+        return None
+
+
+def incident_of(clip_id):
+    """The incident a known clip belongs to (written by incidents.py), or None."""
+    f = CACHE / "clip_incident.json"
+    return (json.loads(f.read_text()) if f.exists() else {}).get(clip_id)
+
+
 def _stage(stage, status, ms=None, summary=None):
     return "stage", {"stage": stage, "status": status, "ms": ms, "summary": summary}
 
@@ -105,6 +121,23 @@ def analyze(path=None, url=None, claimed_place=None, posted_at=None, source_url=
             kinds = ", ".join(dict.fromkeys(e["type"] for e in timeline)) or "none"
             yield emit(_stage("watch", "done", ms["watch"], f"{len(timeline)} events: {kinds}"))
 
+            stage = "physics"
+            yield emit(_stage("physics", "start"))
+            t0 = time.time()
+            phys = physics.measure(path, prep["wav"] if prep else None, timeline)
+            if not prep and phys["delta_s"] is not None:
+                try:  # no file: one finer Hydrogen pass around the blast; its failure only costs precision
+                    finer = gemini.retime(block, phys["blast_ts"])
+                    if finer:
+                        phys["flash_ts"], phys["blast_ts"] = round(finer[0], 2), round(finer[1], 2)
+                        phys["delta_s"] = round(max(0.0, finer[1] - finer[0]), 2)
+                except Exception:
+                    pass
+            ms["physics"] = int((time.time() - t0) * 1000)
+            yield emit(_stage("physics", "done", ms["physics"],
+                              "no flash + blast pair" if phys["delta_s"] is None else
+                              f"flash {mmss(phys['flash_ts'])}, boom +{phys['delta_s']:.2f} s → {physics.SOUND_M_S * phys['delta_s']:.0f} m"))
+
             stage = "score"
             yield emit(_stage("score", "start"))
             if f_score:
@@ -116,6 +149,32 @@ def analyze(path=None, url=None, claimed_place=None, posted_at=None, source_url=
                 scores, ms["score"] = _timed(gemini.score, text)
         yield emit(_stage("score", "done", ms["score"],
                           f"war-related {scores['war_related']:.2f} · real strike {scores['real_strike']:.2f}"))
+
+        t0 = time.time()
+        not_real = 1 - scores["real_strike"]
+        match = fake.seen_match(prep["sha256"], prep["phash"]) if prep else None
+        checks = fake.run_checks(seen, scores, phys, bool(prep), match,
+                                 _older_by_s(posted_at, match["posted_at"]) if match else None)
+        verdict, label, confidence = fake.verdict(checks, not_real, scores["fake_kind"])
+        verdict_ms = int((time.time() - t0) * 1000)
+
+        stage = "locate"
+        location, ms["locate"] = None, None
+        if verdict == "fake":
+            yield emit(_stage("locate", "skipped", None, "rejected clips are not located"))
+        elif scores["military_object"] >= 0.5:  # §13: never locate military objects
+            yield emit(_stage("locate", "skipped", None, "location withheld: military object visible"))
+        else:
+            yield emit(_stage("locate", "start"))
+            decide_input = [{**block, "resolution": "low"}] if prep else seen.get("observations", "")
+            location, ms["locate"] = _timed(geo.locate, seen, claimed_place, decide_input)
+            yield emit(_stage("locate", "done", ms["locate"],
+                              f"{location['level']}: ±{location['radius_m']} m, {location['candidates']} candidates"))
+
+        stage = "verdict"
+        yield emit(_stage("verdict", "start"))
+        ms["verdict"] = verdict_ms
+        yield emit(_stage("verdict", "done", verdict_ms, f"{verdict}: {label or 'needs a human'} ({confidence})"))
 
         link = source_url or url
         platform = platform_of(link)
@@ -138,11 +197,18 @@ def analyze(path=None, url=None, claimed_place=None, posted_at=None, source_url=
                 "uxo": round(scores["uxo"], 2),
                 "military_object": round(scores["military_object"], 2),
             },
-            "weapon": {"options": {k: round(scores["weapon"].get(k, 0.0), 2) for k in gemini.WEAPONS},
-                       "evidence": [f"{mmss(e['clip_ts'])} {e['label']}" for e in cues[:4]]},
-            "stages_ms": ms,
+            "fake": {"verdict": verdict, "label": label, "confidence": confidence, "checks": checks},
+            "location": location,
+            "weapon": None if verdict == "fake" else {
+                "options": {k: round(scores["weapon"].get(k, 0.0), 2) for k in gemini.WEAPONS},
+                "evidence": [f"{mmss(e['clip_ts'])} {e['label']}" for e in cues[:4]]},
+            "incident_id": incident_of(match["clip_id"]) if match else None,
+            "stages_ms": {k: ms.get(k) for k in STAGES},
         }
-        raw = {"seen": seen, "scores": scores, "phash": prep["phash"] if prep else [], "path": str(path) if path else None}
+        if prep:
+            fake.remember(prep["sha256"], prep["phash"], record["clip_id"], posted_at)
+        raw = {"seen": seen, "scores": scores, "phys": phys, "phash": prep["phash"] if prep else [],
+               "path": str(path) if path else None}
         yield emit(("result", record))
         cache_file.write_text(json.dumps({"events": events, "record": record, "raw": raw}, ensure_ascii=False))
     except Exception as e:  # one bad clip must never take the server or a bulk run down
@@ -159,9 +225,16 @@ def analyze_clip(**kw):
             return data
 
 
-def cached(record_or_key):
+def cached(key):
     """The cache entry (events, record, raw) for a sha256 / url hash."""
-    return json.loads((CACHE / "clips" / f"{record_or_key}.json").read_text())
+    return json.loads((CACHE / "clips" / f"{key}.json").read_text())
+
+
+def cached_by_clip_id(clip_id):
+    ids_file = CACHE / "ids.json"
+    key = next((k for k, v in (json.loads(ids_file.read_text()) if ids_file.exists() else {}).items() if v == clip_id), None)
+    f = CACHE / "clips" / f"{key}.json"
+    return json.loads(f.read_text()) if key and f.exists() else None
 
 
 if __name__ == "__main__":

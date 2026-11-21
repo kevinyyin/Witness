@@ -1,0 +1,36 @@
+event: stage
+data: {"stage": "fetch", "status": "start", "ms": null, "summary": null}
+
+event: stage
+data: {"stage": "fetch", "status": "done", "ms": 14803, "summary": "129 s clip"}
+
+event: stage
+data: {"stage": "watch", "status": "start", "ms": null, "summary": null}
+
+event: stage
+data: {"stage": "watch", "status": "done", "ms": 24696, "summary": "16 events: burst, speech, flash, fire"}
+
+event: stage
+data: {"stage": "physics", "status": "start", "ms": null, "summary": null}
+
+event: stage
+data: {"stage": "physics", "status": "done", "ms": 208, "summary": "flash 0:17, boom +0.00 s → 0 m"}
+
+event: stage
+data: {"stage": "score", "status": "start", "ms": null, "summary": null}
+
+event: stage
+data: {"stage": "score", "status": "done", "ms": 4785, "summary": "war-related 0.13 · real strike 0.05"}
+
+event: stage
+data: {"stage": "locate", "status": "skipped", "ms": null, "summary": "rejected clips are not located"}
+
+event: stage
+data: {"stage": "verdict", "status": "start", "ms": null, "summary": null}
+
+event: stage
+data: {"stage": "verdict", "status": "done", "ms": 0, "summary": "fake: fireworks (0.95)"}
+
+event: result
+data: {"clip_id": "c_0003", "source_url": null, "platform": "upload", "embed_url": null, "sha256": "d51aabde1223e4d33792f09199d1e519b32028cb7d80e36bd0eb3f39e7a1c4df", "duration_s": 128.7, "posted_at": null, "claimed_place": null, "timeline": [{"clip_ts": 0.5, "type": "burst", "label": "Fireworks bursting above and between curved towers", "confidence": 0.98}, {"clip_ts": 3.0, "type": "speech", "label": "Child speaking near camera amid cheering crowd", "confidence": 0.85}, {"clip_ts": 5.0, "type": "burst", "label": "Pyrotechnics crackling and popping over buildings", "confidence": 0.95}, {"clip_ts": 11.0, "type": "speech", "label": "Spectators speaking over music and applause", "confidence": 0.85}, {"clip_ts": 16.5, "type": "flash", "label": "Bright firework launch flare at roof level", "confidence": 0.92}, {"clip_ts": 17.2, "type": "burst", "label": "White firework shells bursting mid-air", "confidence": 0.96}, {"clip_ts": 23.0, "type": "flash", "label": "Firework launch flash from lower platform", "confidence": 0.9}, {"clip_ts": 24.0, "type": "burst", "label": "Cluster of white fireworks exploding centrally", "confidence": 0.96}, {"clip_ts": 30.5, "type": "burst", "label": "Multicolored fireworks launching from multiple points", "confidence": 0.97}, {"clip_ts": 37.0, "type": "speech", "label": "Man mentions Trans-Siberian Orchestra in crowd", "confidence": 0.88}, {"clip_ts": 39.5, "type": "burst", "label": "Green, white, and red firework bursts", "confidence": 0.96}, {"clip_ts": 49.0, "type": "burst", "label": "Rapid barrage of bright crackling fireworks", "confidence": 0.98}, {"clip_ts": 80.5, "type": "flash", "label": "Bright blue and white firework flare", "confidence": 0.95}, {"clip_ts": 82.0, "type": "burst", "label": "Intense white finale fireworks exploding continuously", "confidence": 0.98}, {"clip_ts": 84.0, "type": "fire", "label": "Thick pyrotechnic smoke enveloping the towers", "confidence": 0.92}, {"clip_ts": 115.0, "type": "speech", "label": "Crowd cheering, clapping, and whistling loudly", "confidence": 0.95}], "triage": {"war_related": 0.13, "event_type": {"strike": 0.03, "aftermath": 0.03, "other": 0.94}, "graphic_level": 0, "civilian_objects": 0.73, "uxo": 0.13, "military_object": 0.12}, "fake": {"verdict": "fake", "label": "fireworks", "confidence": 0.95, "checks": [{"name": "flash_to_boom", "result": "pass", "detail": "model-timed: Δ 0.00 s → 0.00 km", "clip_ts": 17.93}, {"name": "repeated_sample", "result": "n/a", "detail": "needs the file and at least two blasts", "clip_ts": null}, {"name": "render_hud", "result": "fail", "detail": "looks like fireworks (not-real score 0.95), no HUD", "clip_ts": null}, {"name": "seen_before", "result": "pass", "detail": "no pHash match", "clip_ts": null}]}, "location": null, "weapon": null, "incident_id": null, "stages_ms": {"fetch": 14803, "watch": 24696, "physics": 208, "score": 4785, "locate": null, "verdict": 0}}
+

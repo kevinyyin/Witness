@@ -128,6 +128,30 @@ QUESTIONS = {
 }
 
 
+def same_place(input_blocks, places):
+    """Decisions API: for each candidate place, the probability that the clip was filmed there."""
+    qs = {f"p{i}": _noul(f"Was this filmed at or within sight of this place: {p}?") for i, p in enumerate(places)}
+    answers = _decisions.decisions.create(model=DECISION, input=input_blocks, questions=qs).answers
+    return [answers[f"p{i}"].noul for i in range(len(places))]
+
+
+def retime(video_block, around_s):
+    """Model-timed mode only: Hydrogen re-reads +-5 s around a blast at 10 fps for a finer flash and boom time."""
+    start = max(0.0, around_s - 5)
+    block = {**video_block, "processing": {"type": "static", "start_offset": f"{start:.1f}s",
+                                           "end_offset": f"{around_s + 5:.1f}s", "fps": 10}}
+    out = json.loads(_client.interactions.create(
+        model=HYDROGEN,
+        input=[block, {"type": "text", "text": "Give the time of the first visible light of the explosion (flash_ts) "
+                       "and the time its sound is first heard (blast_ts), in seconds from the start of the full video, with decimals."}],
+        response_format={"type": "text", "mime_type": "application/json", "schema": {
+            "type": "object", "properties": {"flash_ts": {"type": "number"}, "blast_ts": {"type": "number"}},
+            "required": ["flash_ts", "blast_ts"]}},
+    ).output_text)
+    ok = all(start - 1 <= float(out[k]) <= around_s + 6 for k in ("flash_ts", "blast_ts"))
+    return (float(out["flash_ts"]), float(out["blast_ts"])) if ok else None
+
+
 def score(input_blocks):
     """One Decisions call with every question. Returns plain dicts keyed like QUESTIONS."""
     answers = _decisions.decisions.create(model=DECISION, input=input_blocks, questions=QUESTIONS).answers

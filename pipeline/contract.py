@@ -98,6 +98,29 @@ def check_clip(rec, partial=False):
     assert not problems, "\n".join(problems)
 
 
+def check_stream(text):
+    """A raw /api/analyze response body (§9.3): stage events in order, then exactly one result or error."""
+    blocks = [b for b in text.strip().split("\n\n") if b.strip()]
+    events = []
+    for b in blocks:
+        lines = b.split("\n")
+        assert len(lines) == 2 and lines[0].startswith("event: ") and lines[1].startswith("data: "), f"bad event block: {b[:80]!r}"
+        events.append((lines[0][7:], json.loads(lines[1][6:])))
+    assert [k for k, _ in events].count("result") + [k for k, _ in events].count("error") == 1, "need exactly one result or error"
+    assert events[-1][0] in ("result", "error"), "the stream must end with result or error"
+    order = []
+    for kind, d in events[:-1]:
+        assert kind == "stage" and set(d) == {"stage", "status", "ms", "summary"}, f"bad stage event: {d}"
+        assert d["status"] in ("start", "done", "skipped", "error"), d
+        if d["stage"] not in order:
+            order.append(d["stage"])
+    assert order == STAGES[: len(order)], f"stages out of order: {order}"
+    if events[-1][0] == "result":
+        assert order == STAGES, f"missing stages: {order}"
+        check_clip(events[-1][1])
+    return events
+
+
 def _selftest():
     assert key_diff(shape({"a": 1, "b": [{"c": 1}]}), shape({"a": None, "b": [{"c": 2}, {"c": 3}]})) == []
     assert key_diff(shape({"a": 1}), shape({"a": 1, "b": 2})) == [": missing key 'b'"]
@@ -117,6 +140,10 @@ def _selftest():
 if __name__ == "__main__":
     if "--selftest" in sys.argv:
         _selftest()
+    elif "--stream" in sys.argv:
+        for f in sys.argv[sys.argv.index("--stream") + 1:]:
+            ev = check_stream(open(f, encoding="utf-8").read())
+            print(f"{f}: OK, {len(ev)} events, verdict {ev[-1][1].get('fake', {}).get('verdict', ev[-1][0])}")
     elif "--clip" in sys.argv:
         check_clip(json.load(open(sys.argv[sys.argv.index("--clip") + 1])), partial="--partial" in sys.argv)
         print("clip record OK")
