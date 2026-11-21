@@ -94,6 +94,23 @@ button.mini { padding: 1px 6px; font-size: 10px; margin: 2px 4px 2px 0; }
 .source-row { cursor: pointer; margin: 4px 0; } .source-row:hover b { color: var(--cyan); }
 .st-real { color: var(--green); } .st-unsure { color: var(--amber); } .st-fake { color: var(--red); }
 .footer { border-bottom: 0 !important; font-size: 11px; }
+
+/* break-it (§7.2) */
+.breakit { max-width: 1200px; margin: 0 auto; font-size: 14px; }
+.bk-input { display: grid; grid-template-columns: 2fr 1.4fr 1.4fr auto; gap: 8px; margin: 12px 0; }
+.bk-input input:not([hidden]) { font-family: var(--mono); background: var(--panel); color: var(--text); border: 1px solid var(--line); padding: 8px; }
+.drop { border: 1px dashed var(--dim); padding: 8px; color: var(--dim); cursor: pointer; text-align: center; }
+.bk-cols { display: grid; grid-template-columns: 1fr 1.3fr; gap: 24px; }
+.stage-row { padding: 5px 0; font-size: 15px; } .stage-row.pending { color: var(--dim); }
+.stage-row.start .icon { color: var(--cyan); } .stage-row.done .icon { color: var(--green); } .stage-row.error .icon { color: var(--red); }
+.verdict { border-left: 4px solid var(--amber); padding: 4px 14px; }
+.verdict.fake { border-color: var(--red); } .verdict.real { border-color: var(--green); }
+.verdict h3 { margin: 4px 0 10px; font-size: 22px; }
+.check { margin: 3px 0; } .check.fail { color: var(--red); }
+.bk-loc { margin: 10px 0 4px; }
+.bk-judge button { margin-right: 8px; font-size: 14px; padding: 6px 12px; }
+.bk-board .big { font-size: 20px; color: var(--cyan); margin-left: 12px; }
+.bk-board .ok { color: var(--green); } .bk-board .wrong { color: var(--red); }
 .now-flag { color: var(--red); margin: 2px 0; } .now-note { color: var(--yellow); margin: 2px 0; }
 .hud-title { position: absolute; top: 10px; left: 14px; font-size: 14px; letter-spacing: 0.06em; pointer-events: none; }
 .fps { position: absolute; bottom: 8px; right: 14px; font-size: 20px; font-weight: 700; background: rgba(0,0,0,0.6); padding: 2px 8px; pointer-events: none; }

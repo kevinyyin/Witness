@@ -98,7 +98,7 @@ export function IncidentPage({ id }: { id: string }) {
         <SourceVideo inc={inc} />
         <NowPanel inc={inc} />
         <Summary inc={inc} />
-        <WeaponBars inc={inc} />
+        <WeaponBars weapon={inc.weapon} />
         <FlagsList inc={inc} osm={osm?.osm ?? null} />
         <Sources inc={inc} />
         <Footer inc={inc} showKey={showKey} toggleKey={() => setShowKey((v) => !v)} />

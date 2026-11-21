@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { IncidentPage } from './ui/IncidentPage'
 import { OverviewPage } from './ui/OverviewPage'
+import { BreakIt } from './ui/BreakIt'
 
 /** Hash routes: #/ overview · #/incident/<id> · #/break · #/proof */
 function useHashRoute(): string[] {
@@ -24,7 +25,7 @@ export default function App() {
         <a href="#/proof" className={page === 'proof' ? 'on' : ''}>proof</a>
       </nav>
       {page === 'incident' && arg ? <IncidentPage id={arg} key={arg} />
-        : page === 'break' ? <div className="page">Break-it panel (V4)</div>
+        : page === 'break' ? <BreakIt />
         : page === 'proof' ? <div className="page">Proof slide (V5)</div>
         : <OverviewPage />}
     </>

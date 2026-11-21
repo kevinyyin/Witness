@@ -1,6 +1,6 @@
 // §7.1.7 sidebar sections 3–7. Every string shown comes from the incident JSON.
 import { useEffect, useState } from 'react'
-import type { Incident, OsmFile } from '../types'
+import type { Incident, OsmFile, Weapon } from '../types'
 import { useTime } from '../time/store'
 import { fmtT } from '../time/derive'
 import { resolveAnchor } from '../scene/anchors'
@@ -28,9 +28,9 @@ const WEAPONS: [string, string][] = [
   ['fpv_drone', 'FPV drone'], ['unknown', 'Unknown'],
 ]
 
-/** §7.1.7 #4 + D7: probability bars, "Unclear" when the top option is < 0.5. */
-export function WeaponBars({ inc }: { inc: Incident }) {
-  const o = inc.weapon?.options
+/** §7.1.7 #4 + D7: probability bars, "Unclear" when the top option is < 0.5. Same shape in §9.1 and §9.2. */
+export function WeaponBars({ weapon }: { weapon: Weapon | null }) {
+  const o = weapon?.options
   if (!o) return null
   const top = Math.max(...WEAPONS.map(([k]) => o[k] ?? 0))
   return (
@@ -44,7 +44,7 @@ export function WeaponBars({ inc }: { inc: Incident }) {
           <span className="muted">{conf(o[k] ?? 0)}</span>
         </div>
       ))}
-      {!!inc.weapon?.evidence?.length && <div className="muted why">why: {inc.weapon.evidence.join(' · ')}</div>}
+      {!!weapon?.evidence.length && <div className="muted why">why: {weapon.evidence.join(' · ')}</div>}
       <div className="muted foot">Weapon ID needs an expert. These are cues, not conclusions.</div>
     </section>
   )
