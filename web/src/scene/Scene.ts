@@ -10,6 +10,7 @@ import { buildMarkers, type Markers } from './markers'
 import { blinkAt, flashAt, heatAt, waveRadiusM } from '../time/derive'
 import type { Mode } from '../time/store'
 import { makeDirector, witnessAt, type Pose } from './walkthrough'
+import { toLocal } from './geo'
 
 /** Frame counter read by the FPS box. */
 export const frameStats = { frames: 0 }
@@ -130,6 +131,13 @@ export class WitnessScene {
     sphere.scale.setScalar(1 + 0.15 * f0) // pulse at the first impact
     ;(sphere.material as THREE.MeshBasicMaterial).opacity = 0.22 + 0.5 * f0
     for (const [id, icon] of Object.entries(icons)) icon.scale.setScalar(blinkAt(this.inc, id, t) ? 60 : 18)
+    for (const c of this.markers.cues) { // §7.1.5: siren pulse, buzz icon (3–4 s), fire/rescue markers stay
+      const dt = t - c.t
+      c.obj.visible = dt >= 0 && (c.kind === 'marker' || dt < (c.kind === 'pulse' ? 4 : 3))
+      if (!c.obj.visible) continue
+      if (c.kind === 'pulse') c.obj.scale.setScalar(40 + ((dt % 1.5) / 1.5) * 360)
+      else c.obj.scale.setScalar(1 + 0.25 * Math.max(0, Math.sin(dt * 8)) * (c.kind === 'icon' ? 1 : 0))
+    }
   }
 
   /** Source id of the camera icon under a click, if any (§7.1.7: clicking a camera selects its clip). */
@@ -160,6 +168,25 @@ export class WitnessScene {
   }
 
   showAnswerKey(on: boolean) { if (this.markers?.answerKey) this.markers.answerKey.visible = on }
+  showRings(on: boolean) { if (this.markers) this.markers.rings.visible = on }
+
+  /** True when the pointer is over the target building's footprint (hover label: type and floors, §7.1.3). */
+  overTarget(clientX: number, clientY: number): boolean {
+    const tg = this.inc?.target
+    if (!tg) return false
+    const r = this.canvas.getBoundingClientRect(), ray = new THREE.Raycaster()
+    ray.setFromCamera(new THREE.Vector2(((clientX - r.left) / r.width) * 2 - 1, -((clientY - r.top) / r.height) * 2 + 1), this.camera)
+    const h = (tg.levels || 5) * 3
+    const hit = ray.ray.intersectPlane(new THREE.Plane(new THREE.Vector3(0, 1, 0), -h / 2), new THREE.Vector3())
+    if (!hit) return false
+    const poly = tg.footprint.map(([lon, lat]) => toLocal(this.inc!.impact, lat, lon))
+    let inside = false
+    for (let i = 0, j = poly.length - 1; i < poly.length; j = i++) {
+      const [xi, zi] = poly[i], [xj, zj] = poly[j]
+      if ((zi > hit.z) !== (zj > hit.z) && hit.x < ((xj - xi) * (hit.z - zi)) / (zj - zi) + xi) inside = !inside
+    }
+    return inside
+  }
 
   render() {
     const { clientWidth: w, clientHeight: h } = this.canvas

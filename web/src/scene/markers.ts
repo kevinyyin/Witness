@@ -46,6 +46,10 @@ function line(points: THREE.Vector3[], color: THREE.Color, opacity: number, loop
 const circle = (r: number, y = 0.5) =>
   Array.from({ length: 48 }, (_, i) => new THREE.Vector3(Math.cos((i / 48) * Math.PI * 2) * r, y, Math.sin((i / 48) * Math.PI * 2) * r))
 
+/** A timeline event shown in the scene at its time: siren = faint area pulse, buzz = sound icon, fire/rescue stay as markers. */
+export type Cue = { t: number; kind: 'pulse' | 'icon' | 'marker'; obj: THREE.Object3D }
+const GLYPH: Record<string, string> = { engine_buzz: '♪', jet: '♪', fire: '✷', rescue: '+', burst: '✺', gunfire: '•', speech: '…' }
+
 /** One per impact (§9.2: the top-level impact at t = 0, plus every later `impact` event): its own flash and sound wave. */
 export type Blast = { t: number; flash: THREE.Sprite; wave: THREE.Points; waveMax: number }
 
@@ -55,6 +59,8 @@ export type Markers = {
   sphere: THREE.Mesh
   icons: Record<string, THREE.Sprite> // camera icons by source id (they blink)
   cones: Record<string, { mats: (THREE.MeshBasicMaterial | THREE.LineBasicMaterial)[]; base: number[] }> // light up in the witness sweep
+  rings: THREE.Group // evidence rings (toggle): radius = measured flash-to-boom distance
+  cues: Cue[] // non-impact timeline events at their anchor (default: the source camera, §9.2)
   answerKey: THREE.Object3D | null
   unknownCameras: string[]
 }
@@ -133,6 +139,44 @@ export function buildMarkers(inc: Incident): Markers {
     group.add(g)
   }
 
+  // Evidence rings: dashed ground circle around each camera, radius = boom_distance_m (none when null)
+  const rings = new THREE.Group()
+  rings.visible = false
+  for (const s of inc.sources) {
+    if (!s.camera || s.boom_distance_m == null) continue
+    const [x, z] = toLocal(o, s.camera.lat, s.camera.lon)
+    const ring = new THREE.LineLoop(new THREE.BufferGeometry().setFromPoints(circle(s.boom_distance_m, 1)),
+      new THREE.LineDashedMaterial({ color: CYAN, dashSize: 14, gapSize: 10, transparent: true, opacity: 0.6 }))
+    ring.computeLineDistances()
+    ring.position.set(x, 0, z)
+    rings.add(ring)
+  }
+  group.add(rings)
+
+  // Event cues at their anchor: an explicit point anchor, else the source camera; a source without a camera gets none.
+  const cues: Cue[] = []
+  for (const e of inc.timeline) {
+    if (e.type === 'impact' || e.type === 'boom_heard') continue
+    let pos: THREE.Vector3 | null = null
+    if (e.anchor?.kind === 'point') { const [x, z] = toLocal(o, e.anchor.lat, e.anchor.lon); pos = new THREE.Vector3(x, 2, z) }
+    else { const c = inc.sources.find((s) => s.id === e.source)?.camera; if (c) { const [x, z] = toLocal(o, c.lat, c.lon); pos = new THREE.Vector3(x, 2, z) } }
+    if (!pos) continue
+    let obj: THREE.Object3D, kind: Cue['kind']
+    if (e.type === 'siren') {
+      obj = line(circle(1, 1), CYAN, 0.35, true); kind = 'pulse'
+    } else {
+      obj = sprite(letter(GLYPH[e.type] ?? '•'), e.type === 'fire' ? AMBER : e.type === 'rescue' ? GREEN : CYAN, 30, 1.6)
+      obj.position.y = 50
+      kind = e.type === 'fire' || e.type === 'rescue' ? 'marker' : 'icon'
+    }
+    const holder = new THREE.Group()
+    holder.position.copy(pos)
+    holder.add(obj)
+    holder.visible = false
+    group.add(holder)
+    cues.push({ t: e.t, kind, obj: holder })
+  }
+
   let answerKey: THREE.Object3D | null = null
   if (inc.answer_key) {
     const [x, z] = toLocal(o, inc.answer_key.lat, inc.answer_key.lon)
@@ -144,5 +188,5 @@ export function buildMarkers(inc: Incident): Markers {
     answerKey.visible = false
     group.add(answerKey)
   }
-  return { group, blasts, sphere, icons, cones, answerKey, unknownCameras }
+  return { group, blasts, sphere, icons, cones, rings, cues, answerKey, unknownCameras }
 }

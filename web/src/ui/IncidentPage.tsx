@@ -21,6 +21,8 @@ export function IncidentPage({ id }: { id: string }) {
   const [wire, setWire] = useState(() => new URLSearchParams(window.location.search).get('wire') === '1')
   const [points, setPoints] = useState(0)
   const [showKey, setShowKey] = useState(false)
+  const [showRings, setShowRings] = useState(false)
+  const [hoverAt, setHoverAt] = useState<[number, number] | null>(null) // pointer over the target building
   const canvas = useRef<HTMLCanvasElement>(null)
   const scene = useRef<WitnessScene | null>(null)
   const getScene = useCallback(() => scene.current, [])
@@ -67,6 +69,7 @@ export function IncidentPage({ id }: { id: string }) {
   }
 
   useEffect(() => { scene.current?.showAnswerKey(showKey) }, [showKey, points])
+  useEffect(() => { scene.current?.showRings(showRings) }, [showRings, points])
 
   if (inc === undefined) return <div className="page muted">Loading incident {id}…</div>
   if (inc === null) return <div className="page warn">Incident {id} not found (incidents/{id}.json).</div>
@@ -77,6 +80,11 @@ export function IncidentPage({ id }: { id: string }) {
       <div className="stage">
         <div className="scene">
           <canvas ref={canvas} onPointerDown={(e) => { down.current = [e.clientX, e.clientY] }} onPointerUp={onUp}
+            onPointerMove={(e) => {
+              const over = !!scene.current?.overTarget(e.clientX, e.clientY), r = e.currentTarget.getBoundingClientRect()
+              setHoverAt(over ? [e.clientX - r.left, e.clientY - r.top] : null)
+            }}
+            onPointerLeave={() => setHoverAt(null)}
             onDoubleClick={(e) => { useTime.getState().setMode('free'); scene.current?.focusAt(e.clientX, e.clientY) }} />
           <TitleCard inc={inc} />
           {ruler && <GapCard ruler={ruler} />}
@@ -89,6 +97,14 @@ export function IncidentPage({ id }: { id: string }) {
           </div>
           <Clock inc={inc} />
           <LowerThird inc={inc} />
+          {hoverAt && inc.target && (
+            <div className="target-tip" style={{ left: hoverAt[0] + 14, top: hoverAt[1] + 14 }}>
+              {inc.target.osm_tags.building ?? 'building'} · {inc.target.levels} floors <span className="muted">· {inc.target.osm_id} (OSM)</span>
+            </div>
+          )}
+          <div className="hud-tools">
+            <button className="mini" onClick={() => setShowRings((v) => !v)}>Evidence rings: {showRings ? 'on' : 'off'}</button>
+          </div>
           <Fps points={points} />
           <div className="honesty">
             Geometry: OpenStreetMap footprints, heights estimated. Not a scan.{wire && ' (wireframe)'}<br />

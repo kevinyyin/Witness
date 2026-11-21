@@ -50,6 +50,7 @@ export function Callouts({ inc, osm, getScene }: { inc: Incident; osm: OsmFile |
   const cards = useRef<(HTMLDivElement | null)[]>([])
   const pins = useRef<(HTMLDivElement | null)[]>([])
   const leaders = useRef<(SVGPathElement | null)[]>([])
+  const hover = useRef<number | null>(null)
 
   useEffect(() => {
     const draw = (t: number) => {
@@ -72,15 +73,16 @@ export function Callouts({ inc, osm, getScene }: { inc: Incident; osm: OsmFile |
           hide()
           pin.style.display = ''
           pin.style.transform = `translate(${p.x - 6}px, ${p.y - 8}px)`
-          return
+          if (hover.current !== i) return // hovering a pin re-opens its callout (§7.1.5)
         }
+        const op = st.state === 'pin' ? 1 : st.opacity
         const x = Math.max(8, Math.min(p.x + 50, W - 300)), y = Math.max(40, Math.min(p.y - 110, H - 140))
         card.style.display = ''
-        card.style.opacity = String(st.opacity)
+        card.style.opacity = String(op)
         card.style.transform = `translate(${x}px, ${y}px)`
-        pin.style.display = 'none'
+        if (st.state !== 'pin') pin.style.display = 'none'
         path.setAttribute('d', pts.map((q) => `M${x} ${y + 14} L${q.x} ${q.y}`).join(' '))
-        path.style.opacity = String(st.opacity)
+        path.style.opacity = String(op)
       })
     }
     overlays.add(draw)
@@ -101,7 +103,7 @@ export function Callouts({ inc, osm, getScene }: { inc: Incident; osm: OsmFile |
       {items.map((it, i) => (it.anchor === 'clock' ? null : card(it, i)))}
       {items.map((it, i) => (
         <div key={i} ref={(el) => { pins.current[i] = el }} className={`pin ${it.kind}`} style={{ display: 'none' }}
-          title={`${it.label}\n${it.sub}`}>{sym[it.kind]}</div>
+          onMouseEnter={() => { hover.current = i }} onMouseLeave={() => { hover.current = null }}>{sym[it.kind]}</div>
       ))}
       <div className="clock-stack">{items.map((it, i) => (it.anchor === 'clock' ? card(it, i) : null))}</div>
     </>
