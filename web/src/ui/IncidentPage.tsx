@@ -10,7 +10,7 @@ import { SampleBanner } from './SampleBanner'
 import { Fps } from './Fps'
 import { Timeline } from './Timeline'
 import { Callouts } from './Callouts'
-import { Clock, GapCard, Legend, LowerThird, NowPanel, TitleCard } from './HudText'
+import { Clock, GapCard, Legend, TitleCard } from './HudText'
 import { SourceVideo } from './SourceVideo'
 import { FlagsList, Footer, Sources, Summary, WeaponSection } from './Sidebar'
 
@@ -22,6 +22,8 @@ export function IncidentPage({ id }: { id: string }) {
   const [points, setPoints] = useState(0)
   const [showKey, setShowKey] = useState(false)
   const [showRings, setShowRings] = useState(false)
+  const [caseOpen, setCaseOpen] = useState(false) // the case file drawer: closed by default, the scene is the screen
+  const [pipOpen, setPipOpen] = useState(true)
   const [hoverAt, setHoverAt] = useState<[number, number] | null>(null) // pointer over the target building
   const canvas = useRef<HTMLCanvasElement>(null)
   const scene = useRef<WitnessScene | null>(null)
@@ -96,16 +98,18 @@ export function IncidentPage({ id }: { id: string }) {
             {osm && !osm.inside && <div className="warn">Impact is {Math.round(osm.distance_m ?? 0)} m from the centre of {osm.file}; buildings may be missing.</div>}
           </div>
           <Clock inc={inc} />
-          <LowerThird inc={inc} />
+          <button className="cf-btn" onClick={() => setCaseOpen((v) => !v)}>Case file {caseOpen ? '▾' : '▸'}</button>
           {hoverAt && inc.target && (
             <div className="target-tip" style={{ left: hoverAt[0] + 14, top: hoverAt[1] + 14 }}>
               {inc.target.osm_tags.building ?? 'building'} · {inc.target.levels} floors <span className="muted">· {inc.target.osm_id} (OSM)</span>
             </div>
           )}
-          <div className="hud-tools">
-            <Legend inc={inc} />
-            <button className="mini" onClick={() => setShowRings((v) => !v)}>Evidence rings: {showRings ? 'on' : 'off'}</button>
+          {/* the evidence: source video as picture-in-picture over the scene, following the playhead */}
+          <div className={`pip sidebar ${pipOpen ? '' : 'min'}`}>
+            <button className="pip-toggle mini" onClick={() => setPipOpen((v) => !v)}>{pipOpen ? 'hide video' : 'show video'}</button>
+            {pipOpen && <SourceVideo inc={inc} />}
           </div>
+          <Legend inc={inc} />
           <Fps points={points} />
           <div className="honesty">
             Geometry: OpenStreetMap footprints, heights estimated. Not a scan.{wire && ' (wireframe)'}<br />
@@ -114,13 +118,16 @@ export function IncidentPage({ id }: { id: string }) {
         </div>
         {ruler && <Timeline inc={inc} ruler={ruler} />}
       </div>
-      <aside className="sidebar">
-        <SourceVideo inc={inc} />
-        <NowPanel inc={inc} />
+      {/* everything else lives in the case file, opened on purpose */}
+      <aside className={`sidebar drawer ${caseOpen ? 'open' : ''}`}>
+        <div className="drawer-head"><b>CASE FILE</b> · #{inc.id} <button className="mini" onClick={() => setCaseOpen(false)}>close ✕</button></div>
         <Summary inc={inc} />
-        <WeaponSection weapon={inc.weapon} />
         <FlagsList inc={inc} osm={osm?.osm ?? null} />
+        <WeaponSection weapon={inc.weapon} />
         <Sources inc={inc} />
+        <section>
+          <button className="mini" onClick={() => setShowRings((v) => !v)}>Evidence rings: {showRings ? 'on' : 'off'}</button>
+        </section>
         <Footer inc={inc} showKey={showKey} toggleKey={() => setShowKey((v) => !v)} />
       </aside>
     </div>

@@ -57,7 +57,10 @@ export function Callouts({ inc, osm, getScene }: { inc: Incident; osm: OsmFile |
       const s = getScene()
       // cards already laid out this frame (x, y, w, h); the clock + its screen-level stack (top right) is reserved
       const cw = s?.renderer.domElement.clientWidth ?? 800, stack = document.querySelector<HTMLElement>('.clock-stack')
-      const placed: [number, number, number, number][] = [[cw - 310, 0, 310, 66 + (stack?.offsetHeight ?? 0)], [0, 0, 480, 64]] // + the title, top left
+      const placed: [number, number, number, number][] = [[cw - 310, 0, 310, 100 + (stack?.offsetHeight ?? 0)], [0, 0, 480, 64]] // + the title, top left
+      // the picture-in-picture video (bottom right) is reserved too
+      const pip = document.querySelector<HTMLElement>('.pip'), cv = s?.renderer.domElement
+      if (pip && cv) { const a = cv.getBoundingClientRect(), b = pip.getBoundingClientRect(); placed.push([b.left - a.left, b.top - a.top - 30, b.width, b.height + 30]) }
       items.forEach((it, i) => {
         const card = cards.current[i], pin = pins.current[i], path = leaders.current[i]
         if (!card || !pin || !path) return
@@ -82,14 +85,19 @@ export function Callouts({ inc, osm, getScene }: { inc: Incident; osm: OsmFile |
         card.style.display = ''
         const w = card.offsetWidth || 280, h = card.offsetHeight || 40
         // cards live at the left/right edge (the side their anchor is on) so the area of interest stays clear
-        const left = p.x < W / 2
-        const x = left ? 16 : W - 16 - w
-        let y = Math.max(70, Math.min(p.y - h / 2, H - h - 16))
         // several callouts at once (e.g. every impact flag at t = 0): push down until it overlaps no earlier card
-        for (let k = 0; k < placed.length; k++) {
-          const [px, py, pw, ph] = placed[k]
-          if (x < px + pw && x + w > px && y < py + ph + 6 && y + h + 6 > py) { y = py + ph + 6; k = -1 }
+        const place = (lft: boolean): [number, number] => {
+          const cx = lft ? 16 : W - 16 - w
+          let cy = Math.max(70, Math.min(p.y - h / 2, H - h - 16))
+          for (let k = 0; k < placed.length; k++) {
+            const [px, py, pw, ph] = placed[k]
+            if (cx < px + pw && cx + w > px && cy < py + ph + 6 && cy + h + 6 > py) { cy = py + ph + 6; k = -1 }
+          }
+          return [cx, cy]
         }
+        let left = p.x < W / 2
+        let [x, y] = place(left)
+        if (y + h > H - 8) { left = !left; [x, y] = place(left) } // no room on its side (e.g. under the video): use the other side
         placed.push([x, y, w, h])
         card.style.opacity = String(op)
         card.style.transform = `translate(${x}px, ${y}px)`
