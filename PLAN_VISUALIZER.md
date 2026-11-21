@@ -49,6 +49,10 @@
 12. Telegram embeds cannot seek → embed kind prints the moment; seekable hero clips need `embed_url: "/media/telegram/<file>.mp4"` (value convention, not a new field), only after organizer answer to §13 Q3.
 13. Hero in Zaporizhzhia ≠ Kharkiv → overview shows one city at a time (city with most incidents; others as tabs).
 14. Overview map: no tile server (flaky wifi) → dark SVG with dots, scale bar, OSM credit.
+15. Heroes per `data/` (11:06): 2024-06-22 Kharkiv (14 clips; `evidence_report_2024-06-22.html` built), 2024-09-01 Kharkiv (10), 2025-02-28 Zaporizhzhia (3), 2025-06-24 Dnipro (11 links + OSM extract). Zaporizhzhia/Dnipro are other cities (gap 13). `benchmark.csv`: XU_kraine_57707 and itsdonetsk_170630 are the same video (identical stats).
+16. `data/manifest.csv` `screen` column is empty: nothing screened yet (D12). The sample's clip B (Commons 2025-04-03) is unscreened; dev use only, never on stage.
+
+Repo: https://github.com/kevinyyin/Witness (pushed 11:06). `data/` files stay out of git (§4.3).
 
 ## Integration checklist (from teammate; time I need it)
 - [ ] **11:50** fps on his Mac (demo laptop): `git pull; cd web; npm i; npm run dev` → open `http://localhost:5173/#/incident/sample`, read the FPS box. I'll say when it's pushed.
