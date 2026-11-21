@@ -105,16 +105,16 @@ Written Sat Nov 21, 10:45 AM ET. Spec says "Teammate" for the pipeline owner: th
 - [ ] **G3 K3-mini geolocation** — `pipeline/killtests/k3_geo.py`
   5 `dev` clips with known locations: Hydrogen landmarks → OSM landmark search → distance to the key.
   Check: prints 5 distances. Pass: ≥ 2 within 5 km. Fail → pitch "narrows to district + candidates".
-- [ ] **GATE: go / fog.** I give K1, K6, K3-mini results; the user decides. **No product code before "go". On "fog": stop and re-plan (D13).**
+- [x] **GATE: go / fog.** — **GO** from the user at 11:30 on K1 + K6 (K3-mini still pending: Overpass busy). I give K1, K6, K3-mini results; the user decides. **No product code before "go". On "fog": stop and re-plan (D13).**
 
 ### P1 Clip pipeline (go → 12:30)
-- [ ] **P1**
+- [x] **P1** — done 11:32: `python -m pipeline.clip data/telegram/XU_kraine/XU_kraine_57707.mp4` → record in 21 s (fetch 7.5, Hydrogen 13.4 ‖ Decisions 2.3); `contract --selftest` and `--clip --partial` pass. `fake`, `location`, `incident_id` come in P2.
   Goal: one clip (file or URL) → §9.1 record without `fake`/`location` yet.
   Files: `pipeline/ingest.py` (sha256, pHash, ffmpeg → wav + 5 frames, duration), `pipeline/gemini.py` (Hydrogen timeline + landmarks; one Decisions call), `pipeline/clip.py` (`analyze_clip`, cache), `pipeline/contract.py` (same-keys check, used for clips, incidents, stream, results).
   Fields: `clip_id`, `source_url`, `platform`, `embed_url`, `sha256`, `duration_s`, `posted_at`, `claimed_place`, `timeline[] {clip_ts, type, label, confidence}`, `triage {war_related, event_type{strike, aftermath, other}, graphic_level, civilian_objects, uxo, military_object}`, `weapon {options{8}, evidence}`, `stages_ms {fetch, watch, score}`.
   Check: `python -m pipeline.clip data/videos/<dev clip>` prints the record; `python -m pipeline.contract --selftest` passes (enum and key asserts on that record).
   Cut: none (P0).
-- [ ] **11:50 fps check.** (11:27: web runs here; in-app pane showed "FPS 34 · 495k pts" at 800×600 — the user must read it in a full-size browser.) Pull, `cd web && npm i && npm run dev`, ask the user to read the fps number → teammate (12:00 point-cloud decision).
+- [x] **11:50 fps check.** — 11:30: user read **FPS 122 · 495k pts** in a full-size browser on this Mac → point cloud stays. (11:27: web runs here; in-app pane showed "FPS 34 · 495k pts" at 800×600 — the user must read it in a full-size browser.) Pull, `cd web && npm i && npm run dev`, ask the user to read the fps number → teammate (12:00 point-cloud decision).
 
 ### P2 Fake checks + break-it API (12:30 → 1:15) — deadline 1:30
 - [ ] **P2**
