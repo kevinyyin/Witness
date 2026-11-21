@@ -99,11 +99,12 @@ Cut order if behind (§4.2): overview dot map → smoke column → evidence-ring
 - **Fallback:** none needed. If go/fog not heard by end of V0, ask once; on "fog", stop and re-plan.
 
 ### V1a · Point-cloud city + free orbit + fps (11:10–11:40) — needs "go"
-- [ ] **Goal:** §7.1.2 look: black void, LiDAR-style points on walls + roofs (~1 pt per 1.5 m², cap 500k), sparse ground grid, cool white/cyan brighter with height, depth fog; OrbitControls; FPS box.
+- [x] **Goal:** §7.1.2 look: black void, LiDAR-style points on walls + roofs (~1 pt per 1.5 m², cap 500k), sparse ground grid, cool white/cyan brighter with height, depth fog; OrbitControls; FPS box.
 - **Files:** `src/scene/geo.ts` (`toLocal`), `src/scene/pointcloud.ts` (`buildCityPoints(osm, origin, targetId) → {geometry, count}`; `buildCityWire(...)` for fallback), `src/scene/shaders.ts`, `src/scene/Scene.ts`, `src/ui/Fps.tsx` (big mono "FPS 58 · 412k pts", updated every 0.5 s), `src/ui/Reconstruction.tsx`, honesty label.
 - **Reads:** `impact.{lat,lon}`, `target.osm_id`; OSM `tags["building:levels"]`, `geometry`.
 - **Accept:** user eyeball: a recognisable block of point buildings around the impact, no sky, distant points fade; FPS box ≥ 30 on Windows (early warning only). Commit + push; **tell the user "scene pushed, ready for the Mac fps check"**.
 - **Fallback:** `?wire=1` / key `W` → wireframe extrusions from the same data (§7.1.2).
+  - **Result 11:14:** 495k pts (adaptive spacing, budget 450k + ground grid), orbit/zoom work, honesty label + OSM credit on screen, 9 tests pass. Built in `IncidentPage.tsx` (not a separate Reconstruction.tsx). Windows FPS not measured: the agent's browser pane was hidden/throttled (1.5 rAF/s on an empty page), so its 30 fps reading is meaningless. Needs a visible browser.
 
 ### V1b · Target, impact, sphere, cameras, cones, answer key (11:40–12:30)
 - [ ] **Goal:** §7.1.3 objects at a fixed `t` (store exists, no timeline yet): target points tagged for heat, impact marker + flash sprite, uncertainty sphere radius `impact.radius_m`, camera icons + letters + view cones (opacity = location confidence), "position unknown" list for null cameras, green answer-key marker (toggle), bloom only on flash/markers (threshold above city brightness).
