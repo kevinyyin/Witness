@@ -17,7 +17,8 @@ export function buildItems(inc: Incident, osm: OsmFile | null): Item[] {
   for (const [list, kind] of [[inc.flags, 'flag'], [inc.review_notes, 'note']] as const)
     for (const f of list)
       if (f.t != null)
-        items.push({ kind, label: f.label, sub: [...f.basis, conf(f.confidence)].join(' · '), t: f.t, t_end: f.t_end, anchor: resolveAnchor(inc, osm, f.anchor) })
+        // §9.2: an anchor at a null camera or a building not in osm_file is pinned screen-level, like the clock.
+        items.push({ kind, label: f.label, sub: [...f.basis, conf(f.confidence)].join(' · '), t: f.t, t_end: f.t_end, anchor: resolveAnchor(inc, osm, f.anchor) ?? 'clock' })
   // "boom heard +3.1 s → 1.06 km" at the camera that heard it (§7.1.4), from the measured event + boom_distance_m
   for (const e of inc.timeline) {
     if (e.type !== 'boom_heard' || !e.source) continue

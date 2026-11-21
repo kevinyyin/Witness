@@ -68,7 +68,6 @@ button.on { border-color: var(--cyan); color: var(--cyan); }
 .mark.event { top: 24px; color: var(--text); font-size: 9px; }
 .lane-row { position: absolute; left: 0; right: 0; height: 12px; }
 .lane { position: absolute; height: 10px; top: 1px; background: #2e5a6b; font-size: 8px; line-height: 10px; color: var(--text); overflow: hidden; }
-.lane.guessed { border-right: 1px dashed var(--dim); }
 .lane.approx { background: repeating-linear-gradient(135deg, #2e5a6b 0 3px, transparent 3px 6px); }
 .lane-note { font-size: 9px; }
 .boom-tag { position: absolute; top: -1px; font-size: 8px; color: var(--cyan); white-space: nowrap; }
@@ -93,7 +92,7 @@ button.mini { padding: 1px 6px; font-size: 10px; margin: 2px 4px 2px 0; }
 .why, .foot { font-size: 10px; margin-top: 4px; }
 .flag-row { cursor: pointer; margin: 2px 0; } .flag-row:hover { text-decoration: underline; }
 .source-row { cursor: pointer; margin: 4px 0; } .source-row:hover b { color: var(--cyan); }
-.st-real { color: var(--green); } .st-rejected { color: var(--red); }
+.st-real { color: var(--green); } .st-unsure { color: var(--amber); } .st-fake { color: var(--red); }
 .footer { border-bottom: 0 !important; font-size: 11px; }
 .now-flag { color: var(--red); margin: 2px 0; } .now-note { color: var(--yellow); margin: 2px 0; }
 .hud-title { position: absolute; top: 10px; left: 14px; font-size: 14px; letter-spacing: 0.06em; pointer-events: none; }

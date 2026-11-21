@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import type { Incident } from '../types'
-import { loadIncident, loadOsmFor, type OsmPick } from '../data/load'
+import { loadIncident, loadOsm, type OsmPick } from '../data/load'
 import { WitnessScene } from '../scene/Scene'
 import { useTime } from '../time/store'
 import { buildRuler } from '../time/ruler'
@@ -29,7 +29,7 @@ export function IncidentPage({ id }: { id: string }) {
   useEffect(() => {
     loadIncident(id).then((i) => {
       setInc(i)
-      if (i) loadOsmFor(i.impact).then(setOsm)
+      if (i) loadOsm(i).then(setOsm)
     })
   }, [id])
 
@@ -81,8 +81,8 @@ export function IncidentPage({ id }: { id: string }) {
           <div className="hud-title">
             {inc.city.toUpperCase()} · INCIDENT #{inc.id} · {inc.sources.length} SOURCES
             <div className="muted">{inc.title}</div>
-            {osm === null && <div className="warn">No OSM extract found (web/public/osm/index.json).</div>}
-            {osm && !osm.inside && <div className="warn">Impact is {Math.round(osm.distance_m)} m from the nearest OSM extract ({osm.entry.file}); buildings may be missing.</div>}
+            {osm === null && <div className="warn">Building file {inc.osm_file} not found under web/public/.</div>}
+            {osm && !osm.inside && <div className="warn">Impact is {Math.round(osm.distance_m ?? 0)} m from the centre of {osm.file}; buildings may be missing.</div>}
           </div>
           <Clock inc={inc} />
           <LowerThird inc={inc} />

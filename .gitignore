@@ -7,6 +7,10 @@
 *.session
 *.session-journal
 
+# Teammate's saved Gemini doc pages (§14): only VERIFIED.md is committed
+docs/*
+!docs/VERIFIED.md
+
 # Python
 .venv/
 venv/

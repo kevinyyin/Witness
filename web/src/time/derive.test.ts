@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import { blinkAt, calloutState, clockAt, flashAt, heatAt, markTimes, pickClip, slowmo, waveRadiusM } from './derive'
 import { buildRuler } from './ruler'
-import { embeddable, playerKind } from '../ui/players'
+import { embeddable } from '../ui/players'
 import sample from '../../public/sample_incident.json'
 import type { Incident } from '../types'
 
@@ -65,21 +65,26 @@ describe('pickClip (sidebar video follows the playhead)', () => {
   it('a pinned clip wins', () => expect(id(0, 'B')).toBe('B'))
 })
 
-describe('playerKind', () => {
-  const s = (embed_url: string) => ({ id: 'X', camera: null, embed_url })
-  it('youtube / file / embed from embed_url', () => {
-    expect(playerKind(s('https://www.youtube.com/embed/dQw4w9WgXcQ'))).toBe('youtube')
-    expect(playerKind(s('/media/telegram/a/b.mp4'))).toBe('file')
-    expect(playerKind(s('https://t.me/x/1?embed=1'))).toBe('embed')
-  })
+describe('embeddable', () => {
   it('never iframes a placeholder', () => expect(embeddable('…')).toBe(false))
+  it('accepts an https embed', () => expect(embeddable('https://t.me/x/1?embed=1')).toBe(true))
+})
+
+describe('Rev 2 sample = contract fixture (§9.0, §9.2)', () => {
+  const off = Object.fromEntries(inc.sources.map((s) => [s.id, s.offset_s]))
+  it('t agrees with clip_ts + offset_s within 0.05 s on aligned sources', () => {
+    for (const e of inc.timeline) if (inc.sources.find((s) => s.id === e.source)?.aligned)
+      expect(Math.abs(e.t - (e.clip_ts + off[e.source]!))).toBeLessThanOrEqual(0.05)
+  })
+  it('lists all eight flag types', () => expect(inc.flags.length).toBe(8))
+  it('a rejected clip never gets the sidebar', () => expect(pickClip(inc, 0, null)?.authenticity).not.toBe('fake'))
 })
 
 describe('buildRuler', () => {
   const r = buildRuler(markTimes(inc))
-  it('exactly one gap, ending 5 s before the second impact (t = 1080)', () => {
+  it('exactly one gap (41 s → 1020 s), ending 5 s before the next mark', () => {
     expect(r.gaps.length).toBe(1)
-    expect(r.gaps[0].t1).toBe(1075)
+    expect(r.gaps[0].t1).toBe(1015)
   })
   it('round-trips t ↔ x', () => {
     expect(r.xToT(r.tToX(41))).toBeCloseTo(41, 5)

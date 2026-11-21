@@ -1,21 +1,9 @@
-// Video player plumbing for the sidebar (§7.1.7). No React here.
-import type { Source } from '../types'
-
-export type Kind = 'youtube' | 'file' | 'embed'
-
-/** `player` if the JSON has it; else from embed_url (PLAN gap 3). */
-export function playerKind(s: Source): Kind {
-  if (s.player) return s.player
-  const u = s.embed_url ?? ''
-  if (youtubeId(u)) return 'youtube'
-  if (/\.(mp4|webm|mov)(\?|$)/i.test(u) || u.startsWith('/media/')) return 'file'
-  return 'embed'
-}
+// Video player plumbing for the sidebar (§7.1.7, §9.2 "How the sidebar plays a clip"). No React here.
 
 export const youtubeId = (u: string) => /(?:youtube\.com\/embed\/|youtu\.be\/|[?&]v=)([\w-]{11})/.exec(u)?.[1] ?? null
 
 /** Only real web pages go into an iframe (the §9.2 example uses "…" placeholders). */
-export const embeddable = (u: string | undefined) => !!u && /^https:\/\//.test(u)
+export const embeddable = (u: string | null | undefined) => !!u && /^https:\/\//.test(u)
 
 export type Adapter = { time(): number; seek(s: number): void; play(): void; pause(): void; rate(r: number): void; destroy(): void }
 

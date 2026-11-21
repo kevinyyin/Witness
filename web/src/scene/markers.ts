@@ -46,12 +46,13 @@ function line(points: THREE.Vector3[], color: THREE.Color, opacity: number, loop
 const circle = (r: number, y = 0.5) =>
   Array.from({ length: 48 }, (_, i) => new THREE.Vector3(Math.cos((i / 48) * Math.PI * 2) * r, y, Math.sin((i / 48) * Math.PI * 2) * r))
 
+/** One per impact (§9.2: the top-level impact at t = 0, plus every later `impact` event): its own flash and sound wave. */
+export type Blast = { t: number; flash: THREE.Sprite; wave: THREE.Points; waveMax: number }
+
 export type Markers = {
   group: THREE.Group
-  flash: THREE.Sprite
+  blasts: Blast[]
   sphere: THREE.Mesh
-  wave: THREE.Points
-  waveMax: number // m: wave fades out once past the farthest camera
   icons: Record<string, THREE.Sprite> // camera icons by source id (they blink)
   answerKey: THREE.Object3D | null
   unknownCameras: string[]
@@ -72,23 +73,36 @@ export function buildMarkers(inc: Incident): Markers {
 
   const dot = sprite(glow(), AMBER, 16, 2.5)
   dot.position.set(0, 2, 0)
-  const flash = sprite(glow(), new THREE.Color(1, 1, 1), 1, 6)
-  flash.position.set(0, 10, 0)
-  flash.visible = false
   // Uncertainty sphere: radius = impact.radius_m (§7.1.3)
   const sphere = new THREE.Mesh(
     new THREE.SphereGeometry(o.radius_m, 24, 12),
     new THREE.MeshBasicMaterial({ color: AMBER, wireframe: true, transparent: true, opacity: 0.22, depthWrite: false }),
   )
-  // Sound wave: translucent hemisphere of points, radius = 343 m/s × t (set per frame)
-  const wave = new THREE.Points(hemisphere(2500), new THREE.PointsMaterial({
-    color: CYAN, size: 2, sizeAttenuation: false, transparent: true, opacity: 0.5, depthWrite: false,
-  }))
-  wave.visible = false
-  group.add(dot, flash, sphere, wave)
+  group.add(dot, sphere)
+
+  // Impacts: t = 0 at the top-level impact, then any later `impact` event at its own point anchor (else the same spot).
+  const at = [{ t: 0, pos: new THREE.Vector3() }, ...inc.timeline.filter((e) => e.type === 'impact' && e.t > 0).map((e) => {
+    if (e.anchor?.kind !== 'point') return { t: e.t, pos: new THREE.Vector3() }
+    const [x, z] = toLocal(o, e.anchor.lat, e.anchor.lon)
+    return { t: e.t, pos: new THREE.Vector3(x, 0, z) }
+  })]
+  const cams = inc.sources.flatMap((s) => (s.camera ? [toLocal(o, s.camera.lat, s.camera.lon)] : []))
+  const blasts: Blast[] = at.map(({ t, pos }) => {
+    const flash = sprite(glow(), new THREE.Color(1, 1, 1), 1, 6)
+    flash.position.set(pos.x, 10, pos.z)
+    flash.visible = false
+    // Sound wave: translucent hemisphere of points, radius = 343 m/s × (t − t_impact), set per frame
+    const wave = new THREE.Points(hemisphere(2500), new THREE.PointsMaterial({
+      color: CYAN, size: 2, sizeAttenuation: false, transparent: true, opacity: 0.5, depthWrite: false,
+    }))
+    wave.position.copy(pos)
+    wave.visible = false
+    group.add(flash, wave)
+    const waveMax = Math.max(600, ...cams.map(([x, z]) => Math.hypot(x - pos.x, z - pos.z) * 1.15))
+    return { t, flash, wave, waveMax }
+  })
 
   const icons: Record<string, THREE.Sprite> = {}
-  let waveMax = 600
   const unknownCameras: string[] = []
   for (const s of inc.sources) {
     const cam = s.camera
@@ -98,16 +112,14 @@ export function buildMarkers(inc: Incident): Markers {
     g.position.set(x, 2, z)
     const icon = sprite(glow(), CYAN, 18, 2.2)
     icons[s.id] = icon
-    waveMax = Math.max(waveMax, Math.hypot(x, z) * 1.15)
     const label = sprite(letter(s.id), CYAN, 26, 1.6)
     label.position.y = 26
     g.add(icon, label)
     // Position uncertainty: ring of radius camera.radius_m (never a point without its ±)
-    if (cam.radius_m) g.add(line(circle(cam.radius_m), CYAN, 0.35, true))
-    if (cam.heading_deg != null) {
-      // shortcut: §9.2 has no camera location confidence; opacity falls with radius_m (60 m → 0.9, 350 m → 0.3). Swap in a real field if the pipeline adds one.
-      const conf = Math.min(0.9, Math.max(0.15, 1 - (cam.radius_m ?? 300) / 500))
-      const fov = ((cam.fov_deg ?? 60) * Math.PI) / 180, h = (cam.heading_deg * Math.PI) / 180
+    g.add(line(circle(cam.radius_m), CYAN, 0.35, true))
+    {
+      const conf = cam.confidence // §7.1.3: cone opacity = location confidence
+      const fov = (cam.fov_deg * Math.PI) / 180, h = (cam.heading_deg * Math.PI) / 180
       const ray = (a: number) => new THREE.Vector3(Math.sin(a) * CONE_M, 0, -Math.cos(a) * CONE_M) // compass: 0 = north (-z)
       const [l, r] = [ray(h - fov / 2), ray(h + fov / 2)]
       const tri = new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(), l, r])
@@ -128,5 +140,5 @@ export function buildMarkers(inc: Incident): Markers {
     answerKey.visible = false
     group.add(answerKey)
   }
-  return { group, flash, sphere, wave, waveMax, icons, answerKey, unknownCameras }
+  return { group, blasts, sphere, icons, answerKey, unknownCameras }
 }

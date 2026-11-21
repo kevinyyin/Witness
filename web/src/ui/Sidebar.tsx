@@ -2,7 +2,7 @@
 import { useEffect, useState } from 'react'
 import type { Incident, OsmFile } from '../types'
 import { useTime } from '../time/store'
-import { anchorSource, fmtT } from '../time/derive'
+import { fmtT } from '../time/derive'
 import { resolveAnchor } from '../scene/anchors'
 
 const conf = (c: number | null | undefined) => (c == null ? '—' : c.toFixed(2))
@@ -62,7 +62,7 @@ export function FlagsList({ inc, osm }: { inc: Incident; osm: OsmFile | null }) 
         const lost = f.anchor && f.anchor.kind !== 'clock' && resolveAnchor(inc, osm, f.anchor) === null
         return (
           <div key={i} className={`flag-row ${s === '▲' ? 'now-flag' : 'now-note'}`}
-            onClick={() => useTime.getState().jump(f.t! - 2, anchorSource(f.anchor) ?? null)}>
+            onClick={() => useTime.getState().jump(f.t! - 2, f.source)}>
             <span className="muted">{fmtT(f.t!)}</span> {s} {f.label} <span className="muted">{conf(f.confidence)}{lost && ' · anchor not in scene'}</span>
           </div>
         )
@@ -77,28 +77,30 @@ export function FlagsList({ inc, osm }: { inc: Incident; osm: OsmFile | null }) 
 /** §7.1.7 #6: every clip with status, location confidence and licence; rejected collapsed at the bottom. */
 export function Sources({ inc }: { inc: Incident }) {
   const pin = useTime((s) => s.pin)
+  // §9.0: ✓ real / ⚠ unsure / ✗ rejected (= fake)
+  const mark = { real: '✓ real', unsure: '⚠ unsure', fake: '✗ rejected' }
   const row = (s: Incident['sources'][number]) => (
-    <div key={s.id} className="source-row" onClick={() => pin(s.id)} title="Show this clip">
-      <b>{s.id}</b> · {s.platform ?? '?'} · {s.uploader ?? '?'} · {s.posted_at?.replace('T', ' ').slice(0, 16) ?? 'post time unknown'}
+    <div key={s.id} className="source-row" onClick={() => s.authenticity !== 'fake' && pin(s.id)} title="Show this clip">
+      <b>{s.id}</b> · {s.platform} · {s.uploader} · {s.posted_at?.replace('T', ' ').slice(0, 16) ?? 'post time unknown'}
       <div className="muted">
-        <span className={`st-${s.authenticity}`}>{s.authenticity === 'real' ? '✓' : s.authenticity === 'rejected' ? '✗' : '⚠'} {s.authenticity ?? 'unknown'}</span>
-        {' · '}{s.camera ? `camera ±${s.camera.radius_m ?? '?'} m` : 'position unknown'}
-        {' · '}{s.license ?? 'licence unknown'}
+        <span className={`st-${s.authenticity}`}>{mark[s.authenticity]}</span>
+        {s.reject_reason && <> ({s.reject_reason})</>}
+        {' · '}{s.camera ? `location confidence ${s.camera.confidence.toFixed(2)} (±${s.camera.radius_m} m)` : 'position unknown'}
+        {' · '}{s.license}
       </div>
     </div>
   )
-  const ok = inc.sources.filter((s) => s.authenticity !== 'rejected'), bad = inc.sources.filter((s) => s.authenticity === 'rejected')
+  const ok = inc.sources.filter((s) => s.authenticity !== 'fake'), bad = inc.sources.filter((s) => s.authenticity === 'fake')
   return (
     <section>
-      <h4>SOURCES ({inc.sources.length})</h4>
+      <h4>SOURCES ({ok.length}) <span className="muted">✓/⚠/✗</span></h4>
       {ok.map(row)}
       {bad.length > 0 && <details><summary className="muted">✗ rejected ({bad.length})</summary>{bad.map(row)}</details>}
-      {!!inc.verification?.n_rejected && bad.length === 0 && <div className="muted">✗ rejected: {inc.verification.n_rejected} (not in this file)</div>}
     </section>
   )
 }
 
-/** §7.1.7 #7 + §13.1: evidence report link (if the pipeline exported it) + investigators' location toggle. */
+/** §7.1.7 #7: evidence record (custody.py's report, if the pipeline exported it) + investigators' location toggle. */
 export function Footer({ inc, showKey, toggleKey }: { inc: Incident; showKey: boolean; toggleKey: () => void }) {
   const [report, setReport] = useState(false)
   const url = `incidents/evidence_report_${encodeURIComponent(inc.id)}.html`
@@ -110,7 +112,6 @@ export function Footer({ inc, showKey, toggleKey }: { inc: Incident; showKey: bo
     <section className="footer">
       Evidence record: {report ? <a href={url} target="_blank" rel="noreferrer">evidence report ↗</a> : <span className="muted">no report exported yet</span>}
       {inc.answer_key && <> · Investigators' location <button className="mini" onClick={toggleKey}>{showKey ? 'hide' : 'reveal'}</button></>}
-      <div className="muted">Built around the Berkeley Protocol: originals hashed at capture, every step logged.</div>
     </section>
   )
 }

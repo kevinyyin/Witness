@@ -2,6 +2,7 @@
   "id": "sample",
   "city": "Kharkiv",
   "title": "Strike on apartment block, Saltivskyi district",
+  "osm_file": "osm/Kharkiv_buildings_2024-06-22.json",
   "time": {
     "impact_local": "2026-03-14T02:41:07+02:00",
     "plus_minus_s": 360,
@@ -66,8 +67,8 @@
       "unknown": 0.09
     },
     "evidence": [
-      "A@0:04-0:11 engine buzz",
-      "C@0:02-0:09 engine buzz"
+      "A@0:06 engine buzz",
+      "C@0:02 engine buzz"
     ]
   },
   "flags": [
@@ -82,9 +83,11 @@
         "kind": "building",
         "ref": "way/103292605"
       },
+      "source": "B",
+      "clip_ts": 12,
       "basis": [
         "osm:building=apartments",
-        "B@0:12"
+        "B@0:12 balconies"
       ]
     },
     {
@@ -97,9 +100,51 @@
       "anchor": {
         "kind": "clock"
       },
+      "source": null,
+      "clip_ts": null,
       "basis": [
         "time.impact_local"
       ]
+    },
+    {
+      "type": "dense_population",
+      "label": "Densely populated · 99 buildings within 300 m",
+      "status": "raised",
+      "confidence": 0.85,
+      "t": 0,
+      "t_end": null,
+      "anchor": {
+        "kind": "impact"
+      },
+      "source": null,
+      "clip_ts": null,
+      "basis": [
+        "osm: 99 buildings within 300 m"
+      ]
+    },
+    {
+      "type": "protected_site",
+      "label": "Hospital / school / worship / shelter nearby",
+      "status": "checked_none",
+      "confidence": null,
+      "t": null,
+      "t_end": null,
+      "anchor": null,
+      "source": null,
+      "clip_ts": null,
+      "basis": []
+    },
+    {
+      "type": "indiscriminate_weapon",
+      "label": "Indiscriminate-weapon indicator",
+      "status": "checked_none",
+      "confidence": null,
+      "t": null,
+      "t_end": null,
+      "anchor": null,
+      "source": null,
+      "clip_ts": null,
+      "basis": []
     },
     {
       "type": "second_strike",
@@ -109,6 +154,32 @@
       "t": null,
       "t_end": null,
       "anchor": null,
+      "source": null,
+      "clip_ts": null,
+      "basis": []
+    },
+    {
+      "type": "uxo",
+      "label": "Unexploded ordnance visible",
+      "status": "checked_none",
+      "confidence": null,
+      "t": null,
+      "t_end": null,
+      "anchor": null,
+      "source": null,
+      "clip_ts": null,
+      "basis": []
+    },
+    {
+      "type": "military_object",
+      "label": "Military object visible",
+      "status": "checked_none",
+      "confidence": null,
+      "t": null,
+      "t_end": null,
+      "anchor": null,
+      "source": null,
+      "clip_ts": null,
       "basis": []
     }
   ],
@@ -126,37 +197,27 @@
           "E"
         ]
       },
+      "source": "E",
+      "clip_ts": 3,
       "basis": [
         "C@0:12 impact",
         "E@0:03 smoke already visible"
       ]
     },
     {
-      "type": "weak_camera_position",
-      "label": "Camera E position uncertain (±350 m)",
-      "confidence": 0.6,
-      "t": -6,
-      "t_end": null,
-      "anchor": {
-        "kind": "camera",
-        "ref": "E"
-      },
-      "basis": [
-        "E camera radius 350 m"
-      ]
-    },
-    {
-      "type": "graphic_content",
-      "label": "Graphic content in clip D (blurred)",
+      "type": "weak_camera",
+      "label": "Camera D position is weak (±350 m)",
       "confidence": 0.9,
-      "t": 1085,
+      "t": 1020,
       "t_end": null,
       "anchor": {
         "kind": "camera",
         "ref": "D"
       },
+      "source": "D",
+      "clip_ts": 0,
       "basis": [
-        "D@0:10 graphic level 2"
+        "camera.radius_m=350"
       ]
     }
   ],
@@ -165,8 +226,15 @@
       "t": -14,
       "type": "siren",
       "source": "A",
-      "clip_ts": 2.1,
+      "clip_ts": 2.2,
       "confidence": 0.9
+    },
+    {
+      "t": -10.4,
+      "type": "engine_buzz",
+      "source": "C",
+      "clip_ts": 2,
+      "confidence": 0.8
     },
     {
       "t": -9.6,
@@ -183,39 +251,46 @@
       "confidence": 0.95
     },
     {
-      "t": 1.5,
-      "type": "boom_heard",
-      "source": "B",
-      "clip_ts": 13.5,
-      "confidence": 0.85
-    },
-    {
-      "t": 2,
+      "t": 0.9,
       "type": "boom_heard",
       "source": "C",
-      "clip_ts": 14.4,
+      "clip_ts": 13.3,
+      "confidence": 0.9
+    },
+    {
+      "t": 1.9,
+      "type": "boom_heard",
+      "source": "B",
+      "clip_ts": 9.9,
       "confidence": 0.9
     },
     {
       "t": 3.1,
       "type": "boom_heard",
       "source": "A",
-      "clip_ts": 19.2,
+      "clip_ts": 19.3,
       "confidence": 0.9
     },
     {
-      "t": 60,
+      "t": 6,
       "type": "fire",
       "source": "B",
-      "clip_ts": 72,
+      "clip_ts": 14,
+      "confidence": 0.85
+    },
+    {
+      "t": 41,
+      "type": "fire",
+      "source": "E",
+      "clip_ts": 3,
       "confidence": 0.7
     },
     {
-      "t": 1080,
-      "type": "impact",
+      "t": 1075,
+      "type": "rescue",
       "source": "D",
-      "clip_ts": 5,
-      "confidence": 0.6
+      "clip_ts": 55,
+      "confidence": 0.9
     }
   ],
   "sources": [
@@ -225,155 +300,224 @@
       "platform": "telegram",
       "url": "…",
       "embed_url": "…",
+      "player": "embed",
+      "media_url": null,
       "uploader": "…",
       "posted_at": "2026-03-14T02:44:00+02:00",
+      "duration_s": 31,
       "camera": {
-        "lat": 49.975509,
-        "lon": 36.235912,
-        "heading_deg": 45,
+        "lat": 49.976781,
+        "lon": 36.234243,
+        "heading_deg": 55,
         "fov_deg": 70,
-        "radius_m": 60
+        "radius_m": 60,
+        "confidence": 0.8
       },
       "boom_distance_m": 1063,
       "offset_s": -16.2,
       "aligned": true,
       "authenticity": "real",
+      "reject_reason": null,
       "graphic_level": 1,
       "license": "embed only",
       "findings": [
         {
+          "clip_ts": 2.2,
+          "label": "siren",
+          "confidence": 0.9
+        },
+        {
           "clip_ts": 6.6,
-          "label": "engine buzz"
+          "label": "engine buzz",
+          "confidence": 0.8
+        },
+        {
+          "clip_ts": 19.3,
+          "label": "boom",
+          "confidence": 0.9
         }
       ]
     },
     {
       "id": "B",
-      "clip_id": "c_0201",
-      "platform": "commons",
-      "url": "https://commons.wikimedia.org/wiki/File:Destructions_in_Kharkiv_after_Russian_attack,_2025-04-03_(001).webm",
-      "embed_url": "/media/videos/Kharkiv/Destructions_in_Kharkiv_after_Russian_attack_2025-04-03_001_.webm",
-      "uploader": "State Emergency Service of Ukraine",
+      "clip_id": "c_0188",
+      "platform": "youtube",
+      "url": "…",
+      "embed_url": "…",
+      "player": "youtube",
+      "media_url": null,
+      "uploader": "…",
       "posted_at": "2026-03-14T03:10:00+02:00",
+      "duration_s": 40,
       "camera": {
-        "lat": 49.979948,
-        "lon": 36.252644,
+        "lat": 49.979331,
+        "lon": 36.254303,
         "heading_deg": 300,
         "fov_deg": 60,
-        "radius_m": 40
+        "radius_m": 80,
+        "confidence": 0.7
       },
-      "boom_distance_m": 515,
-      "offset_s": -12,
+      "boom_distance_m": 652,
+      "offset_s": -8,
       "aligned": true,
       "authenticity": "real",
+      "reject_reason": null,
       "graphic_level": 1,
-      "license": "CC BY 4.0 · dsns.gov.ua",
+      "license": "embed only",
       "findings": [
         {
-          "clip_ts": 12,
-          "label": "balconies"
+          "clip_ts": 9.9,
+          "label": "boom",
+          "confidence": 0.9
         },
         {
-          "clip_ts": 13.5,
-          "label": "boom"
+          "clip_ts": 12,
+          "label": "balconies",
+          "confidence": 0.9
         }
       ]
     },
     {
       "id": "C",
-      "clip_id": "c_0212",
-      "platform": "x",
+      "clip_id": "c_0189",
+      "platform": "youtube",
       "url": "…",
       "embed_url": "…",
+      "player": "youtube",
+      "media_url": null,
       "uploader": "…",
-      "posted_at": "2026-03-14T02:52:00+02:00",
+      "posted_at": "2026-03-14T02:58:00+02:00",
+      "duration_s": 22,
       "camera": {
-        "lat": 49.987629,
-        "lon": 36.241593,
-        "heading_deg": 150,
-        "fov_deg": 75,
-        "radius_m": 80
+        "lat": 49.984871,
+        "lon": 36.247893,
+        "heading_deg": 200,
+        "fov_deg": 70,
+        "radius_m": 40,
+        "confidence": 0.9
       },
-      "boom_distance_m": 686,
+      "boom_distance_m": 309,
       "offset_s": -12.4,
       "aligned": true,
       "authenticity": "real",
+      "reject_reason": null,
       "graphic_level": 1,
       "license": "embed only",
       "findings": [
         {
           "clip_ts": 12.4,
-          "label": "flash"
+          "label": "flash",
+          "confidence": 0.95
         },
         {
-          "clip_ts": 14.4,
-          "label": "boom"
+          "clip_ts": 13.3,
+          "label": "boom",
+          "confidence": 0.9
         }
       ]
     },
     {
       "id": "D",
-      "clip_id": "c_0230",
-      "platform": "telegram",
-      "url": "…",
-      "embed_url": "…",
-      "uploader": "…",
-      "posted_at": "2026-03-14T03:05:00+02:00",
-      "camera": null,
+      "clip_id": "c_0190",
+      "platform": "commons",
+      "url": "https://commons.wikimedia.org/wiki/File:Kharkiv_Art_Museum_after_Russian_attack,_2026-06-14_(001).webm",
+      "embed_url": null,
+      "player": "file",
+      "media_url": "https://upload.wikimedia.org/wikipedia/commons/transcoded/9/99/Kharkiv_Art_Museum_after_Russian_attack%2C_2026-06-14_%28001%29.webm/Kharkiv_Art_Museum_after_Russian_attack%2C_2026-06-14_%28001%29.webm.480p.vp9.webm",
+      "uploader": "State Emergency Service of Ukraine",
+      "posted_at": "2026-03-14T04:30:00+02:00",
+      "duration_s": 98.6,
+      "camera": {
+        "lat": 49.984421,
+        "lon": 36.240603,
+        "heading_deg": 120,
+        "fov_deg": 60,
+        "radius_m": 350,
+        "confidence": 0.3
+      },
       "boom_distance_m": null,
-      "offset_s": 1075,
+      "offset_s": 1020,
       "aligned": false,
       "authenticity": "real",
-      "graphic_level": 2,
-      "license": "embed only",
+      "reject_reason": null,
+      "graphic_level": 1,
+      "license": "CC BY 4.0 · State Emergency Service of Ukraine (dsns.gov.ua)",
       "findings": [
         {
-          "clip_ts": 5,
-          "label": "second impact"
+          "clip_ts": 55,
+          "label": "rescue crews",
+          "confidence": 0.9
         }
       ]
     },
     {
       "id": "E",
-      "clip_id": "c_0244",
-      "platform": "telegram",
+      "clip_id": "c_0191",
+      "platform": "x",
       "url": "…",
       "embed_url": "…",
+      "player": "embed",
+      "media_url": null,
       "uploader": "…",
-      "posted_at": "2026-03-14T02:58:00+02:00",
+      "posted_at": "2026-03-14T02:50:00+02:00",
+      "duration_s": 48,
       "camera": {
-        "lat": 49.989185,
-        "lon": 36.25263,
-        "heading_deg": 210,
-        "fov_deg": 65,
-        "radius_m": 350
+        "lat": 49.974301,
+        "lon": 36.248593,
+        "heading_deg": 350,
+        "fov_deg": 50,
+        "radius_m": 150,
+        "confidence": 0.5
       },
       "boom_distance_m": null,
       "offset_s": 38,
       "aligned": true,
       "authenticity": "unsure",
+      "reject_reason": null,
       "graphic_level": 1,
       "license": "embed only",
       "findings": [
         {
           "clip_ts": 3,
-          "label": "smoke already visible"
+          "label": "smoke already visible",
+          "confidence": 0.7
         }
       ]
+    },
+    {
+      "id": "F",
+      "clip_id": "c_0192",
+      "platform": "telegram",
+      "url": "…",
+      "embed_url": "…",
+      "player": "embed",
+      "media_url": null,
+      "uploader": "…",
+      "posted_at": "2026-03-14T05:00:00+02:00",
+      "duration_s": 60,
+      "camera": null,
+      "boom_distance_m": null,
+      "offset_s": null,
+      "aligned": false,
+      "authenticity": "fake",
+      "reject_reason": "recycled: pHash match to an older upload",
+      "graphic_level": 0,
+      "license": "embed only",
+      "findings": []
     }
   ],
-  "summary": "Strike on a 10-floor apartment block… (Carbon)",
+  "summary": "Probably a strike on a 10-floor apartment block… (Carbon)",
   "verification": {
     "agree_place": true,
-    "agree_time": true,
+    "agree_time": false,
     "corroboration": "high",
     "n_sources": 5,
     "n_rejected": 1
   },
   "answer_key": {
     "source": "Bellingcat",
-    "lat": 49.982441,
-    "lon": 36.246293,
+    "lat": 49.982061,
+    "lon": 36.246213,
     "url": "…"
   },
   "is_sample": true

@@ -1,4 +1,4 @@
-import type { Incident, IncidentIndex, IndexEntry, OsmFile, OsmIndexEntry } from '../types'
+import type { Incident, IncidentIndex, OsmFile } from '../types'
 
 const BASE = import.meta.env.BASE_URL
 
@@ -15,25 +15,14 @@ export async function getJSON<T>(path: string): Promise<T | null> {
   }
 }
 
-/** Accepts `{incidents:[…], run?}` or a bare array (PLAN gap 9). */
-export function normalizeIndex(raw: unknown, fromSample: boolean): IncidentIndex | null {
-  if (Array.isArray(raw)) return { incidents: raw as IndexEntry[], is_sample: fromSample }
-  if (raw && typeof raw === 'object' && Array.isArray((raw as any).incidents)) {
-    const r = raw as any
-    return { incidents: r.incidents, run: r.run, is_sample: fromSample || r.is_sample === true }
-  }
-  return null
+/** §9.3: incidents/index.json (pipeline) → if missing, sample_index.json (same shape, is_sample: true). */
+export async function loadIndex(): Promise<IncidentIndex | null> {
+  const real = await getJSON<IncidentIndex>('incidents/index.json')
+  if (real && Array.isArray(real.incidents)) return real
+  return getJSON<IncidentIndex>('sample_index.json')
 }
 
-/** incidents/index.json (teammate) → fallback sample_index.json (mine, banner). */
-export async function loadIndex(): Promise<IncidentIndex> {
-  const real = normalizeIndex(await getJSON('incidents/index.json'), false)
-  if (real && real.incidents.length) return real
-  const sample = normalizeIndex(await getJSON('sample_index.json'), true)
-  return sample ?? { incidents: [], is_sample: true }
-}
-
-/** id "sample" → sample_incident.json; anything else → incidents/<id>.json. */
+/** id "sample" (the one entry in sample_index.json) → sample_incident.json; anything else → incidents/<id>.json. */
 export async function loadIncident(id: string): Promise<Incident | null> {
   if (id === 'sample') return getJSON<Incident>('sample_incident.json')
   return getJSON<Incident>(`incidents/${encodeURIComponent(id)}.json`)
@@ -46,17 +35,13 @@ export function distanceM(a: { lat: number; lon: number }, b: { lat: number; lon
   return Math.hypot(x, y) * 6371000
 }
 
-export type OsmPick = { entry: OsmIndexEntry; osm: OsmFile; distance_m: number; inside: boolean }
+export type OsmPick = { file: string; osm: OsmFile; distance_m: number | null; inside: boolean }
 
-/** Nearest OSM extract (by center) to the impact. `inside` = impact within its radius. */
-export async function loadOsmFor(impact: { lat: number; lon: number }): Promise<OsmPick | null> {
-  const index = await getJSON<OsmIndexEntry[]>('osm/index.json')
-  if (!index || !index.length) return null
-  const ranked = index
-    .map((entry) => ({ entry, d: distanceM(impact, entry.center) }))
-    .sort((a, b) => a.d - b.d)
-  const best = ranked[0]
-  const osm = await getJSON<OsmFile>(`osm/${best.entry.file}`)
+/** The building file named in `osm_file` (§9.2). `inside` = impact within the extract's radius (a warning, not an error). */
+export async function loadOsm(inc: Incident): Promise<OsmPick | null> {
+  const osm = await getJSON<OsmFile>(inc.osm_file)
   if (!osm) return null
-  return { entry: best.entry, osm, distance_m: best.d, inside: best.d <= best.entry.radius_m }
+  const c = osm.center
+  const d = c ? distanceM(inc.impact, { lat: c[0], lon: c[1] }) : null
+  return { file: inc.osm_file, osm, distance_m: d, inside: d == null || d <= (osm.radius_m ?? Infinity) }
 }

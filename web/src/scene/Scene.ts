@@ -106,16 +106,19 @@ export class WitnessScene {
     this.controls.autoRotate = mode === 'walk' // V2 walkthrough-lite; V5 replaces with the director camera
     for (const m of this.mats) m.uniforms.uHeat.value = heatAt(t)
     if (!this.markers || !this.inc) return
-    const f = flashAt(t), { flash, sphere, wave, waveMax, icons } = this.markers
-    flash.visible = f > 0
-    flash.scale.setScalar(60 + 220 * (1 - f))
-    flash.material.opacity = f
-    sphere.scale.setScalar(1 + 0.15 * f) // pulse at impact
-    ;(sphere.material as THREE.MeshBasicMaterial).opacity = 0.22 + 0.5 * f
-    const r = waveRadiusM(t)
-    wave.visible = r > 0 && r < waveMax
-    wave.scale.setScalar(Math.max(r, 0.001))
-    ;(wave.material as THREE.PointsMaterial).opacity = 0.55 * (1 - r / waveMax)
+    const { blasts, sphere, icons } = this.markers
+    for (const b of blasts) {
+      const f = flashAt(t - b.t), r = waveRadiusM(t - b.t)
+      b.flash.visible = f > 0
+      b.flash.scale.setScalar(60 + 220 * (1 - f))
+      b.flash.material.opacity = f
+      b.wave.visible = r > 0 && r < b.waveMax
+      b.wave.scale.setScalar(Math.max(r, 0.001))
+      ;(b.wave.material as THREE.PointsMaterial).opacity = 0.55 * (1 - r / b.waveMax)
+    }
+    const f0 = flashAt(t)
+    sphere.scale.setScalar(1 + 0.15 * f0) // pulse at the first impact
+    ;(sphere.material as THREE.MeshBasicMaterial).opacity = 0.22 + 0.5 * f0
     for (const [id, icon] of Object.entries(icons)) icon.scale.setScalar(blinkAt(this.inc, id, t) ? 60 : 18)
   }
 

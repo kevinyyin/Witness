@@ -3,15 +3,16 @@ import { useEffect, useMemo, useRef } from 'react'
 import type { Incident } from '../types'
 import type { Ruler } from '../time/ruler'
 import { useTime } from '../time/store'
-import { anchorSource, fmtT, laneOf, mmss } from '../time/derive'
+import { fmtT, laneOf, mmss } from '../time/derive'
 
-type Mark = { t: number; row: 'flag' | 'note' | 'event'; text: string; tip: string; src?: string }
+// `src` = the clip a click should show (§9.2: flags/notes carry `source`, events carry `source`).
+type Mark = { t: number; row: 'flag' | 'note' | 'event'; text: string; tip: string; src: string | null }
 
 function marksOf(inc: Incident): Mark[] {
   const c = (x: number | null | undefined) => (x == null ? '—' : x.toFixed(2))
   return [
-    ...inc.flags.filter((f) => f.t != null).map((f) => ({ t: f.t!, row: 'flag' as const, text: '▲', src: anchorSource(f.anchor), tip: `${f.label}\n${f.basis.join(' · ')}\nconf ${c(f.confidence)}` })),
-    ...inc.review_notes.filter((f) => f.t != null).map((f) => ({ t: f.t!, row: 'note' as const, text: '●', src: anchorSource(f.anchor), tip: `${f.label}\n${f.basis.join(' · ')}\nconf ${c(f.confidence)}` })),
+    ...inc.flags.filter((f) => f.t != null).map((f) => ({ t: f.t!, row: 'flag' as const, text: '▲', src: f.source, tip: `${f.label}\n${f.basis.join(' · ')}\nconf ${c(f.confidence)}` })),
+    ...inc.review_notes.filter((f) => f.t != null).map((f) => ({ t: f.t!, row: 'note' as const, text: '●', src: f.source, tip: `${f.label}\n${f.basis.join(' · ')}\nconf ${c(f.confidence)}` })),
     ...inc.timeline.map((e) => ({
       t: e.t, row: 'event' as const, src: e.source,
       text: e.type === 'impact' ? '✦' : e.type === 'boom_heard' ? `boom@${e.source}` : e.type.replace(/_/g, ' '),
@@ -100,19 +101,19 @@ export function Timeline({ inc, ruler }: { inc: Incident; ruler: Ruler }) {
           ))}
           {marks.map((m, i) => (
             <div key={i} className={`mark ${m.row}`} style={{ left: x(m.t) }} title={m.tip}
-              onPointerDown={(e) => e.stopPropagation()} onClick={() => jump(m.t - 2, m.src ?? null)}>{m.text}</div>
+              onPointerDown={(e) => e.stopPropagation()} onClick={() => jump(m.t - 2, m.src)}>{m.text}</div>
           ))}
           {inc.sources.map((s, i) => {
-            const l = laneOf(inc, s)
+            const l = laneOf(s)
             const boom = inc.timeline.find((e) => e.type === 'boom_heard' && e.source === s.id)
             return (
               <div key={s.id} className="lane-row" style={{ top: 40 + i * 16 }}>
                 {l ? (
-                  <div className={`lane ${s.aligned === false ? 'approx' : ''} ${l.guessed ? 'guessed' : ''}`}
+                  <div className={`lane ${s.aligned === false ? 'approx' : ''}`}
                     style={{ left: x(l.t0), width: `${(ruler.tToX(l.t1) - ruler.tToX(l.t0)) * 100}%` }}>
                     {s.aligned === false && 'approx.'}
                   </div>
-                ) : <span className="muted lane-note">not aligned</span>}
+                ) : <span className="muted lane-note">{s.authenticity === 'fake' ? 'rejected' : 'not placed in time'}</span>}
                 {boom && <span className="boom-tag" style={{ left: x(boom.t) }}>boom heard {fmtT(boom.t)}</span>}
               </div>
             )
