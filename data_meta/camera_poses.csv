@@ -1,0 +1,4 @@
+hero_id,clip_url,lat,lon,heading_deg,fov_deg,radius_m,confidence,frame_t,skyline_err_deg,separation,method
+0622,https://t.me/itsdonetsk/170721,49.979159,36.246041,132,55,150,0.6,1,0.59,2.22,skyline.py vs osm/Kharkiv_buildings_2024-06-22.json
+0622,https://t.me/itsdonetsk/170581,49.981719,36.244994,101,55,300,0.3,1,2.41,1.05,skyline.py vs osm/Kharkiv_buildings_2024-06-22.json
+0622,https://t.me/XU_kraine/57685,49.982977,36.247438,29,85,300,0.3,1,1.03,0.82,skyline.py vs osm/Kharkiv_buildings_2024-06-22.json
