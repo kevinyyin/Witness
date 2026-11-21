@@ -154,14 +154,15 @@ Written Sat Nov 21, 10:45 AM ET. Spec says "Teammate" for the pipeline owner: th
   **3:00 gate — pass:** hero files with Carbon notes, `index.json`, both `results.json` (`split: dev`) committed and pushed. → "pull now: index + summaries".
 
 ### P5 Eval harness (3:00 → 3:30), freeze, test run
-- [ ] **P5**
+- [x] **P5** — harness done: baselines (Hydrogen direct, gemini-3.8-flash, Claude Opus 5.5 on 5 frames), ablation, grouping, worst misses; no weapon or area-type rows (keys lack those fields); no video-only geolocation mode (cut).
   Files: `eval/run_eval.py --split dev|test`.
   Fields: `split`, `frozen_at`, `n_clips`, `rows[] {claim, metric, witness, baseline, unit, baseline_name, n}` (geolocation within 1 km / 5 km / median, with post text and video-only, vs. Gemini asked directly · inside-radius %, baseline `null` · fake precision / recall vs. single Hydrogen call · weapon top-1 vs. majority class · civilian-area flag vs. always residential · grouping vs. city + date), `ablation {metric, unit, full_video, frames_5, transcript, n}`, `worst_misses[3] {clip_id, thumb, expected, got, why}` (largest error among scored test items; `thumb` from Commons clips only, else `null`).
   Check: `python eval/run_eval.py --split dev && cmp eval/results.json web/public/eval/results.json && python -m pipeline.contract --results eval/results.json`; `! grep -rn rehearsal pipeline eval`.
   Cut: weapon and civilian-area rows first, then the video-only geolocation mode. Ablation and fake rows stay.
 - [x] **3:30 AI FREEZE.** — 15:29: tag `ai-freeze` on `ad3f2ee`, pushed. Note: the visualizer-side session in this same folder started `eval/run_eval.py --split test` at 15:27 (an earlier attempt crashed on a non-ASCII file name and left 30 test clips cached). I did not start a second run. Uncommitted at tag time, from that session: an ASCII-file-name fix in `gemini.upload` and a live-only median of 3 link scores.
 - (original line) **3:30 AI FREEZE.** Commit, `git tag ai-freeze`, push. No prompt or rule changes after this.
-- [ ] **3:30–3:50 test run, once.** `python eval/run_eval.py --split test` (refuses if a `split: test` result already exists; sets `frozen_at`). Commit both files. → "pull now: test results".
+- [x] **3:30–3:50 test run, once.** — results pushed 15:47 (`split: test`, `frozen_at` 20:47 UTC, 70 clips; run by the other session, see the freeze line). Geolocation n=47: within 1 km 47% (Hydrogen direct 40, 3.8-flash 38, Claude 23); within 5 km 83% (81 / 85 / 77); median 1.2 km (1.2 / 1.5 / 2.6); inside radius 66% (target 70, missed). Fakes: precision 95%, recall 100% (baselines 100 / 100). Grouping 82% vs 79%. Ablation 98 / 95 / 48 (n=60). Worst misses: `str_0005`–`str_0007`, three clips of one hospital, 13–14 km off.
+- (original line) **3:30–3:50 test run, once.** `python eval/run_eval.py --split test` (refuses if a `split: test` result already exists; sets `frozen_at`). Commit both files. → "pull now: test results".
 
 ### Tuning log (dev only, before the 3:30 freeze)
 - 12:40 Eval set grown: 62 Telegram clips with answer-key coords joined `eval/split.csv` by md5 of the clip id (19 dev, 43 test), plus 15 break-it links from `data_meta/break_it.csv` (5 dev, 10 test). `str_0001` is skipped (`screen.csv`).
