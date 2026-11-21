@@ -28,7 +28,8 @@ function FilePlayer({ src }: { src: Source }) {
   const a = useRef<Adapter | null>(null)
   useEffect(() => { a.current = v.current && videoAdapter(v.current); return () => a.current?.destroy() }, [])
   useSync(src, useRef(() => a.current).current)
-  return <video ref={v} src={src.media_url ?? undefined} playsInline preload="auto" />
+  // offset_s null = not placed in time: no sync, so the reviewer plays it by hand
+  return <video ref={v} src={src.media_url ?? undefined} playsInline preload="auto" controls={src.offset_s == null} />
 }
 
 function YouTubePlayer({ src }: { src: Source }) {
