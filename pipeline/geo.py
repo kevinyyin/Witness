@@ -25,6 +25,8 @@ CITIES = {
     "Kryvyi Rih": (47.9105, 33.3918, 15000, ["kryvyi rih", "krivoy rog", "кривий ріг", "кривого рогу", "кривому розі", "кривой рог"]),
     "Poltava": (49.5883, 34.5514, 7000, ["poltava", "полтав"]),
 }
+CLEAR_LEAD = 0.2  # Decisions score gap that lets one candidate win outright
+SIGHT_M = 300     # a landmark seen in the clip puts the camera within about this distance of it
 UNKNOWN = {"lat": 48.38, "lon": 31.17, "radius_m": 700000, "level": "unknown", "method": "none", "evidence": [], "candidates": 0}
 
 
@@ -57,7 +59,7 @@ def _landmarks(city):
 
 
 def search(city, name):
-    """OSM places in the city whose name matches. Each hit: (lat, lon, osm name)."""
+    """OSM places in the city whose name matches. Each hit: (lat, lon, osm name, description for scoring)."""
     q = _norm(name)
     if len(q) < 4:
         return []
@@ -68,7 +70,9 @@ def search(city, name):
             n = _norm(tags.get(k))
             if n and (q in n or SequenceMatcher(None, q, n).ratio() >= 0.85):
                 c = e.get("center", e)
-                hits.append((c["lat"], c["lon"], tags.get("name", name)))
+                kind = tags.get("amenity") or tags.get("tourism") or tags.get("shop") or tags.get("leisure") or tags.get("railway") or ""
+                desc = "; ".join(x for x in (tags.get("name"), tags.get("name:en"), kind.replace("_", " "), tags.get("addr:street")) if x)
+                hits.append((c["lat"], c["lon"], tags.get("name", name), desc))
                 break
     return hits
 
@@ -99,13 +103,17 @@ def locate(seen, claimed_place, decide_input):
     n = len(cands)
     cands = cands[:10]
     try:
-        weights = gemini.same_place(decide_input, [f"{c[2]}, {city}" for c in cands])
+        weights = gemini.same_place(decide_input, [f"{c[3]} ({city})" for c in cands])
     except Exception:
         weights = [0.5] * len(cands)  # the funnel still works without the extra scoring
-    kept = [(c, w) for c, w in zip(cands, weights) if w >= 0.5] or list(zip(cands, weights))
+    ranked = sorted(zip(cands, weights), key=lambda cw: -cw[1])
+    if len(ranked) == 1 or ranked[0][1] - ranked[1][1] >= CLEAR_LEAD:
+        kept = ranked[:1]  # one candidate clearly fits the footage best
+    else:
+        kept = [cw for cw in ranked if cw[1] >= 0.5] or ranked
     total = sum(w for _, w in kept) or 1.0
     centre = (sum(c[0] * w for c, w in kept) / total, sum(c[1] * w for c, w in kept) / total)
-    r = int(max(dist_m(centre, c) for c, _ in kept) + 150)
+    r = int(max(dist_m(centre, c) for c, _ in kept) + SIGHT_M)
     if r > radius:
         return city_only | {"candidates": n}
     ts = lambda s: f"{int(s) // 60}:{int(s) % 60:02d}"

@@ -6,6 +6,7 @@ import hashlib
 import json
 import re
 import sys
+import threading
 import time
 from concurrent.futures import ThreadPoolExecutor
 
@@ -37,13 +38,17 @@ def embed_of(url, platform):
     return None
 
 
+_LOCK = threading.Lock()  # clips are analyzed in parallel threads; the small JSON stores are shared
+
+
 def clip_id_for(key):
     ids_file = CACHE / "ids.json"
-    ids = json.loads(ids_file.read_text()) if ids_file.exists() else {}
-    if key not in ids:
-        ids[key] = f"c_{len(ids) + 1:04d}"
-        ids_file.write_text(json.dumps(ids))
-    return ids[key]
+    with _LOCK:
+        ids = json.loads(ids_file.read_text()) if ids_file.exists() else {}
+        if key not in ids:
+            ids[key] = f"c_{len(ids) + 1:04d}"
+            ids_file.write_text(json.dumps(ids))
+        return ids[key]
 
 
 def mmss(ts):
@@ -206,7 +211,8 @@ def analyze(path=None, url=None, claimed_place=None, posted_at=None, source_url=
             "stages_ms": {k: ms.get(k) for k in STAGES},
         }
         if prep:
-            fake.remember(prep["sha256"], prep["phash"], record["clip_id"], posted_at)
+            with _LOCK:
+                fake.remember(prep["sha256"], prep["phash"], record["clip_id"], posted_at)
         raw = {"seen": seen, "scores": scores, "phys": phys, "phash": prep["phash"] if prep else [],
                "path": str(path) if path else None}
         yield emit(("result", record))

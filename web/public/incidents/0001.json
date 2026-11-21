@@ -1,0 +1,994 @@
+{
+ "id": "0001",
+ "city": "Kharkiv",
+ "title": "Strike on apartment block, Kharkiv",
+ "osm_file": "osm/Kharkiv_buildings_2024-06-22.json",
+ "time": {
+  "impact_local": "2024-06-22T15:47:06+03:00",
+  "plus_minus_s": 3600,
+  "basis": "earliest post time; the impact is earlier by an unknown amount"
+ },
+ "impact": {
+  "lat": 49.97908,
+  "lon": 36.24601,
+  "radius_m": 300,
+  "method": "landmarks",
+  "confidence": 0.6
+ },
+ "target": {
+  "osm_id": "way/115136823",
+  "footprint": [
+   [
+    36.2453634,
+    49.9778262
+   ],
+   [
+    36.2455557,
+    49.9777711
+   ],
+   [
+    36.245865,
+    49.9782174
+   ],
+   [
+    36.2456727,
+    49.9782725
+   ],
+   [
+    36.2453634,
+    49.9778262
+   ]
+  ],
+  "levels": 5,
+  "osm_tags": {
+   "addr:housenumber": "12",
+   "building": "apartments",
+   "building:entrances": "3",
+   "building:flats": "55",
+   "building:levels": "5"
+  },
+  "visual_basis": [
+   "B@0:00 apartment block",
+   "C@0:18 apartment block",
+   "I@0:00 apartment block"
+  ]
+ },
+ "weapon": {
+  "options": {
+   "shahed_drone": 0.07,
+   "cruise_missile": 0.02,
+   "ballistic_missile": 0.25,
+   "glide_bomb": 0.09,
+   "rocket_cluster": 0.05,
+   "tube_artillery": 0.14,
+   "fpv_drone": 0.18,
+   "unknown": 0.19
+  },
+  "evidence": [
+   "D@0:03 Loud explosion shakes and detaches dashcam",
+   "E@0:03 Shockwave knocks dashcam inside vehicle",
+   "F@0:03 Loud explosion heard while facing sky"
+  ]
+ },
+ "flags": [
+  {
+   "type": "residential",
+   "label": "Residential building · 5 floors",
+   "status": "raised",
+   "confidence": 0.9,
+   "t": 0.0,
+   "t_end": null,
+   "anchor": {
+    "kind": "building",
+    "ref": "way/115136823"
+   },
+   "source": null,
+   "clip_ts": null,
+   "basis": [
+    "osm:building=apartments"
+   ]
+  },
+  {
+   "type": "protected_site",
+   "label": "Hospital / school / worship / shelter nearby",
+   "status": "checked_none",
+   "confidence": null,
+   "t": null,
+   "t_end": null,
+   "anchor": null,
+   "source": null,
+   "clip_ts": null,
+   "basis": []
+  },
+  {
+   "type": "dense_population",
+   "label": "Densely populated · 109 buildings within 300 m",
+   "status": "raised",
+   "confidence": 0.85,
+   "t": 0.0,
+   "t_end": null,
+   "anchor": {
+    "kind": "impact"
+   },
+   "source": null,
+   "clip_ts": null,
+   "basis": [
+    "osm: 109 buildings within 300 m"
+   ]
+  },
+  {
+   "type": "night_strike",
+   "label": "Night strike",
+   "status": "checked_none",
+   "confidence": null,
+   "t": null,
+   "t_end": null,
+   "anchor": null,
+   "source": null,
+   "clip_ts": null,
+   "basis": []
+  },
+  {
+   "type": "indiscriminate_weapon",
+   "label": "Indiscriminate-weapon indicator",
+   "status": "checked_none",
+   "confidence": null,
+   "t": null,
+   "t_end": null,
+   "anchor": null,
+   "source": null,
+   "clip_ts": null,
+   "basis": []
+  },
+  {
+   "type": "second_strike",
+   "label": "Second strike on responders",
+   "status": "checked_none",
+   "confidence": null,
+   "t": null,
+   "t_end": null,
+   "anchor": null,
+   "source": null,
+   "clip_ts": null,
+   "basis": []
+  },
+  {
+   "type": "uxo",
+   "label": "Unexploded ordnance visible",
+   "status": "checked_none",
+   "confidence": null,
+   "t": null,
+   "t_end": null,
+   "anchor": null,
+   "source": null,
+   "clip_ts": null,
+   "basis": []
+  },
+  {
+   "type": "military_object",
+   "label": "Military object visible",
+   "status": "checked_none",
+   "confidence": null,
+   "t": null,
+   "t_end": null,
+   "anchor": null,
+   "source": null,
+   "clip_ts": null,
+   "basis": []
+  }
+ ],
+ "review_notes": [
+  {
+   "type": "graphic",
+   "label": "Graphic content in clip C (blurred)",
+   "confidence": 0.9,
+   "t": 16268.0,
+   "t_end": null,
+   "anchor": {
+    "kind": "camera",
+    "ref": "C"
+   },
+   "source": "C",
+   "clip_ts": 0.0,
+   "basis": [
+    "graphic_level=2"
+   ]
+  },
+  {
+   "type": "recycled_or_edited",
+   "label": "Clip E is the same video as clip D",
+   "confidence": 0.9,
+   "t": 0.0,
+   "t_end": null,
+   "anchor": {
+    "kind": "camera",
+    "ref": "E"
+   },
+   "source": "E",
+   "clip_ts": 0.0,
+   "basis": [
+    "pHash match"
+   ]
+  },
+  {
+   "type": "recycled_or_edited",
+   "label": "Clip H is the same video as clip G",
+   "confidence": 0.9,
+   "t": 6152.0,
+   "t_end": null,
+   "anchor": {
+    "kind": "camera",
+    "ref": "H"
+   },
+   "source": "H",
+   "clip_ts": 0.0,
+   "basis": [
+    "pHash match"
+   ]
+  },
+  {
+   "type": "graphic",
+   "label": "Graphic content in clip K (blurred)",
+   "confidence": 0.9,
+   "t": 3441.0,
+   "t_end": null,
+   "anchor": {
+    "kind": "camera",
+    "ref": "K"
+   },
+   "source": "K",
+   "clip_ts": 0.0,
+   "basis": [
+    "graphic_level=2"
+   ]
+  },
+  {
+   "type": "graphic",
+   "label": "Graphic content in clip M (blurred)",
+   "confidence": 0.9,
+   "t": 2354.0,
+   "t_end": null,
+   "anchor": {
+    "kind": "camera",
+    "ref": "M"
+   },
+   "source": "M",
+   "clip_ts": 0.0,
+   "basis": [
+    "graphic_level=2"
+   ]
+  },
+  {
+   "type": "recycled_or_edited",
+   "label": "Clip M is the same video as clip K",
+   "confidence": 0.9,
+   "t": 2354.0,
+   "t_end": null,
+   "anchor": {
+    "kind": "camera",
+    "ref": "M"
+   },
+   "source": "M",
+   "clip_ts": 0.0,
+   "basis": [
+    "pHash match"
+   ]
+  }
+ ],
+ "timeline": [
+  {
+   "t": 0.0,
+   "type": "impact",
+   "source": "E",
+   "clip_ts": 2.82,
+   "confidence": 0.98
+  },
+  {
+   "t": 0.0,
+   "type": "boom_heard",
+   "source": "D",
+   "clip_ts": 2.82,
+   "confidence": 0.9
+  },
+  {
+   "t": 0.0,
+   "type": "boom_heard",
+   "source": "E",
+   "clip_ts": 2.82,
+   "confidence": 0.9
+  },
+  {
+   "t": 0.0,
+   "type": "boom_heard",
+   "source": "F",
+   "clip_ts": 3.74,
+   "confidence": 0.9
+  },
+  {
+   "t": 0.18,
+   "type": "fire",
+   "source": "D",
+   "clip_ts": 3.0,
+   "confidence": 0.9
+  },
+  {
+   "t": 0.18,
+   "type": "fire",
+   "source": "E",
+   "clip_ts": 3.0,
+   "confidence": 0.9
+  },
+  {
+   "t": 2.26,
+   "type": "fire",
+   "source": "F",
+   "clip_ts": 6.0,
+   "confidence": 0.95
+  },
+  {
+   "t": 18.26,
+   "type": "siren",
+   "source": "F",
+   "clip_ts": 22.0,
+   "confidence": 0.8
+  },
+  {
+   "t": 30.0,
+   "type": "fire",
+   "source": "N",
+   "clip_ts": 0.0,
+   "confidence": 0.95
+  },
+  {
+   "t": 3133.0,
+   "type": "rescue",
+   "source": "L",
+   "clip_ts": 4.0,
+   "confidence": 0.6
+  },
+  {
+   "t": 4064.0,
+   "type": "rescue",
+   "source": "J",
+   "clip_ts": 0.0,
+   "confidence": 0.85
+  },
+  {
+   "t": 4068.0,
+   "type": "rescue",
+   "source": "J",
+   "clip_ts": 4.0,
+   "confidence": 0.95
+  },
+  {
+   "t": 5208.0,
+   "type": "rescue",
+   "source": "I",
+   "clip_ts": 0.0,
+   "confidence": 0.9
+  },
+  {
+   "t": 6349.0,
+   "type": "rescue",
+   "source": "G",
+   "clip_ts": 7.0,
+   "confidence": 0.6
+  },
+  {
+   "t": 16268.5,
+   "type": "rescue",
+   "source": "C",
+   "clip_ts": 0.5,
+   "confidence": 0.95
+  },
+  {
+   "t": 16274.5,
+   "type": "rescue",
+   "source": "C",
+   "clip_ts": 6.5,
+   "confidence": 0.98
+  },
+  {
+   "t": 16277.5,
+   "type": "siren",
+   "source": "C",
+   "clip_ts": 9.5,
+   "confidence": 0.95
+  },
+  {
+   "t": 16291.5,
+   "type": "siren",
+   "source": "C",
+   "clip_ts": 23.5,
+   "confidence": 0.95
+  },
+  {
+   "t": 16295.5,
+   "type": "rescue",
+   "source": "C",
+   "clip_ts": 27.5,
+   "confidence": 0.95
+  },
+  {
+   "t": 16303.0,
+   "type": "rescue",
+   "source": "C",
+   "clip_ts": 35.0,
+   "confidence": 0.95
+  },
+  {
+   "t": 16309.0,
+   "type": "fire",
+   "source": "C",
+   "clip_ts": 41.0,
+   "confidence": 0.85
+  },
+  {
+   "t": 16312.0,
+   "type": "rescue",
+   "source": "C",
+   "clip_ts": 44.0,
+   "confidence": 0.9
+  },
+  {
+   "t": 16316.0,
+   "type": "rescue",
+   "source": "C",
+   "clip_ts": 48.0,
+   "confidence": 0.95
+  },
+  {
+   "t": 16326.0,
+   "type": "rescue",
+   "source": "C",
+   "clip_ts": 58.0,
+   "confidence": 0.95
+  },
+  {
+   "t": 16354.0,
+   "type": "rescue",
+   "source": "C",
+   "clip_ts": 86.0,
+   "confidence": 0.95
+  },
+  {
+   "t": 25082.0,
+   "type": "rescue",
+   "source": "B",
+   "clip_ts": 13.0,
+   "confidence": 0.9
+  },
+  {
+   "t": 25085.0,
+   "type": "rescue",
+   "source": "B",
+   "clip_ts": 16.0,
+   "confidence": 0.95
+  },
+  {
+   "t": 25107.0,
+   "type": "rescue",
+   "source": "B",
+   "clip_ts": 38.0,
+   "confidence": 0.9
+  },
+  {
+   "t": 25113.0,
+   "type": "rescue",
+   "source": "B",
+   "clip_ts": 44.0,
+   "confidence": 0.95
+  },
+  {
+   "t": 60774.5,
+   "type": "fire",
+   "source": "A",
+   "clip_ts": 8.5,
+   "confidence": 0.9
+  }
+ ],
+ "sources": [
+  {
+   "id": "A",
+   "clip_id": "c_0002",
+   "platform": "telegram",
+   "url": "https://t.me/itsdonetsk/170721",
+   "embed_url": "https://t.me/itsdonetsk/170721?embed=1",
+   "player": "file",
+   "media_url": "/api/media/telegram/itsdonetsk/itsdonetsk_170721.mp4",
+   "uploader": "itsdonetsk",
+   "posted_at": "2024-06-23T08:39:52+03:00",
+   "duration_s": 29.37,
+   "camera": null,
+   "boom_distance_m": null,
+   "offset_s": 60766.0,
+   "aligned": false,
+   "authenticity": "real",
+   "reject_reason": null,
+   "graphic_level": 1,
+   "license": "embed only",
+   "findings": [
+    {
+     "clip_ts": 8.0,
+     "label": "Bright orange fireball erupts near street corner",
+     "confidence": 0.95
+    },
+    {
+     "clip_ts": 8.5,
+     "label": "Heavy smoke and dust cloud billows outward",
+     "confidence": 0.9
+    }
+   ]
+  },
+  {
+   "id": "B",
+   "clip_id": "c_0007",
+   "platform": "telegram",
+   "url": "https://t.me/XU_kraine/57716",
+   "embed_url": "https://t.me/XU_kraine/57716?embed=1",
+   "player": "file",
+   "media_url": "/api/media/telegram/XU_kraine/XU_kraine_57716.mp4",
+   "uploader": "XU_kraine",
+   "posted_at": "2024-06-22T22:44:55+03:00",
+   "duration_s": 78.93,
+   "camera": {
+    "lat": 49.97908,
+    "lon": 36.24601,
+    "heading_deg": 0,
+    "fov_deg": 60,
+    "radius_m": 300,
+    "confidence": 0.7
+   },
+   "boom_distance_m": null,
+   "offset_s": 25069.0,
+   "aligned": false,
+   "authenticity": "real",
+   "reject_reason": null,
+   "graphic_level": 1,
+   "license": "embed only",
+   "findings": [
+    {
+     "clip_ts": 13.0,
+     "label": "Excavator and responders near damaged apartment building",
+     "confidence": 0.9
+    },
+    {
+     "clip_ts": 16.0,
+     "label": "Fire trucks, ambulances, and emergency tent on street",
+     "confidence": 0.95
+    },
+    {
+     "clip_ts": 38.0,
+     "label": "Personnel in protective gear inspect building rubble",
+     "confidence": 0.9
+    },
+    {
+     "clip_ts": 44.0,
+     "label": "Fire engine and emergency crews at intersection",
+     "confidence": 0.95
+    }
+   ]
+  },
+  {
+   "id": "C",
+   "clip_id": "c_0004",
+   "platform": "telegram",
+   "url": "https://t.me/itsdonetsk/170689",
+   "embed_url": "https://t.me/itsdonetsk/170689?embed=1",
+   "player": "file",
+   "media_url": "/api/media/telegram/itsdonetsk/itsdonetsk_170689.mp4",
+   "uploader": "itsdonetsk",
+   "posted_at": "2024-06-22T20:18:14+03:00",
+   "duration_s": 90.77,
+   "camera": null,
+   "boom_distance_m": null,
+   "offset_s": 16268.0,
+   "aligned": false,
+   "authenticity": "real",
+   "reject_reason": null,
+   "graphic_level": 2,
+   "license": "embed only",
+   "findings": [
+    {
+     "clip_ts": 0.5,
+     "label": "Firefighter walks past street debris and vehicles",
+     "confidence": 0.95
+    },
+    {
+     "clip_ts": 3.0,
+     "label": "Background speech near damaged white minibus",
+     "confidence": 0.85
+    },
+    {
+     "clip_ts": 6.5,
+     "label": "Medics wheel injured person into ambulance",
+     "confidence": 0.98
+    },
+    {
+     "clip_ts": 9.5,
+     "label": "Ambulance drives away with siren sounding",
+     "confidence": 0.95
+    },
+    {
+     "clip_ts": 14.5,
+     "label": "Person shouts in distance among street debris",
+     "confidence": 0.9
+    },
+    {
+     "clip_ts": 23.5,
+     "label": "Second ambulance passes with siren active",
+     "confidence": 0.95
+    }
+   ]
+  },
+  {
+   "id": "D",
+   "clip_id": "c_0001",
+   "platform": "telegram",
+   "url": "https://t.me/XU_kraine/57707",
+   "embed_url": "https://t.me/XU_kraine/57707?embed=1",
+   "player": "file",
+   "media_url": "/api/media/telegram/XU_kraine/XU_kraine_57707.mp4",
+   "uploader": "XU_kraine",
+   "posted_at": "2024-06-22T18:50:54+03:00",
+   "duration_s": 32.93,
+   "camera": null,
+   "boom_distance_m": null,
+   "offset_s": -2.82,
+   "aligned": true,
+   "authenticity": "real",
+   "reject_reason": null,
+   "graphic_level": 1,
+   "license": "embed only",
+   "findings": [
+    {
+     "clip_ts": 2.9,
+     "label": "Bright orange flash and flames on left",
+     "confidence": 0.95
+    },
+    {
+     "clip_ts": 3.0,
+     "label": "Flames visible outside vehicle window",
+     "confidence": 0.9
+    },
+    {
+     "clip_ts": 3.0,
+     "label": "Loud explosion shakes and detaches dashcam",
+     "confidence": 0.98
+    },
+    {
+     "clip_ts": 15.0,
+     "label": "Distant shouting and crying heard outside",
+     "confidence": 0.8
+    },
+    {
+     "clip_ts": 26.5,
+     "label": "Screaming and distressed voices in background",
+     "confidence": 0.85
+    }
+   ]
+  },
+  {
+   "id": "E",
+   "clip_id": "c_0003",
+   "platform": "telegram",
+   "url": "https://t.me/itsdonetsk/170630",
+   "embed_url": "https://t.me/itsdonetsk/170630?embed=1",
+   "player": "file",
+   "media_url": "/api/media/telegram/itsdonetsk/itsdonetsk_170630.mp4",
+   "uploader": "itsdonetsk",
+   "posted_at": "2024-06-22T18:01:16+03:00",
+   "duration_s": 32.93,
+   "camera": null,
+   "boom_distance_m": null,
+   "offset_s": -2.82,
+   "aligned": true,
+   "authenticity": "real",
+   "reject_reason": null,
+   "graphic_level": 1,
+   "license": "embed only",
+   "findings": [
+    {
+     "clip_ts": 2.9,
+     "label": "Bright orange explosion flash on left",
+     "confidence": 0.98
+    },
+    {
+     "clip_ts": 3.0,
+     "label": "Flames visible near vehicle during impact",
+     "confidence": 0.9
+    },
+    {
+     "clip_ts": 3.0,
+     "label": "Shockwave knocks dashcam inside vehicle",
+     "confidence": 0.95
+    }
+   ]
+  },
+  {
+   "id": "F",
+   "clip_id": "c_0005",
+   "platform": "telegram",
+   "url": "https://t.me/XU_kraine/57699",
+   "embed_url": "https://t.me/XU_kraine/57699?embed=1",
+   "player": "file",
+   "media_url": "/api/media/telegram/XU_kraine/XU_kraine_57699.mp4",
+   "uploader": "XU_kraine",
+   "posted_at": "2024-06-22T17:48:01+03:00",
+   "duration_s": 26.27,
+   "camera": null,
+   "boom_distance_m": null,
+   "offset_s": -3.74,
+   "aligned": false,
+   "authenticity": "real",
+   "reject_reason": null,
+   "graphic_level": 1,
+   "license": "embed only",
+   "findings": [
+    {
+     "clip_ts": 3.5,
+     "label": "Loud explosion heard while facing sky",
+     "confidence": 0.95
+    },
+    {
+     "clip_ts": 6.0,
+     "label": "Dense grey-brown smoke plume rising above trees",
+     "confidence": 0.95
+    },
+    {
+     "clip_ts": 11.5,
+     "label": "Second loud blast heard after object dives",
+     "confidence": 0.95
+    },
+    {
+     "clip_ts": 17.5,
+     "label": "Third loud explosion heard behind smoke",
+     "confidence": 0.9
+    },
+    {
+     "clip_ts": 22.0,
+     "label": "Distant siren wailing in the background",
+     "confidence": 0.8
+    }
+   ]
+  },
+  {
+   "id": "G",
+   "clip_id": "c_0006",
+   "platform": "telegram",
+   "url": "https://t.me/XU_kraine/57693",
+   "embed_url": "https://t.me/XU_kraine/57693?embed=1",
+   "player": "file",
+   "media_url": "/api/media/telegram/XU_kraine/XU_kraine_57693.mp4",
+   "uploader": "XU_kraine",
+   "posted_at": "2024-06-22T17:32:48+03:00",
+   "duration_s": 11.22,
+   "camera": null,
+   "boom_distance_m": null,
+   "offset_s": 6342.0,
+   "aligned": false,
+   "authenticity": "real",
+   "reject_reason": null,
+   "graphic_level": 1,
+   "license": "embed only",
+   "findings": [
+    {
+     "clip_ts": 7.0,
+     "label": "Yellow emergency truck and crowd outside",
+     "confidence": 0.6
+    }
+   ]
+  },
+  {
+   "id": "H",
+   "clip_id": "c_0008",
+   "platform": "telegram",
+   "url": "https://t.me/itsdonetsk/170615",
+   "embed_url": "https://t.me/itsdonetsk/170615?embed=1",
+   "player": "file",
+   "media_url": "/api/media/telegram/itsdonetsk/itsdonetsk_170615.mp4",
+   "uploader": "itsdonetsk",
+   "posted_at": "2024-06-22T17:29:38+03:00",
+   "duration_s": 11.2,
+   "camera": null,
+   "boom_distance_m": null,
+   "offset_s": 6152.0,
+   "aligned": false,
+   "authenticity": "real",
+   "reject_reason": null,
+   "graphic_level": 1,
+   "license": "embed only",
+   "findings": []
+  },
+  {
+   "id": "I",
+   "clip_id": "c_0009",
+   "platform": "telegram",
+   "url": "https://t.me/kharkivlife/88665",
+   "embed_url": "https://t.me/kharkivlife/88665?embed=1",
+   "player": "file",
+   "media_url": "/api/media/telegram/kharkivlife/kharkivlife_88665.mp4",
+   "uploader": "kharkivlife",
+   "posted_at": "2024-06-22T17:13:54+03:00",
+   "duration_s": 27.27,
+   "camera": null,
+   "boom_distance_m": null,
+   "offset_s": 5208.0,
+   "aligned": false,
+   "authenticity": "real",
+   "reject_reason": null,
+   "graphic_level": 1,
+   "license": "embed only",
+   "findings": [
+    {
+     "clip_ts": 0.0,
+     "label": "Man speaks in Ukrainian to camera",
+     "confidence": 0.99
+    },
+    {
+     "clip_ts": 0.0,
+     "label": "Emergency and utility vehicles behind damaged building",
+     "confidence": 0.9
+    }
+   ]
+  },
+  {
+   "id": "J",
+   "clip_id": "c_0011",
+   "platform": "telegram",
+   "url": "https://t.me/itsdonetsk/170597",
+   "embed_url": "https://t.me/itsdonetsk/170597?embed=1",
+   "player": "file",
+   "media_url": "/api/media/telegram/itsdonetsk/itsdonetsk_170597.mp4",
+   "uploader": "itsdonetsk",
+   "posted_at": "2024-06-22T16:54:50+03:00",
+   "duration_s": 7.2,
+   "camera": null,
+   "boom_distance_m": null,
+   "offset_s": 4064.0,
+   "aligned": false,
+   "authenticity": "real",
+   "reject_reason": null,
+   "graphic_level": 1,
+   "license": "embed only",
+   "findings": [
+    {
+     "clip_ts": 0.0,
+     "label": "Helmeted responder in vest documenting wrecked cars",
+     "confidence": 0.85
+    },
+    {
+     "clip_ts": 4.0,
+     "label": "Fire truck with extended ladder near rubble",
+     "confidence": 0.95
+    }
+   ]
+  },
+  {
+   "id": "K",
+   "clip_id": "c_0010",
+   "platform": "telegram",
+   "url": "https://t.me/XU_kraine/57685",
+   "embed_url": "https://t.me/XU_kraine/57685?embed=1",
+   "player": "file",
+   "media_url": "/api/media/telegram/XU_kraine/XU_kraine_57685.mp4",
+   "uploader": "XU_kraine",
+   "posted_at": "2024-06-22T16:44:27+03:00",
+   "duration_s": 2.67,
+   "camera": null,
+   "boom_distance_m": null,
+   "offset_s": 3441.0,
+   "aligned": false,
+   "authenticity": "real",
+   "reject_reason": null,
+   "graphic_level": 2,
+   "license": "embed only",
+   "findings": []
+  },
+  {
+   "id": "L",
+   "clip_id": "c_0013",
+   "platform": "telegram",
+   "url": "https://t.me/itsdonetsk/170581",
+   "embed_url": "https://t.me/itsdonetsk/170581?embed=1",
+   "player": "file",
+   "media_url": "/api/media/telegram/itsdonetsk/itsdonetsk_170581.mp4",
+   "uploader": "itsdonetsk",
+   "posted_at": "2024-06-22T16:39:15+03:00",
+   "duration_s": 7.57,
+   "camera": null,
+   "boom_distance_m": null,
+   "offset_s": 3129.0,
+   "aligned": false,
+   "authenticity": "real",
+   "reject_reason": null,
+   "graphic_level": 1,
+   "license": "embed only",
+   "findings": [
+    {
+     "clip_ts": 4.0,
+     "label": "Workers in yellow gear near damaged building",
+     "confidence": 0.6
+    }
+   ]
+  },
+  {
+   "id": "M",
+   "clip_id": "c_0012",
+   "platform": "telegram",
+   "url": "https://t.me/itsdonetsk/170575",
+   "embed_url": "https://t.me/itsdonetsk/170575?embed=1",
+   "player": "file",
+   "media_url": "/api/media/telegram/itsdonetsk/itsdonetsk_170575.mp4",
+   "uploader": "itsdonetsk",
+   "posted_at": "2024-06-22T16:26:20+03:00",
+   "duration_s": 2.67,
+   "camera": null,
+   "boom_distance_m": null,
+   "offset_s": 2354.0,
+   "aligned": false,
+   "authenticity": "real",
+   "reject_reason": null,
+   "graphic_level": 2,
+   "license": "embed only",
+   "findings": []
+  },
+  {
+   "id": "N",
+   "clip_id": "c_0014",
+   "platform": "telegram",
+   "url": "https://t.me/XU_kraine/57682",
+   "embed_url": "https://t.me/XU_kraine/57682?embed=1",
+   "player": "file",
+   "media_url": "/api/media/telegram/XU_kraine/XU_kraine_57682.mp4",
+   "uploader": "XU_kraine",
+   "posted_at": "2024-06-22T15:47:06+03:00",
+   "duration_s": 13.9,
+   "camera": null,
+   "boom_distance_m": null,
+   "offset_s": 30.0,
+   "aligned": false,
+   "authenticity": "real",
+   "reject_reason": null,
+   "graphic_level": 1,
+   "license": "embed only",
+   "findings": [
+    {
+     "clip_ts": 0.0,
+     "label": "Large smoke plume rising across water",
+     "confidence": 0.95
+    },
+    {
+     "clip_ts": 0.0,
+     "label": "Man reacting in Russian to strikes",
+     "confidence": 0.98
+    },
+    {
+     "clip_ts": 6.5,
+     "label": "Second man speaking in background",
+     "confidence": 0.9
+    },
+    {
+     "clip_ts": 11.0,
+     "label": "Man repeating shock at the scene",
+     "confidence": 0.95
+    }
+   ]
+  }
+ ],
+ "summary": null,
+ "verification": {
+  "agree_place": true,
+  "agree_time": true,
+  "corroboration": "high",
+  "n_sources": 14,
+  "n_rejected": 0
+ },
+ "answer_key": {
+  "source": "Bellingcat",
+  "lat": 49.979833,
+  "lon": 36.247089,
+  "url": "https://ukraine.bellingcat.com"
+ },
+ "is_sample": false
+}

@@ -10,8 +10,20 @@ HYDROGEN = "gemini-4-hydrogen"
 CARBON = "gemini-4-carbon"
 DECISION = "gemini-decision-1"
 
-_client = genai.Client()
-_decisions = genai.Client(http_options={"api_version": "v1beta"})
+class _Lazy:
+    """Creates the client on first use, so the server can start (and serve media) on a laptop without a key."""
+
+    def __init__(self, **kw):
+        self._kw, self._c = kw, None
+
+    def __getattr__(self, name):
+        if self._c is None:
+            self._c = genai.Client(**self._kw)
+        return getattr(self._c, name)
+
+
+_client = _Lazy()
+_decisions = _Lazy(http_options={"api_version": "v1beta"})
 
 EVENT_TYPES = ["siren", "flash", "blast", "burst", "engine_buzz", "jet", "gunfire", "fire", "rescue", "speech"]
 WEAPONS = ["shahed_drone", "cruise_missile", "ballistic_missile", "glide_bomb", "rocket_cluster", "tube_artillery",
