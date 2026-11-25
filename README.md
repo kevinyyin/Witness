@@ -2,7 +2,7 @@
 
 Investigators get hundreds of thousands of war videos with no location, no grouping, and fakes mixed in. Witness takes the pile, throws out the fakes, places each real clip on a map with honest uncertainty, groups clips of the same strike, and lets a human scrub through a 3D reconstruction of each strike with every source video one click away. **It sorts. Humans decide.**
 
-Built at the Gemini 4 NYC Hackathon, Nov 21, 2026. Track: **Element 119** (video and audio are the input; we show where it breaks).
+Built at the Gemini 4 NYC Hackathon, Nov 21, 2026, by Kevin Yin and James Wang (39 commits each). Track: **Element 119** (video and audio are the input; we show where it breaks).
 
 ## Contents
 1. [What it does](#what-it-does)
